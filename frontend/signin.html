@@ -1,0 +1,180 @@
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signin</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            background-color: #eee;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fafff7;
+            display: flex;
+            align-items: center;
+            max-width: 100%;
+            justify-content: center;
+            flex-direction: column;
+            padding: 30px 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 50px rgba(135, 135, 135, 0.45);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: green;
+            margin-bottom: 20px;
+        }
+
+        .inputs {
+            position: relative;
+            font-family: 'Lora', sans-serif;
+            margin: 15px 0;
+        }
+
+        label {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 15px;
+            color: black;
+            transition: .3s;
+        }
+
+        input {
+            width: 250px;
+            height: 47px;
+            border: 2px solid green;
+            outline: 0;
+            border-radius: 15px;
+            padding: 15px;
+            background-color: rgba(197, 241, 197, 0.199);
+            font-size: 16px;
+        }
+
+        input:focus~label,
+        input:valid~label {
+            top: 0;
+            padding: 5px 7px;
+            font-size: 12px;
+            background-color: lightgreen;
+            border-radius: 7px;
+            color: #111;
+        }
+
+        .submit {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .submit button {
+            border-radius: 10px;
+            background-color: green;
+            padding: 10px;
+            height: 40px;
+            width: 200px;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        .submit button:hover {
+            background-color: lightgreen;
+            color: rgb(1, 49, 1);
+        }
+
+        .create-account {
+            margin-top: 15px;
+        }
+
+        .create-account a {
+            text-decoration: none;
+            color: rgb(1, 83, 1);
+            font-family: 'Lora', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Welcome Back </h1>
+        <p>Enter your details to login</p>
+
+        <!-- ✅ FORM -->
+        <form id="signinForm">
+            <div class="inputs">
+                <input type="text" id="mobile" name="mobile" required maxlength="10">
+                <label for="mobile">Mobile Number</label>
+            </div>
+
+            <div class="inputs">
+                <input type="password" id="password" name="password" required>
+                <label for="password">Password</label>
+            </div>
+
+            <div class="submit">
+                <button type="submit">Login</button>
+            </div>
+        </form>
+
+        <div class="create-account">
+            <a href="signup.html">Create account</a>
+        </div>
+    </div>
+</body>
+
+<script>
+
+    document.getElementById("signinForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const mobile = document.getElementById("mobile").value;
+        const password = document.getElementById("password").value;
+
+        try {
+            const response = await fetch("http://localhost:5000/signin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mobile, password }),
+                credentials: "include" // ✅ important for cookies
+            });
+
+            const result = await response.json();
+
+            if (result.message === "Login Successful ✅") {
+                window.location.replace("index.html"); // redirect
+            } else {
+                alert(result.message);
+            }
+        } catch (err) {
+            alert("❌ Failed to connect to server");
+            console.error(err);
+        }
+    });
+
+
+</script>
+
+</html>

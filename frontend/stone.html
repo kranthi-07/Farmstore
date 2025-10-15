@@ -1,0 +1,73 @@
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stone Fruits</title>
+    <link rel="stylesheet" href="items.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        .item {
+            /* background-color: rgb(248, 190, 91); */
+            border: 2px solid rgb(64, 181, 46);
+            /* box-shadow: 0 0 5px rgb(229, 229, 229); */
+            background: linear-gradient(to bottom, white, white, rgb(184, 247, 183));
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+
+        <button onclick="goHome()" style="background:none;
+        border:none;color:green;
+        font-size:18px;
+        cursor:pointer;
+        position:absolute;
+        left:0;margin-left:20px;
+        background-color: #ffffff;
+        border-radius:10px;
+        padding:3px 5px">⬅</button>
+
+        <h1>FARMSTORE</h1>
+
+        <div class="cart flex" id="goCart">
+            <i class='bx bx-cart'></i>
+            <div class="count">0</div>
+        </div>
+
+    </header>
+
+    <div class="heading">
+        <h1>STONE FRUITS</h1>
+    </div>
+
+    <div class="items flex">
+
+
+        <div class="jackfruit item" onclick="goToItem('Jackfruit','₹25','Juicy','Assets/jackfruit.png')">
+            <img src="assets/jackfruit.png" alt="">
+            <div class="matter">
+                <p>Jackfruit</p>
+            </div>
+        </div>
+
+
+
+        <div class="coconut item" onclick="goToItem('Coconut','₹25','Juicy','Assets/coconut.png')">
+            <img src="assets/coconut.png" alt="">
+            <div class="matter">
+                <p>Coconut</p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+<script src="itemjs.js">
+    localStorage.setItem("activeSection", "fruits");
+</script>
+
+</html>

@@ -1,0 +1,227 @@
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FARM STORE</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+
+<body>
+
+
+    <!-- Login Popup -->
+    <div id="loginPopup" class="popup-overlay">
+        <div class="popup-box">
+            <span class="close-btn" id="closePopup">&times;</span>
+            <h2>Login Required</h2>
+            <p>You must log in to continue shopping.</p>
+            <div class="popup-actions">
+                <button id="goToLogin">Login</button>
+                <button id="cancelPopup">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Loader -->
+    <div class="loader-overlay" id="loader">
+        <div class="loader"></div>
+    </div>
+
+
+
+
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="overlay"></div>
+
+    <div id="sidebar">
+        <h3>FARMSTORE</h3>
+
+        <div id="sidebarContent">
+            <!-- Menu items or dynamic content will be injected here -->
+            <div class="sidebar-menu">
+                <div class="sidebar-item" data-target="profileSection">
+                    <i class="ri-user-line"></i> Profile
+                </div>
+                <div class="sidebar-item" data-target="ordersSection">
+                    <i class="ri-shopping-bag-line"></i> Orders
+                </div>
+                <div class="sidebar-item" id="logoutBtn">
+                    <i class="ri-logout-box-line"></i> Logout
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <nav class="top-bar flex">
+
+
+        <div class="left flex">
+            <div class="menu" onclick="openSidebar()">
+                <i class='bx bx-menu menu-icon'></i>
+            </div>
+
+            <div class="logo">
+                <h1>FARMSTORE</h1>
+            </div>
+        </div>
+
+
+        <div class="search-bar">
+            <i class='bx bx-search' id="searchBtn"></i>
+            <input type="search" placeholder="Search..." name="search">
+            <div class="search-suggestions" id="searchSuggestions"></div>
+        </div>
+
+
+        <div class="cart">
+            <i class='bx bx-cart'></i>
+        </div>
+
+        <div class="signin" id="userIcon" onclick="window.location.href='signin.html'">
+            <i class='bx bx-user'></i>
+        </div>
+
+    </nav>
+
+
+    <div class="card-container">
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide"><img src="assets/FRUITS.png" alt="Fruits"></div>
+                <div class="swiper-slide"><img src="assets/apple.png" alt="Apple"></div>
+                <div class="swiper-slide"><img src="assets/leafy vegetables.png" alt="Leafy"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <section class="main-items flex">
+        <div class="fruits flex active">
+            <h3>Fruits</h3>
+        </div>
+
+        <div class="vegetables flex">
+            <h3>Vegetables</h3>
+        </div>
+    </section>
+
+
+
+    <main class="main-content">
+
+        <div class="fruits-bar">
+            <div class="head">
+                <h1>Fruits</h1>
+            </div>
+
+            <div class="items">
+                <div class="citrus-fruits card" data-link="citrusfruits.html">
+                    <img src="assets/citrus fruits.png" class="box" alt="">
+                    <h3>Citrus<br>Fruits</h3>
+                </div>
+
+
+                <div class="tropical-fruits card" data-link='tropical.html'>
+                    <img src="assets/tropical fruits.png" class="box" alt="">
+                    <h3>Tropical <br> Fruits</h3>
+                </div>
+
+
+                <div class="berries card" data-link='berries.html'>
+                    <img src="assets/berries.png" class="box" alt="">
+                    <h3>Berries</h3>
+                </div>
+
+
+                <div class="stone-fruits card" data-link='stone.html'>
+                    <img src="assets/stone fruits.png" class="box" alt="">
+                    <h3>Stone Fruits</h3>
+                </div>
+
+
+                <div class="melons card" data-link='melon.html'>
+                    <img src="assets/melons.png" class="box" alt="">
+                    <h3>Melons</h3>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="vegetables-bar display">
+
+            <div class="head">
+                <h1>Vegetables</h1>
+            </div>
+
+            <div class="items">
+
+                <div class="leafy-vegetables card" data-link='leafy.html'>
+                    <img src="assets/leafy vegetables.png" class="box" alt="">
+                    <h3>Leafy<br> Vegetables</h3>
+                </div>
+
+
+                <div class="root-vegetables card" data-link='root.html'>
+                    <img src="assets/root vegetables.png" class="box" alt="">
+                    <h3>Root<br> Vegetables</h3>
+                </div>
+
+
+                <div class="fruiting-vegetables card" data-link='fruiting.html'>
+                    <img src="assets/fruiting vegetables.png" class="box" alt="">
+                    <h3>Fruiting <br>Vegetables</h3>
+                </div>
+
+                <div class="tuber-vegetables card" data-link='tuber.html'>
+                    <img src="assets/tuber vegetables.png" class="box" alt="">
+                    <h3>Bulb&Tuber <br>Vegetables</h3>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </main>
+
+    <footer class="footer flex">
+        <div class="aboutus">
+            <h3>About us</h3>
+        </div>
+
+        <div class="contactus">
+            <h3>Contact us</h3>
+        </div>
+
+        <div class="registered">
+            <p>All rights reserved according to the law 2005</p>
+        </div>
+    </footer>
+</body>
+<!-- ✅ Include Swiper library FIRST -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<!-- ✅ Then include your custom JS -->
+<script src="script.js"></script>
+
+
+</html>

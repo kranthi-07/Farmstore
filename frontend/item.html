@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Item Details - Dab Dab</title>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #fff8f0;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    .item-wrapper {
+
+      margin: 2rem auto;
+      padding: 1.5rem;
+
+      border-radius: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .item-image {
+      flex: 1 1 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .item-image img {
+      width: 100%;
+      max-width: 93%;
+      margin: 0 auto;
+      border-radius: 14px;
+    }
+
+    .item-info {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+    }
+
+    .name-price {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+
+    }
+
+    .item-info h1 {
+      font-size: 2rem;
+      padding-bottom:10px;
+    }
+
+    .item-info .price{
+      padding:10px;
+      font-size: 20px;
+      color:green;
+      font-weight:bold;
+    }
+
+    .labels {
+      display: flex;
+      text-align: left;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+
+    label {
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+      padding: 15px;
+      font-size: 16px;
+    }
+
+    .desc {
+      width:100%;
+      text-align: center;
+      font-size: 1.2rem;
+      color: #444;
+    }
+
+
+
+    input[type="radio"] {
+      display: none;
+    }
+
+    /* Base style */
+
+
+    /* Custom circle */
+    .custom-radio {
+      width: 27px;
+      height: 27px;
+      border: 2px solid #4CAF50;
+      border-radius: 50%;
+      margin-right: 8px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    /* Inner dot (hidden by default) */
+    .custom-radio::after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      background: #4CAF50;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      transition: all 0.2s ease;
+    }
+
+
+    /* _________________________________________RADIO___________________________________ */
+
+    /* When checked */
+    input[type="radio"]:checked+.custom-radio::after {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Hover effect */
+    label:hover .custom-radio {
+      border-color: #2e7d32;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .actions button {
+      padding: 0.7rem 1.5rem;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .cont {
+      display: flex;
+    }
+
+
+
+
+    .add-cart {
+      background: green;
+      color: white;
+      height: 55px;
+      width: 170px;
+    }
+
+    .add-cart:hover {
+      background: lightgreen;
+    }
+
+
+
+    .back-btn {
+      text-align: center;
+      margin-top: 2rem;
+      display: block;
+      text-decoration: none;
+      color: #666;
+    }
+
+    .go-to-cart {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .go-to-cart a {
+      width: 150px;
+      border-radius: 10px;
+      height: 50px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+      background-color: green;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .go-to-cart i {
+      margin-left: 5px;
+    }
+
+    .back-btn:hover {
+      color: #000;
+    }
+
+    /* ✅ Full Page Loader */
+    #pageLoader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999999;
+      transition: opacity 0.3s ease;
+    }
+
+    #pageLoader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+
+
+    .loader {
+      width: 40px;
+      height: 40px;
+      border: 6px solid #d6ffd0;
+      border-top: 6px solid green;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ✅ Full Page Loader -->
+  <div id="pageLoader">
+    <div class="loader"></div>
+  </div>
+
+  <div class="item-wrapper">
+    <div class="item-image">
+      <img id="itemImage" src="" alt="Item Image">
+    </div>
+    <div class="item-info">
+
+      <div class="name-price">
+        <h1 id="itemName"></h1>
+        <div class="price" id="itemPrice">₹--</div>
+      </div>
+
+
+
+      <div class="labels flex">
+
+        <label>
+          <input type="radio" name="fruit1" value="50" data-qty="1kg">
+          <span class="custom-radio"></span>
+          <div class="cont">
+            <p>1 kg -</p>
+            <p>&ensp;₹50</p>
+          </div>
+        </label>
+
+
+        <label>
+          <input type="radio" name="fruit1" value="30" data-qty="500g">
+          <span class="custom-radio"></span>
+          <div class="cont">
+            <p>1/2 kg -</p>
+            <p>&ensp;₹30</p>
+          </div>
+        </label>
+
+      </div>
+
+
+    </div>
+
+    <div class="desc" id="itemDesc">Loading...</div>
+
+  </div>
+
+  <div class="actions">
+    <button id="cartBtn" class="add-cart">Add to Cart</button>
+  </div>
+  <a onclick="window.location.replace('index.html')" class="back-btn"><i class="ri-arrow-left-line"></i> Back to
+    Home</a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const name = decodeURIComponent(params.get("name") || "");
+    const priceStr = decodeURIComponent(params.get("price") || "₹0");
+    const desc = decodeURIComponent(params.get("desc") || "No description.");
+    const image = decodeURIComponent(params.get("image") || "");
+    const price = parseInt(String(priceStr).replace("₹", "").trim()) || 0;
+
+    document.getElementById("itemName").textContent = name;
+    document.getElementById("itemPrice").textContent = `₹${price}`;
+    document.getElementById("itemDesc").textContent = desc;
+    document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
+
+    const cartBtn = document.getElementById("cartBtn");
+    const pageLoader = document.getElementById("pageLoader");
+
+    function showLoader() {
+      pageLoader.classList.remove("hidden");
+    }
+    function hideLoader() {
+      pageLoader.classList.add("hidden");
+    }
+
+    // ✅ Add to Cart function
+    async function toggleCart() {
+      const selected = document.querySelector('input[name="fruit1"]:checked');
+      if (!selected) {
+        alert("Please select a quantity.");
+        return;
+      }
+
+      const selectedPrice = parseInt(selected.value);
+      const selectedQty = selected.dataset.qty;
+
+      const cartItem = {
+        name: name + " (" + selectedQty + ")",
+        price: selectedPrice,
+        quantity: 1,
+        image: image
+      };
+
+      try {
+        showLoader();
+        const res = await fetch("http://localhost:5000/cart/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(cartItem)
+        });
+
+        if (res.ok) {
+          cartBtn.textContent = "Remove from Cart";
+          cartBtn.style.background = "#38b725";
+          cartBtn.onclick = removeFromCart;
+        } else {
+          alert("Failed to add item.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error adding item to cart.");
+      } finally {
+        hideLoader();
+      }
+    }
+
+    async function removeFromCart() {
+      try {
+        showLoader();
+        const res = await fetch("http://localhost:5000/cart/remove", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ name })
+        });
+
+        if (res.ok) {
+          cartBtn.textContent = "Add to Cart";
+          cartBtn.style.background = "green";
+          cartBtn.onclick = toggleCart;
+        } else {
+          alert("Failed to remove item.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error removing item.");
+      } finally {
+        hideLoader();
+      }
+    }
+
+    // ✅ Init
+    window.addEventListener("load", () => {
+      hideLoader();
+      cartBtn.onclick = toggleCart;
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,73 @@
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leafy Vegetables</title>
+    <link rel="stylesheet" href="items.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        .item {
+            border: 2px solid rgb(46, 181, 55);
+            /* box-shadow: 0 0 5px rgb(229, 229, 229); */
+            background: linear-gradient(to bottom, white, white, rgb(198, 247, 197));
+        }
+    </style>
+</head>
+
+<body>
+
+     <header>
+
+        <button onclick="goHome()" style="background:none;
+        border:none;color:green;
+        font-size:18px;
+        cursor:pointer;
+        position:absolute;
+        left:0;margin-left:20px;
+        background-color: #ffffff;
+        border-radius:10px;
+        padding:3px 5px">⬅</button>
+
+        <h1>FARMSTORE</h1>
+
+        <div class="cart flex" id="goCart">
+            <i class='bx bx-cart'></i>
+            <div class="count">0</div>
+        </div>
+
+    </header>
+
+    <div class="heading">
+        <h1>LEAFY<br> VEGETABLES</h1>
+    </div>
+
+    <div class="items flex">
+
+
+        <div class="spinach item" onclick="goToItem('Spinach','₹25','Juicy','Assets/spinach.png')">
+            <img src="assets/spinach.png" alt="Spinach">
+            <div class="matter">
+                <p>Spinach</p>
+            </div>
+        </div>
+
+
+        <div class="coriander item" onclick="goToItem('Coriander','₹25','Juicy','Assets/coriander.png')">
+            <img src="assets/coriander.png" alt="Coriander">
+            <div class="matter">
+                <p>Coriander</p>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script src="itemjs.js">
+        localStorage.setItem("activeSection", "vegetables");
+    </script>
+
+</body>
+
+</html>
