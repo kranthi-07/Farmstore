@@ -1,6 +1,6 @@
 async function updateCartCount() {
     try {
-        const res = await fetch("http://localhost:5000/cart", {
+        const res = await fetch("https://farmstore-1.onrender.com/cart", {
             method: "GET",
             credentials: "include"
         });

@@ -378,7 +378,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadProfile() {
   try {
-    const res = await fetch("http://localhost:5000/profile", {
+    const res = await fetch("https://farmstore-1.onrender.com/profile", {
       credentials: "include"
     });
     const data = await res.json();
@@ -412,7 +412,7 @@ function goBackToSidebar() {
 
 // 🔹 Logout function
 async function logout() {
-  await fetch("http://localhost:5000/logout", {
+  await fetch("https://farmstore-1.onrender.com/logout", {
     method: "POST",
     credentials: "include"
   });

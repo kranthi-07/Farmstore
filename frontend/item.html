@@ -360,7 +360,7 @@
 
       try {
         showLoader();
-        const res = await fetch("http://localhost:5000/cart/add", {
+        const res = await fetch("https://farmstore-1.onrender.com/cart/add", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -385,7 +385,7 @@
     async function removeFromCart() {
       try {
         showLoader();
-        const res = await fetch("http://localhost:5000/cart/remove", {
+        const res = await fetch("https://farmstore-1.onrender.com/cart/remove", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
