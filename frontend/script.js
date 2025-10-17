@@ -2,7 +2,7 @@
 const body = document.querySelector('body');
 const menu = body.querySelector('.menu');
 const sidebar = document.getElementById("sidebar"); // use id
-const overlay = document.getElementById("sidebarOverlay");
+const overlay = document.querySelector(".overlay");
 const sidebarContent = document.getElementById("sidebarContent");
 const sidebarItems = document.querySelectorAll(".sidebar-item");
 
@@ -33,6 +33,10 @@ function openSidebar() {
   sidebar.classList.add("active");
   overlay.classList.add("show");
 }
+
+
+document.getElementById("openSidebar").addEventListener("click", openSidebar);
+
 
 function closeSidebarFunc() {
   sidebar.classList.remove("active");
