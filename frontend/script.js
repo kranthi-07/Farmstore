@@ -192,6 +192,16 @@ const swiper = new Swiper(".mySwiper", {
 
 const loader = document.getElementById("loader");
 
+// ===== Loader Control =====
+window.addEventListener("load", () => {
+
+  if (loader) {
+    loader.style.opacity = "0";
+    setTimeout(() => {
+      loader.style.display = "none";
+    }, 400); // smooth fade
+  }
+});
 
 
 
@@ -224,13 +234,6 @@ function switchTab(section) {
   }, 1000); // simulate loading delay
 }
 
-// ✅ Initial load
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    switchTab("fruits"); // default
-    hideLoader();
-  }, 800);
-});
 
 // ✅ Tab events (ONLY call switchTab, not old code)
 fruits.addEventListener("click", () => switchTab("fruits"));
