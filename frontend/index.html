@@ -38,24 +38,36 @@
 
 
 
+    <!-- Sidebar -->
     <!-- Sidebar Overlay -->
-    <div id="sidebarOverlay" class="overlay"></div>
+    <div class="overlay"></div>
 
-    <div id="sidebar">
-        <h3>FARMSTORE</h3>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 id="sidebarTitle">Menu</h2>
+            <button id="closeSidebar" class="close-btn">&times;</button>
+        </div>
+        <ul class="sidebar-menu">
+            <li data-section="profile">Profile</li>
+            <li data-section="orders">Orders</li>
+            <li data-section="favorites">Favorites</li>
+            <li data-section="contact">Contact</li>
+            <li id="logoutBtn">Logout</li>
+        </ul>
 
-        <div id="sidebarContent">
-            <!-- Menu items or dynamic content will be injected here -->
-            <div class="sidebar-menu">
-                <div class="sidebar-item" data-target="profileSection">
-                    <i class="ri-user-line"></i> Profile
-                </div>
-                <div class="sidebar-item" data-target="ordersSection">
-                    <i class="ri-shopping-bag-line"></i> Orders
-                </div>
-                <div class="sidebar-item" id="logoutBtn">
-                    <i class="ri-logout-box-line"></i> Logout
-                </div>
+        <!-- Sidebar Content Area -->
+        <div id="sidebarContent" class="sidebar-content"></div>
+    </aside>
+
+    <!-- Logout Popup -->
+    <div class="logout-popup" id="logoutPopup">
+        <div class="popup-content">
+            <h3>Logout Confirmation</h3>
+            <p>Are you sure you want to log out?</p>
+            <div class="popup-buttons">
+                <button id="confirmLogout">Yes</button>
+                <button id="cancelLogout">Cancel</button>
             </div>
         </div>
     </div>
@@ -64,13 +76,15 @@
 
 
 
+    <!--    TOP BAR     -->
+
 
 
     <nav class="top-bar flex">
 
 
         <div class="left flex">
-            <div class="menu" onclick="openSidebar()">
+            <div class="menu" id="openSidebar">
                 <i class='bx bx-menu menu-icon'></i>
             </div>
 

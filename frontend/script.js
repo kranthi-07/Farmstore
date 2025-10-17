@@ -1,19 +1,19 @@
 
-  const body = document.querySelector('body');
-  const menu = body.querySelector('.menu');
-  const sidebar = document.getElementById("sidebar"); // use id
-  const overlay = document.getElementById("sidebarOverlay");
-  const sidebarContent = document.getElementById("sidebarContent");
-  const sidebarItems = document.querySelectorAll(".sidebar-item");
+const body = document.querySelector('body');
+const menu = body.querySelector('.menu');
+const sidebar = document.getElementById("sidebar"); // use id
+const overlay = document.getElementById("sidebarOverlay");
+const sidebarContent = document.getElementById("sidebarContent");
+const sidebarItems = document.querySelectorAll(".sidebar-item");
 
-  const fruits = body.querySelector('.fruits');
-  const vegetables = body.querySelector('.vegetables');
-  const fruits_bar = body.querySelector('.fruits-bar');
-  const vegetables_bar = body.querySelector('.vegetables-bar');
-  const mainContent = body.querySelector('.main-content');
-  const mainItems = body.querySelector('.main-items');
+const fruits = body.querySelector('.fruits');
+const vegetables = body.querySelector('.vegetables');
+const fruits_bar = body.querySelector('.fruits-bar');
+const vegetables_bar = body.querySelector('.vegetables-bar');
+const mainContent = body.querySelector('.main-content');
+const mainItems = body.querySelector('.main-items');
 
-  // Now you can safely use sidebar, overlay, fruits, vegetables, etc.
+// Now you can safely use sidebar, overlay, fruits, vegetables, etc.
 
 
 let startX = 0;
@@ -26,21 +26,126 @@ let touchingSidebar = false;
 // __________________________________________SIDEBAR______________________________________________
 
 
+// ===== Sidebar Toggle =====
+const closeSidebar = document.getElementById("closeSidebar");
 
-// Toggle sidebar
 function openSidebar() {
-  sidebar.classList.add("open");
-  overlay.classList.add("on");
+  sidebar.classList.add("active");
+  overlay.classList.add("show");
 }
 
-function closeSidebar() {
-  sidebar.classList.remove("open");
-  overlay.classList.remove("on");
-  sidebarContent.classList.remove("active");
+function closeSidebarFunc() {
+  sidebar.classList.remove("active");
+  overlay.classList.remove("show");
 }
 
-// Close when clicking overlay
-overlay.addEventListener("click", closeSidebar);
+overlay.addEventListener("click", closeSidebarFunc);
+closeSidebar.addEventListener("click", closeSidebarFunc);
+
+
+
+// ===== Sidebar Menu Switching =====
+const menuItems = document.querySelectorAll(".sidebar-menu li");
+
+// Simulate user data fetching from backend
+async function getUserData() {
+  try {
+    const res = await fetch("/api/user/profile", { credentials: "include" });
+    if (!res.ok) throw new Error("Failed to fetch user");
+    return await res.json();
+  } catch (err) {
+    console.error("User fetch error:", err);
+    return null;
+  }
+}
+
+async function showSection(section) {
+  sidebarContent.classList.add("fade-out");
+
+  setTimeout(async () => {
+    sidebarContent.innerHTML = ""; // clear
+    if (section === "profile") {
+      const user = await getUserData();
+      if (user) {
+        sidebarContent.innerHTML = `
+          <div class="section profile-section">
+            <h3>👤 Profile</h3>
+            <p><strong>Name:</strong> ${user.name}</p>
+            <p><strong>Phone:</strong> ${user.phone}</p>
+            <p><strong>Email:</strong> ${user.email || "N/A"}</p>
+          </div>`;
+      } else {
+        sidebarContent.innerHTML = `<p>Error loading profile.</p>`;
+      }
+    } else if (section === "orders") {
+      const res = await fetch("/api/user/orders", { credentials: "include" });
+      const orders = await res.json();
+      sidebarContent.innerHTML = `
+        <div class="section orders-section">
+          <h3>📦 Orders</h3>
+          ${orders.length
+          ? orders
+            .map(
+              (o) => `
+            <div class="order-card">
+              <p><strong>Order ID:</strong> ${o._id}</p>
+              <p><strong>Date:</strong> ${new Date(o.date).toLocaleDateString()}</p>
+              <p><strong>Status:</strong> ${o.status}</p>
+            </div>`
+            )
+            .join("")
+          : `<p>No orders yet.</p>`
+        }
+        </div>`;
+    } else if (section === "favorites") {
+      sidebarContent.innerHTML = `
+        <div class="section favorites-section">
+          <h3>❤️ Favorites</h3>
+          <p>Feature coming soon!</p>
+        </div>`;
+    } else if (section === "contact") {
+      sidebarContent.innerHTML = `
+        <div class="section contact-section">
+          <h3>📞 Contact Us</h3>
+          <p>Email: support@farmstore.com</p>
+          <p>Phone: +91-9876543210</p>
+        </div>`;
+    }
+
+    sidebarContent.classList.remove("fade-out");
+    sidebarContent.classList.add("fade-in");
+  }, 200);
+}
+
+menuItems.forEach((item) => {
+  item.addEventListener("click", () => {
+    const section = item.getAttribute("data-section");
+    if (section) showSection(section);
+    if (section !== "logout") document.getElementById("sidebarTitle").textContent = section.charAt(0).toUpperCase() + section.slice(1);
+  });
+});
+
+// ===== Logout Popup =====
+const logoutBtn = document.getElementById("logoutBtn");
+const logoutPopup = document.getElementById("logoutPopup");
+const confirmLogout = document.getElementById("confirmLogout");
+const cancelLogout = document.getElementById("cancelLogout");
+
+logoutBtn.addEventListener("click", () => {
+  logoutPopup.classList.add("show");
+});
+
+cancelLogout.addEventListener("click", () => {
+  logoutPopup.classList.remove("show");
+});
+
+confirmLogout.addEventListener("click", async () => {
+  await fetch("/api/user/logout", { method: "POST", credentials: "include" });
+  window.location.href = "signin.html";
+});
+
+
+
 
 
 function addDragClose(el) {
