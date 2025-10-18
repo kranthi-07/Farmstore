@@ -25,150 +25,273 @@ let touchingSidebar = false;
 
 // __________________________________________SIDEBAR______________________________________________
 
+// ====== Sidebar Dynamic Content ======
+const sidebarLinks = document.querySelectorAll(".sidebar-menu a");
+const userAvatar = document.getElementById("userAvatar");
+const userName = document.getElementById("userName");
+const userEmail = document.getElementById("userEmail");
 
-// ===== Sidebar Toggle =====
-const closeSidebar = document.getElementById("closeSidebar");
-
-function openSidebar() {
-  sidebar.classList.add("active");
-  overlay.classList.add("show");
-}
-
-
-document.getElementById("openSidebar").addEventListener("click", openSidebar);
-
-
-function closeSidebarFunc() {
-  sidebar.classList.remove("active");
-  overlay.classList.remove("show");
-}
-
-overlay.addEventListener("click", closeSidebarFunc);
-closeSidebar.addEventListener("click", closeSidebarFunc);
-
-
-
-// ===== Sidebar Menu Switching =====
-const menuItems = document.querySelectorAll(".sidebar-menu li");
-
-// Simulate user data fetching from backend
-async function getUserData() {
+// Fetch user profile (Replace URL with your backend endpoint)
+async function loadUserProfile() {
   try {
-    const res = await fetch("/api/user/profile", { credentials: "include" });
-    if (!res.ok) throw new Error("Failed to fetch user");
-    return await res.json();
+    const res = await fetch("http://localhost:5000/api/user/profile"); // your backend endpoint
+    const data = await res.json();
+
+    userAvatar.src = data.avatar || "images/default-avatar.png";
+    userName.textContent = data.name || "Guest User";
+    userEmail.textContent = data.email || "guest@farmstore.com";
   } catch (err) {
-    console.error("User fetch error:", err);
-    return null;
+    console.error("Error loading user profile:", err);
   }
 }
 
-async function showSection(section) {
-  sidebarContent.classList.add("fade-out");
+// Dynamic content rendering
+function loadSection(section) {
+  sidebarLinks.forEach(link => link.classList.remove("active"));
+  document.querySelector(`[data-section="${section}"]`).classList.add("active");
 
-  setTimeout(async () => {
-    sidebarContent.innerHTML = ""; // clear
-    if (section === "profile") {
-      const user = await getUserData();
-      if (user) {
-        sidebarContent.innerHTML = `
-          <div class="section profile-section">
-            <h3>👤 Profile</h3>
-            <p><strong>Name:</strong> ${user.name}</p>
-            <p><strong>Phone:</strong> ${user.phone}</p>
-            <p><strong>Email:</strong> ${user.email || "N/A"}</p>
-          </div>`;
-      } else {
-        sidebarContent.innerHTML = `<p>Error loading profile.</p>`;
-      }
-    } else if (section === "orders") {
-      const res = await fetch("/api/user/orders", { credentials: "include" });
-      const orders = await res.json();
+  switch (section) {
+    case "profile":
       sidebarContent.innerHTML = `
-        <div class="section orders-section">
-          <h3>📦 Orders</h3>
-          ${orders.length
-          ? orders
-            .map(
-              (o) => `
-            <div class="order-card">
-              <p><strong>Order ID:</strong> ${o._id}</p>
-              <p><strong>Date:</strong> ${new Date(o.date).toLocaleDateString()}</p>
-              <p><strong>Status:</strong> ${o.status}</p>
-            </div>`
-            )
-            .join("")
-          : `<p>No orders yet.</p>`
-        }
-        </div>`;
-    } else if (section === "favorites") {
+        <h3>👤 Profile</h3>
+        <p><strong>Name:</strong> ${userName.textContent}</p>
+        <p><strong>Email:</strong> ${userEmail.textContent}</p>
+        <button class="edit-btn" onclick="editProfile()">Edit Profile</button>
+      `;
+      break;
+
+    case "orders":
       sidebarContent.innerHTML = `
-        <div class="section favorites-section">
-          <h3>❤️ Favorites</h3>
-          <p>Feature coming soon!</p>
-        </div>`;
-    } else if (section === "contact") {
+        <h3>📦 My Orders</h3>
+        <p>Loading your orders...</p>
+      `;
+      fetchOrders();
+      break;
+
+    case "favorites":
       sidebarContent.innerHTML = `
-        <div class="section contact-section">
-          <h3>📞 Contact Us</h3>
-          <p>Email: support@farmstore.com</p>
-          <p>Phone: +91-9876543210</p>
-        </div>`;
+        <h3>❤️ Favorites</h3>
+        <p>Your favorite items will appear here.</p>
+      `;
+      break;
+
+    case "contact":
+      sidebarContent.innerHTML = `
+        <h3>📩 Contact Us</h3>
+        <p>Email: support@farmstore.com</p>
+        <p>Phone: +91 98765 43210</p>
+      `;
+      break;
+
+    case "settings":
+      sidebarContent.innerHTML = `
+        <h3>⚙️ Settings</h3>
+        <p>Dark mode and account preferences coming soon!</p>
+      `;
+      break;
+
+    case "logout":
+      sidebarContent.innerHTML = `<h3>Logging out...</h3>`;
+      setTimeout(() => {
+        localStorage.clear();
+        window.location.href = "login.html";
+      }, 1000);
+      break;
+
+    default:
+      sidebarContent.innerHTML = `<p>Select an option to view details</p>`;
+  }
+}
+
+// Example: Fetch Orders
+async function fetchOrders() {
+  try {
+    const res = await fetch("http://localhost:5000/api/user/orders");
+    const orders = await res.json();
+
+    if (orders.length === 0) {
+      sidebarContent.innerHTML = "<p>No orders yet.</p>";
+    } else {
+      sidebarContent.innerHTML = `
+        <h3>📦 My Orders</h3>
+        <ul>
+          ${orders
+            .map(order => `<li>${order.item} - ₹${order.amount}</li>`)
+            .join("")}
+        </ul>
+      `;
     }
-
-    sidebarContent.classList.remove("fade-out");
-    sidebarContent.classList.add("fade-in");
-  }, 200);
+  } catch (err) {
+    sidebarContent.innerHTML = "<p>Failed to load orders.</p>";
+  }
 }
 
-menuItems.forEach((item) => {
-  item.addEventListener("click", () => {
-    const section = item.getAttribute("data-section");
-    if (section) showSection(section);
-    if (section !== "logout") document.getElementById("sidebarTitle").textContent = section.charAt(0).toUpperCase() + section.slice(1);
+// Example: Edit Profile (in-place)
+function editProfile() {
+  sidebarContent.innerHTML = `
+    <h3>✏️ Edit Profile</h3>
+    <label>Name</label>
+    <input type="text" id="editName" value="${userName.textContent}">
+    <label>Email</label>
+    <input type="email" id="editEmail" value="${userEmail.textContent}">
+    <button class="save-btn" onclick="saveProfile()">Save</button>
+  `;
+}
+
+async function saveProfile() {
+  const name = document.getElementById("editName").value;
+  const email = document.getElementById("editEmail").value;
+
+  try {
+    await fetch("http://localhost:5000/api/user/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email }),
+    });
+
+    userName.textContent = name;
+    userEmail.textContent = email;
+    sidebarContent.innerHTML = `<p>✅ Profile updated successfully!</p>`;
+  } catch (err) {
+    sidebarContent.innerHTML = `<p>❌ Error updating profile.</p>`;
+  }
+}
+
+// Sidebar navigation events
+sidebarLinks.forEach(link => {
+  link.addEventListener("click", e => {
+    e.preventDefault();
+    const section = e.target.closest("a").dataset.section;
+    loadSection(section);
   });
 });
 
-// ===== Logout Popup =====
-const logoutBtn = document.getElementById("logoutBtn");
-const logoutPopup = document.getElementById("logoutPopup");
-const confirmLogout = document.getElementById("confirmLogout");
-const cancelLogout = document.getElementById("cancelLogout");
-
-logoutBtn.addEventListener("click", () => {
-  logoutPopup.classList.add("show");
-});
-
-cancelLogout.addEventListener("click", () => {
-  logoutPopup.classList.remove("show");
-});
-
-confirmLogout.addEventListener("click", async () => {
-  await fetch("/api/user/logout", { method: "POST", credentials: "include" });
-  window.location.href = "signin.html";
-});
+// Load user data on start
+loadUserProfile();
 
 
 
+// // ===== Sidebar Menu Switching =====
+// const menuItems = document.querySelectorAll(".sidebar-menu li");
+
+// // Simulate user data fetching from backend
+// async function getUserData() {
+//   try {
+//     const res = await fetch("/api/user/profile", { credentials: "include" });
+//     if (!res.ok) throw new Error("Failed to fetch user");
+//     return await res.json();
+//   } catch (err) {
+//     console.error("User fetch error:", err);
+//     return null;
+//   }
+// }
+
+// async function showSection(section) {
+//   sidebarContent.classList.add("fade-out");
+
+//   setTimeout(async () => {
+//     sidebarContent.innerHTML = ""; // clear
+//     if (section === "profile") {
+//       const user = await getUserData();
+//       if (user) {
+//         sidebarContent.innerHTML = `
+//           <div class="section profile-section">
+//             <h3>👤 Profile</h3>
+//             <p><strong>Name:</strong> ${user.name}</p>
+//             <p><strong>Phone:</strong> ${user.phone}</p>
+//             <p><strong>Email:</strong> ${user.email || "N/A"}</p>
+//           </div>`;
+//       } else {
+//         sidebarContent.innerHTML = `<p>Error loading profile.</p>`;
+//       }
+//     } else if (section === "orders") {
+//       const res = await fetch("/api/user/orders", { credentials: "include" });
+//       const orders = await res.json();
+//       sidebarContent.innerHTML = `
+//         <div class="section orders-section">
+//           <h3>📦 Orders</h3>
+//           ${orders.length
+//           ? orders
+//             .map(
+//               (o) => `
+//             <div class="order-card">
+//               <p><strong>Order ID:</strong> ${o._id}</p>
+//               <p><strong>Date:</strong> ${new Date(o.date).toLocaleDateString()}</p>
+//               <p><strong>Status:</strong> ${o.status}</p>
+//             </div>`
+//             )
+//             .join("")
+//           : `<p>No orders yet.</p>`
+//         }
+//         </div>`;
+//     } else if (section === "favorites") {
+//       sidebarContent.innerHTML = `
+//         <div class="section favorites-section">
+//           <h3>❤️ Favorites</h3>
+//           <p>Feature coming soon!</p>
+//         </div>`;
+//     } else if (section === "contact") {
+//       sidebarContent.innerHTML = `
+//         <div class="section contact-section">
+//           <h3>📞 Contact Us</h3>
+//           <p>Email: support@farmstore.com</p>
+//           <p>Phone: +91-9876543210</p>
+//         </div>`;
+//     }
+
+//     sidebarContent.classList.remove("fade-out");
+//     sidebarContent.classList.add("fade-in");
+//   }, 200);
+// }
+
+// menuItems.forEach((item) => {
+//   item.addEventListener("click", () => {
+//     const section = item.getAttribute("data-section");
+//     if (section) showSection(section);
+//     if (section !== "logout") document.getElementById("sidebarTitle").textContent = section.charAt(0).toUpperCase() + section.slice(1);
+//   });
+// });
+
+// // ===== Logout Popup =====
+// const logoutBtn = document.getElementById("logoutBtn");
+// const logoutPopup = document.getElementById("logoutPopup");
+// const confirmLogout = document.getElementById("confirmLogout");
+// const cancelLogout = document.getElementById("cancelLogout");
+
+// logoutBtn.addEventListener("click", () => {
+//   logoutPopup.classList.add("show");
+// });
+
+// cancelLogout.addEventListener("click", () => {
+//   logoutPopup.classList.remove("show");
+// });
+
+// confirmLogout.addEventListener("click", async () => {
+//   await fetch("/api/user/logout", { method: "POST", credentials: "include" });
+//   window.location.href = "signin.html";
+// });
 
 
-function addDragClose(el) {
-  let startX = 0;
-  el.addEventListener("touchstart", e => startX = e.touches[0].clientX);
-  el.addEventListener("touchmove", e => {
-    let delta = e.touches[0].clientX - startX;
-    if (delta < -70) closeAllViews();
-  });
-}
-
-addDragClose(sidebar);
 
 
-function closeAllViews() {
-  sidebar.classList.remove("open");
-  overlay.classList.remove("on");
 
-}
+// function addDragClose(el) {
+//   let startX = 0;
+//   el.addEventListener("touchstart", e => startX = e.touches[0].clientX);
+//   el.addEventListener("touchmove", e => {
+//     let delta = e.touches[0].clientX - startX;
+//     if (delta < -70) closeAllViews();
+//   });
+// }
+
+// addDragClose(sidebar);
+
+
+// function closeAllViews() {
+//   sidebar.classList.remove("open");
+//   overlay.classList.remove("on");
+
+// }
 
 
 
