@@ -8,7 +8,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FARM STORE</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
@@ -37,38 +36,48 @@
     </div>
 
 
+    <!-- SIDEBAR OVERLAY (separate from search overlay) -->
+    <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
 
-
-    <!-- Sidebar -->
-    <!-- Sidebar Overlay -->
-    <div class="overlay"></div>
-
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar" aria-hidden="true">
         <div class="sidebar-header">
-            <div class="avatar">
-                <img id="userAvatar" src="images/default-avatar.png" alt="User Avatar">
-                <div class="user-info">
-                    <h3 id="userName">Guest</h3>
-                    <p id="userEmail">guest@farmstore.com</p>
+            <div class="sidebar-title">
+                <img src="assets/default-avatar.png" alt="avatar" id="sidebarAvatar" class="sidebar-avatar">
+                <div>
+                    <div id="sidebarName" class="sidebar-name">Guest</div>
+                    <div id="sidebarEmail" class="sidebar-email">guest@farmstore.com</div>
                 </div>
             </div>
-            <button class="close-btn" id="close-sidebar">✖</button>
+
+            <button id="closeSidebarBtn" class="sidebar-close" aria-label="Close sidebar">✕</button>
         </div>
 
-        <ul class="sidebar-menu">
-            <li><a href="#" data-section="profile"><i class="fa fa-user"></i> Profile</a></li>
-            <li><a href="#" data-section="orders"><i class="fa fa-box"></i> Orders</a></li>
-            <li><a href="#" data-section="favorites"><i class="fa fa-heart"></i> Favorites</a></li>
-            <li><a href="#" data-section="contact"><i class="fa fa-envelope"></i> Contact</a></li>
-            <li><a href="#" data-section="settings"><i class="fa fa-cog"></i> Settings</a></li>
-            <li><a href="#" data-section="logout" class="logout"><i class="fa fa-sign-out-alt"></i> Logout</a></li>
+        <ul id="sidebarMenu" class="sidebar-menu">
+            <li data-section="profile" class="sidebar-menu-item">Profile</li>
+            <li data-section="orders" class="sidebar-menu-item">Orders</li>
+            <li data-section="favorites" class="sidebar-menu-item">Favorites</li>
+            <li data-section="contact" class="sidebar-menu-item">Contact</li>
+            <li data-section="logout" class="sidebar-menu-item">Logout</li>
         </ul>
 
-        <div class="sidebar-content" id="sidebarContent">
-            <p class="placeholder-text">Select an option to view details</p>
+        <div id="sidebarContent" class="sidebar-content">
+            <p class="placeholder">Select an item to view details</p>
         </div>
     </aside>
+
+
+    <!-- Logout Popup -->
+    <!-- <div class="logout-popup" id="logoutPopup">
+        <div class="popup-content">
+            <h3>Logout Confirmation</h3>
+            <p>Are you sure you want to log out?</p>
+            <div class="popup-buttons">
+                <button id="confirmLogout">Yes</button>
+                <button id="cancelLogout">Cancel</button>
+            </div>
+        </div>
+    </div> -->
 
 
 
