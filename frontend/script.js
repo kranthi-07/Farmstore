@@ -89,22 +89,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let contentHtml = '';
       if (section === 'profile') {
+        openSidebar(); // open immediately
+        showWithBack('<p>Loading profile...</p>'); // show loading placeholder
         await loadProfile();
-        const ps = document.getElementById('profileSection');
-        contentHtml = ps ? ps.innerHTML : `<p>Profile not found</p>`;
       } else if (section === 'orders') {
         const os = document.getElementById('ordersSection');
         contentHtml = os ? os.innerHTML : `<h3>Orders</h3><p>No orders found.</p>`;
+        showWithBack(contentHtml);
       } else if (section === 'favorites') {
         contentHtml = `<h3>Favorites</h3><p>Coming soon.</p>`;
+        showWithBack(contentHtml);
       } else if (section === 'contact') {
         contentHtml = `<h3>Contact</h3><p>Email: support@farmstore.com<br>Phone: +91 98765 43210</p>`;
+        showWithBack(contentHtml);
       } else if (section === 'logout') {
         await logout();
         return;
       }
-
-      showWithBack(contentHtml);
     });
   });
 
@@ -112,11 +113,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sidebarAvatar) {
     sidebarAvatar.addEventListener('click', async () => {
       openSidebar();
+      showWithBack('<p>Loading profile...</p>'); // loading while fetching
       await loadProfile();
-      const ps = document.getElementById('profileSection');
-      sidebarMenu.style.display = 'none';
-      const contentHtml = ps ? ps.innerHTML : `<p>Profile not found</p>`;
-      showWithBack(contentHtml);
     });
   }
 
@@ -128,22 +126,23 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.success) {
         sidebarName.textContent = data.user.name || "Guest";
         sidebarEmail.textContent = data.user.mobile ? `+91 ${data.user.mobile}` : "guest@farmstore.com";
-        sidebarAvatar.src = "assets/default-avatar.png"; // optionally replace with user's avatar URL
-        // Optional: insert profile section HTML
-        let profileHtml = `
+        sidebarAvatar.src = "assets/default-avatar.png"; // replace with avatar URL if available
+        const profileHtml = `
           <div id="profileSection">
             <h3>Profile</h3>
             <p><strong>Name:</strong> ${data.user.name}</p>
             <p><strong>Mobile:</strong> +91 ${data.user.mobile}</p>
           </div>
         `;
-        sidebarContent.innerHTML = profileHtml;
+        showWithBack(profileHtml);
       } else {
         sidebarName.textContent = "Guest";
         sidebarEmail.textContent = "guest@farmstore.com";
+        showWithBack('<p>Not logged in</p>');
       }
     } catch (err) {
       console.error("Profile load error:", err);
+      showWithBack('<p>Error loading profile</p>');
     }
   }
 
