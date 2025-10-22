@@ -21,9 +21,39 @@ let currentX = 0;
 let touchingSidebar = false;
 
 
+//__________________________________________SWIPER_________________________________________
+
+
+var swiper = new Swiper('.mySwiper', {
+  slidePerView: 1,
+  loop: true,
+  spaceBetween: 20,
+  speed: 1000,
+
+  autoplay: {
+    delay: 1200,
+  },
+
+})
+
+
+
+
+
+// ________________________________________SWITCHING TABS________________________________________
+
+
+
+
+
+
+
 
 
 // __________________________________________SIDEBAR______________________________________________
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const menuBtn = document.querySelector('#openSidebar') || document.querySelector('.menu');
   const sidebar = document.getElementById('sidebar');
@@ -38,7 +68,96 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!sidebar || !sidebarOverlay || !menuBtn) return;
 
-  // -------------------- Open / Close Sidebar --------------------
+  // Populate header quickly when sidebar opens
+  async function populateSidebarHeader() {
+    try {
+      // lightweight endpoint that only needs to confirm user & basic info.
+      // Using /getUser (same as you used elsewhere) so it stays consistent with your backend.
+      const res = await fetch('/getUser', { credentials: 'include' });
+      const data = await res.json();
+      if (data && data.loggedIn) {
+        sidebarName.textContent = data.name || "User";
+        sidebarEmail.textContent = data.mobile ? `+91 ${data.mobile}` : (data.email || "user@farmstore.com");
+        // avatar: keep default unless backend has avatar URL in response
+        // if (data.avatarUrl) sidebarAvatar.src = data.avatarUrl;
+      } else {
+        sidebarName.textContent = "Guest";
+        sidebarEmail.textContent = "guest@farmstore.com";
+        sidebarAvatar.src = "assets/default-avatar.png";
+      }
+    } catch (err) {
+      console.error("Sidebar header load failed:", err);
+      sidebarName.textContent = "Guest";
+      sidebarEmail.textContent = "guest@farmstore.com";
+      sidebarAvatar.src = "assets/default-avatar.png";
+    }
+  }
+
+  function showSidebarLoading() {
+    // lightweight inline loader / placeholder while profile content is fetched
+    sidebarContent.innerHTML = `<div class="sidebar-loading" style="display:flex;align-items:center;justify-content:center;height:120px;font-weight:600;color:#2e7d32">Loading...</div>`;
+    sidebarContent.classList.add('show');
+  }
+
+  // Restore the menu (used by Back button)
+  function restoreMenu() {
+    if (sidebarMenu) sidebarMenu.style.display = 'block';
+    sidebarMenuItems.forEach(i => i.classList.remove('active'));
+
+    sidebarContent.style.opacity = '0';
+    setTimeout(() => {
+      sidebarContent.innerHTML = '';
+      sidebarContent.classList.remove('show');
+      sidebarContent.style.opacity = '1';
+      sidebarContent.scrollTop = 0; // ensure reset to top
+    }, 200);
+  }
+
+
+  // Show content with a Back button (safe single place to render)
+  function showWithBack(innerHtml) {
+    sidebarContent.innerHTML = `<div class="back-btn" id="sidebarBackBtn">← Back</div>` + innerHtml;
+    sidebarContent.classList.add('show');
+    const backBtn = document.getElementById('sidebarBackBtn');
+    if (backBtn) backBtn.addEventListener('click', restoreMenu);
+  }
+
+
+
+
+
+  // -------------------- Load Profile --------------------
+
+  // Unified profile loader — only one definition (replaces duplicates)
+  async function loadProfile() {
+    showSidebarLoading();
+    try {
+      const res = await fetch("https://farmstore-1.onrender.com/profile", { credentials: 'include' });
+      const data = await res.json();
+      if (data && data.success) {
+        // Immediately update header so top section is visible
+        sidebarName.textContent = data.user.name || "Guest";
+        sidebarEmail.textContent = data.user.mobile ? `+91 ${data.user.mobile}` : (data.user.email || "guest@farmstore.com");
+        // Render profile area inside the sidebar content (single location)
+        const profileHtml = `
+          <div id="profileSection">
+            <h3>Profile</h3>
+            <p><strong>Name:</strong> ${data.user.name || "N/A"}</p>
+            <p><strong>Mobile:</strong> ${data.user.mobile || "N/A"}</p>
+            ${data.user.email ? `<p><strong>Email:</strong> ${data.user.email}</p>` : ''}
+          </div>
+        `;
+        showWithBack(profileHtml);
+      } else {
+        showWithBack('<p>Not logged in</p>');
+      }
+    } catch (err) {
+      console.error("Profile load error:", err);
+      showWithBack('<p>Error loading profile</p>');
+    }
+  }
+
+  // Sidebar open / close
   function openSidebar() {
     sidebar.classList.add('open');
     sidebarOverlay.classList.add('show');
@@ -46,6 +165,8 @@ document.addEventListener("DOMContentLoaded", () => {
     sidebarOverlay.setAttribute('aria-hidden', 'false');
     document.documentElement.style.overflow = 'hidden';
     document.body.classList.add('sidebar-open');
+    // fetch header info right away so top section isn't blank
+    populateSidebarHeader();
   }
 
   function closeSidebar() {
@@ -64,44 +185,28 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
   sidebar.addEventListener('click', (e) => e.stopPropagation());
 
-  // -------------------- Back Button --------------------
-  function restoreMenu() {
-    if (sidebarMenu) sidebarMenu.style.display = 'block';
-    sidebarMenuItems.forEach(i => i.classList.remove('active'));
-    sidebarContent.innerHTML = '';
-    sidebarContent.classList.remove('show');
-  }
-
-  function showWithBack(innerHtml) {
-    sidebarContent.innerHTML = `<div class="back-btn" id="sidebarBackBtn">← Back</div>` + innerHtml;
-    sidebarContent.classList.add('show');
-    const backBtn = document.getElementById('sidebarBackBtn');
-    if (backBtn) backBtn.addEventListener('click', restoreMenu);
-  }
-
-  // -------------------- Menu Items Click --------------------
+  // Menu items click
   sidebarMenuItems.forEach(item => {
     item.addEventListener('click', async () => {
       const section = item.getAttribute('data-section');
-      sidebarMenu.style.display = 'none';
+      // Hide the menu and show loader area while we fetch
+      if (sidebarMenu) sidebarMenu.style.display = 'none';
       sidebarMenuItems.forEach(i => i.classList.remove('active'));
       item.classList.add('active');
 
-      let contentHtml = '';
       if (section === 'profile') {
-        openSidebar(); // open immediately
-        showWithBack('<p>Loading profile...</p>'); // show loading placeholder
-        await loadProfile();
+        openSidebar();            // ensure sidebar is open
+        // show placeholder immediately
+        showSidebarLoading();
+        await loadProfile();      // will replace content when done
       } else if (section === 'orders') {
         const os = document.getElementById('ordersSection');
-        contentHtml = os ? os.innerHTML : `<h3>Orders</h3><p>No orders found.</p>`;
+        const contentHtml = os ? os.innerHTML : `<h3>Orders</h3><p>No orders found.</p>`;
         showWithBack(contentHtml);
       } else if (section === 'favorites') {
-        contentHtml = `<h3>Favorites</h3><p>Coming soon.</p>`;
-        showWithBack(contentHtml);
+        showWithBack(`<h3>Favorites</h3><p>Coming soon.</p>`);
       } else if (section === 'contact') {
-        contentHtml = `<h3>Contact</h3><p>Email: support@farmstore.com<br>Phone: +91 98765 43210</p>`;
-        showWithBack(contentHtml);
+        showWithBack(`<h3>Contact</h3><p>Email: support@farmstore.com<br>Phone: +91 98765 43210</p>`);
       } else if (section === 'logout') {
         await logout();
         return;
@@ -109,48 +214,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // -------------------- Avatar Click --------------------
+  // Avatar click loads profile (same unified flow)
   if (sidebarAvatar) {
     sidebarAvatar.addEventListener('click', async () => {
       openSidebar();
-      showWithBack('<p>Loading profile...</p>'); // loading while fetching
+      if (sidebarMenu) sidebarMenu.style.display = 'none';
+      showSidebarLoading();
       await loadProfile();
     });
   }
 
-  // -------------------- Load Profile --------------------
-  async function loadProfile() {
-    try {
-      const res = await fetch("https://farmstore-1.onrender.com/profile", { credentials: 'include' });
-      const data = await res.json();
-      if (data.success) {
-        sidebarName.textContent = data.user.name || "Guest";
-        sidebarEmail.textContent = data.user.mobile ? `+91 ${data.user.mobile}` : "guest@farmstore.com";
-        sidebarAvatar.src = "assets/default-avatar.png"; // replace with avatar URL if available
-        const profileHtml = `
-          <div id="profileSection">
-            <h3>Profile</h3>
-            <p><strong>Name:</strong> ${data.user.name}</p>
-            <p><strong>Mobile:</strong> +91 ${data.user.mobile}</p>
-          </div>
-        `;
-        showWithBack(profileHtml);
-      } else {
-        sidebarName.textContent = "Guest";
-        sidebarEmail.textContent = "guest@farmstore.com";
-        showWithBack('<p>Not logged in</p>');
-      }
-    } catch (err) {
-      console.error("Profile load error:", err);
-      showWithBack('<p>Error loading profile</p>');
-    }
-  }
-
-  // -------------------- Drag to Close --------------------
+  // drag to close (keeps existing behavior)
   (function enableDragToClose() {
     let startX = null;
     let touching = false;
-
     sidebar.addEventListener('touchstart', e => {
       if (!sidebar.classList.contains('open')) return;
       touching = true;
@@ -460,62 +537,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
-
-
-
-
-
-
-async function loadProfile() {
-  try {
-    const res = await fetch("https://farmstore-1.onrender.com/profile", {
-      credentials: "include"
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      const user = data.user;
-      document.getElementById("profileSection").innerHTML = `
-        <div class="profile-section">
-          <button class="back-btn" onclick="goBackToSidebar()">⬅</button>
-          <h2>Profile</h2>
-          <p><strong>Username:</strong> ${user.name || "N/A"}</p>
-          <p><strong>Mobile:</strong> ${user.mobile}</p>
-          ${user.email ? `<p><strong>Email:</strong> ${user.email}</p>` : ""}
-          
-        </div>
-      `;
-    } else {
-      document.getElementById("profileSection").innerHTML = "<div class='not-login'><p class='please-login'>Please log in</p><br><button class='login-btn-profile'>Login</button></div>";
-    }
-  } catch (err) {
-    console.error("❌ Failed to load profile:", err);
-  }
-}
-
-
-function goBackToSidebar() {
-  document.getElementById("profileSection").innerHTML = `
-    <h3 onclick="loadProfile()">Profile</h3>`;
-}
-
-
-// 🔹 Logout function
-async function logout() {
-  await fetch("https://farmstore-1.onrender.com/logout", {
-    method: "POST",
-    credentials: "include"
-  });
-
-  // Force signin page to reload fresh (not from cache)
-  window.location.href = "signin.html?ts=" + new Date().getTime();
-}
-
-
-
-
-
+// _________________________________________AVATAR____________________________________
 
 
 document.addEventListener("DOMContentLoaded", async () => {
