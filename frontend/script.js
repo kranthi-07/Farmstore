@@ -580,156 +580,193 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 // _______________________________________SEARCH BAR________________________________________________
-const searchBox = document.querySelector(".search-bar input");
-const searchBtn = document.getElementById("searchBtn");
+// ===== SEARCH BAR & SUGGESTIONS =====
+const searchInput = document.querySelector(".search-bar input");
 const suggestionsBox = document.getElementById("searchSuggestions");
-const overlayEl = document.querySelector(".overlay");
+const overlayEl = document.querySelector(".search-overlay");
 
-const items = {
-  "Citrus Fruits": "citrusfruits.html",
-  "Oranges": "citrusfruits.html",
-  "Lemons": "citrusfruits.html",
-  "Mosambi": "citrusfruits.html",
+// ✅ Example items dataset
+const items = [
+  
+  // Citrus Fruits
+  // { name: "Citrus Fruits", emoji: "🍊", link: "citrusfruits.html" },
+  { name: "Oranges", emoji: "🍊", link: "citrusfruits.html" },
+  { name: "Lemons", emoji: "🍋", link: "citrusfruits.html" },
+  { name: "Mosambi", emoji: "🍊", link: "citrusfruits.html" },
 
-  "Tropical Fruits": "tropical.html",
-  "Mango": "tropical.html",
-  "Banana": "tropical.html",
-  "Papaya": "tropical.html",
-  "Guava": "tropical.html",
+  // Tropical Fruits
+  // { name: "Tropical Fruits", emoji: "🥭", link: "tropical.html" },
+  { name: "Mango", emoji: "🥭", link: "tropical.html" },
+  { name: "Banana", emoji: "🍌", link: "tropical.html" },
+  { name: "Papaya", emoji: "🟠", link: "tropical.html" }, // closest visual
+  { name: "Guava", emoji: "🟢", link: "tropical.html" }, // placeholder
 
-  "Berries": "berries.html",
-  "Strawberries": "berries.html",
+  // Berries
+  // { name: "Berries", emoji: "🍓", link: "berries.html" },
+  { name: "Strawberries", emoji: "🍓", link: "berries.html" },
 
-  "Stone Fruits": "stone.html",
-  "Coconut": "stone.html",
-  "Jackfruit": "stone.html",
+  // Stone Fruits
+  // { name: "Stone Fruits", emoji: "🍑", link: "stone.html" },
+  { name: "Coconut", emoji: "🥥", link: "stone.html" },
+  { name: "Jackfruit", emoji: "🟡", link: "stone.html" }, // placeholder
 
-  "Melons": "melon.html",
-  "Watermelon": "melon.html",
-  "Muskmelon": "melon.html",
+  // Melons
+  // { name: "Melons", emoji: "🍈", link: "melon.html" },
+  { name: "Watermelon", emoji: "🍉", link: "melon.html" },
+  { name: "Muskmelon", emoji: "🍈", link: "melon.html" },
 
-  "Leafy Vegetables": "leafy.html",
-  "Spinach": "leafy.html",
-  "Coriander": "leafy.html",
+  // Leafy Vegetables
+  // { name: "Leafy Vegetables", emoji: "🥬", link: "leafy.html" },
+  { name: "Spinach", emoji: "🥬", link: "leafy.html" },
+  { name: "Coriander", emoji: "🌿", link: "leafy.html" },
 
-  "Root Vegetables": "root.html",
-  "Carrot": "root.html",
-  "Beetroot": "root.html",
-  "Radish": "root.html",
+  // Root Vegetables
+  // { name: "Root Vegetables", emoji: "🟠", link: "root.html" }, // placeholder
+  { name: "Carrot", emoji: "🥕", link: "root.html" },
+  { name: "Beetroot", emoji: "🟣", link: "root.html" }, // placeholder
+  { name: "Radish", emoji: "🟥", link: "root.html" }, // placeholder
 
-  "Fruiting Vegetables": "fruiting.html",
-  "Tomato": "fruiting.html",
-  "Brinjal": "fruiting.html",
-  "Ladysfinger": "fruiting.html",
+  // Fruiting Vegetables
+  // { name: "Fruiting Vegetables", emoji: "🍅", link: "fruiting.html" },
+  { name: "Tomato", emoji: "🍅", link: "fruiting.html" },
+  { name: "Brinjal", emoji: "🍆", link: "fruiting.html" },
+  { name: "Lady's Finger", emoji: "🫛", link: "fruiting.html" },
 
-  "Bulb & Tuber Vegetables": "tuber.html",
-  "Potato": "tuber.html",
-  "Garlic": "tuber.html",
-  "Onion": "tuber.html",
-};
+  // Bulb & Tuber Vegetables
+  // { name: "Bulb & Tuber Vegetables", emoji: "🥔", link: "tuber.html" },
+  { name: "Potato", emoji: "🥔", link: "tuber.html" },
+  { name: "Garlic", emoji: "🧄", link: "tuber.html" },
+  { name: "Onion", emoji: "🧅", link: "tuber.html" },
 
-// Show overlay when focusing, but hide suggestions until typing
-searchBox.addEventListener("focus", () => {
-  overlayEl.classList.add("on-search");
-  suggestionsBox.style.display = "none";
+];
+
+let selectedIndex = -1; // for keyboard navigation
+
+// Helper: Check login once and cache result
+let isUserLoggedIn = null;
+async function checkLogin() {
+  if (isUserLoggedIn !== null) return isUserLoggedIn;
+  try {
+    const res = await fetch("/getUser", { credentials: "include" });
+    const data = await res.json();
+    isUserLoggedIn = data.loggedIn === true;
+  } catch {
+    isUserLoggedIn = false;
+  }
+  return isUserLoggedIn;
+}
+
+// ✅ Render suggestions
+function renderSuggestions(filtered) {
+  if (!filtered.length) {
+    suggestionsBox.innerHTML = `<p class="no-result">No Items Found ❌</p>`;
+  } else {
+    suggestionsBox.innerHTML = filtered
+      .map((item, index) => {
+        // highlight match
+        const query = searchInput.value.toLowerCase();
+        const nameHighlight = item.name.replace(
+          new RegExp(query, "gi"),
+          match => `<mark>${match}</mark>`
+        );
+        return `<div class="suggestion-item" data-link="${item.link}" data-index="${index}">${item.emoji} ${nameHighlight}</div>`;
+      })
+      .join("");
+  }
+  suggestionsBox.style.display = "block";
+  overlayEl.classList.add("show");
+}
+
+// ✅ Handle input
+let debounceTimer;
+searchInput.addEventListener("input", () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    const query = searchInput.value.trim().toLowerCase();
+    if (!query) {
+      suggestionsBox.innerHTML = "";
+      suggestionsBox.style.display = "none";
+      overlayEl.classList.remove("show");
+      selectedIndex = -1;
+      return;
+    }
+
+    const filtered = items.filter(item => item.name.toLowerCase().includes(query));
+    selectedIndex = -1;
+    renderSuggestions(filtered);
+  }, 150);
 });
 
-// Hide overlay + suggestions when overlay clicked
-overlayEl.addEventListener("click", () => {
-  overlayEl.classList.remove("on-search");
-  suggestionsBox.style.display = "none";
-});
+// ✅ Keyboard navigation
+// ✅ Show suggestions dynamically
+searchInput.addEventListener("input", () => {
+  const query = searchInput.value.trim().toLowerCase();
 
-// Render suggestions dynamically
-function renderSuggestions(query) {
-  let q = query.trim().toLowerCase();
-  if (!q) {
+  if (!query) {
     suggestionsBox.style.display = "none";
+    overlayEl.style.display = "none";
     return;
   }
 
-  let html = "";
-  Object.keys(items).forEach(label => {
-    if (label.toLowerCase().includes(q)) {
-      // ✅ No inline onclick, use data-link instead
-      html += `<div class="suggestion" data-link="${items[label]}">${label}</div>`;
-    }
-  });
-
-  suggestionsBox.innerHTML = html || "<div>No results found ❌</div>";
-  suggestionsBox.style.display = "block";
-}
-
-// Typing → show suggestions
-searchBox.addEventListener("input", (e) => {
-  renderSuggestions(e.target.value);
-});
-
-// =====================================================
-// ✅ Suggestion Click with Login Check
-// =====================================================
-if (suggestionsBox) {
-  suggestionsBox.addEventListener("click", async (e) => {
-    const target = e.target.closest(".suggestion");
-    if (target) {
-      e.preventDefault();
-      const targetPage = target.getAttribute("data-link");
-
-      if (!(await isLoggedIn())) {
-        showLoginPopup(targetPage);
-      } else {
-        window.location.href = targetPage;
-      }
-    }
-  });
-}
-
-// =====================================================
-// ✅ Enter Key Search with Login Check
-// =====================================================
-async function doSearch() {
-  let query = searchBox.value.trim().toLowerCase();
-  if (!query) return;
-
-  let found = Object.keys(items).find(label =>
-    label.toLowerCase().includes(query)
+  const filtered = items.filter(item =>
+    item.name.toLowerCase().includes(query)
   );
 
-  if (found) {
-    const targetPage = items[found];
-    if (!(await isLoggedIn())) {
-      showLoginPopup(targetPage);
-    } else {
-      window.location.href = targetPage;
-    }
+  if (!filtered.length) {
+    suggestionsBox.innerHTML = `<p class="no-result">No Items Found ❌</p>`;
   } else {
-    suggestionsBox.innerHTML = "<div>No results found ❌</div>";
-    suggestionsBox.style.display = "block";
+    suggestionsBox.innerHTML = filtered
+      .map(i => `<div class="suggestion-item" data-link="${i.link}">${i.emoji} ${i.name}</div>`)
+      .join('');
   }
+
+  // ✅ make suggestions appear below input
+  suggestionsBox.style.display = "block";
+  overlayEl.style.display = "block";
+});
+
+// ✅ Close suggestions on clicking overlay
+overlayEl.addEventListener("click", () => {
+  suggestionsBox.style.display = "none";
+  overlayEl.style.display = "none";
+});
+
+
+function highlightSuggestion(items) {
+  items.forEach((item, i) => {
+    if (i === selectedIndex) item.classList.add("active");
+    else item.classList.remove("active");
+  });
 }
 
-// Press Enter → search
-searchBox.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    doSearch();
+// ✅ Click suggestion
+suggestionsBox.addEventListener("click", async (e) => {
+  const target = e.target.closest(".suggestion-item");
+  if (!target) return;
+  const link = target.getAttribute("data-link");
+
+  const loggedIn = await checkLogin();
+  if (!loggedIn) {
+    showLoginPopup(link);
+  } else {
+    window.location.href = link;
   }
 });
 
-// Click search icon → search
-searchBtn.addEventListener("click", () => {
-  doSearch();
+// ✅ Click overlay to close suggestions
+overlayEl.addEventListener("click", () => {
+  suggestionsBox.style.display = "none";
+  overlayEl.classList.remove("show");
 });
 
-// Press ESC → close
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    overlayEl.classList.remove("on-search");
+// ✅ Optional: blur input closes suggestions
+searchInput.addEventListener("blur", () => {
+  setTimeout(() => {
     suggestionsBox.style.display = "none";
-    searchBox.blur();
-  }
+    overlayEl.classList.remove("show");
+    selectedIndex = -1;
+  }, 200);
 });
-
 
 
 

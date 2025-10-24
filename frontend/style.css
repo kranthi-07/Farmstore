@@ -390,28 +390,66 @@ input[type="search"]::-webkit-search-cancel-button {
     display: none;
 }
 
-.suggestions {
-    font-family: 'Popppins', sans-serif;
-}
-
-/* Black transparent overlay */
-.overlay.on-search {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 5;
+/* Search bar wrapper */
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  z-index: 9999;
 }
 
 /* Suggestions dropdown */
-.search-suggestions {
+#searchSuggestions {
+  position: absolute;
+  top: 110%; /* right below the input */
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 9999; /* above everything */
+  display: none;
+}
+
+.suggestion-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover,
+.suggestion-item.active {
+  background-color: #e8f5e9;
+}
+
+.no-result {
+  padding: 10px;
+  color: #999;
+}
+
+/* Search overlay (dark transparent behind suggestions) */
+.search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.2);
+  z-index: 999; /* below suggestions */
+  display: none;
+}
+
+
+
+/* Suggestions dropdown */
+/* .search-suggestions {
     display: none;
     position: absolute;
     top: 70px;
-    /* below search bar */
+    
     left: 0;
     width: 100%;
     background: #fff;
@@ -420,7 +458,7 @@ input[type="search"]::-webkit-search-cancel-button {
     max-height: 200px;
     overflow-y: auto;
     z-index: 100;
-}
+} */
 
 .search-suggestions div {
     padding: 10px;
