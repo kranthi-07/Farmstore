@@ -540,50 +540,48 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // _______________________________________SEARCH BAR________________________________________________
 // ===== SEARCH BAR & SUGGESTIONS =====
+// --- Search & Suggestions ---
 const searchInput = document.querySelector(".search-bar input");
 const suggestionsBox = document.getElementById("searchSuggestions");
 const overlayEl = document.querySelector(".search-overlay");
 const searchBar = document.querySelector(".search-bar");
 
-// ✅ Suggestion data
-const items = [
-  { name: "Oranges", emoji: "🍊", link: "citrusfruits.html" },
+// Sample items
+const items =
+  [{ name: "Oranges", emoji: "🍊", link: "citrusfruits.html" },
   { name: "Lemons", emoji: "🍋", link: "citrusfruits.html" },
   { name: "Mosambi", emoji: "🍊", link: "citrusfruits.html" },
-
   { name: "Mango", emoji: "🥭", link: "tropical.html" },
   { name: "Banana", emoji: "🍌", link: "tropical.html" },
   { name: "Papaya", emoji: "🟠", link: "tropical.html" },
   { name: "Guava", emoji: "🟢", link: "tropical.html" },
-
   { name: "Strawberries", emoji: "🍓", link: "berries.html" },
-
   { name: "Coconut", emoji: "🥥", link: "stone.html" },
   { name: "Jackfruit", emoji: "🟡", link: "stone.html" },
-
   { name: "Watermelon", emoji: "🍉", link: "melon.html" },
   { name: "Muskmelon", emoji: "🍈", link: "melon.html" },
-
   { name: "Spinach", emoji: "🥬", link: "leafy.html" },
   { name: "Coriander", emoji: "🌿", link: "leafy.html" },
-
   { name: "Carrot", emoji: "🥕", link: "root.html" },
   { name: "Beetroot", emoji: "🟣", link: "root.html" },
   { name: "Radish", emoji: "🟥", link: "root.html" },
-
   { name: "Tomato", emoji: "🍅", link: "fruiting.html" },
   { name: "Brinjal", emoji: "🍆", link: "fruiting.html" },
   { name: "Lady's Finger", emoji: "🫛", link: "fruiting.html" },
-
   { name: "Potato", emoji: "🥔", link: "tuber.html" },
   { name: "Garlic", emoji: "🧄", link: "tuber.html" },
   { name: "Onion", emoji: "🧅", link: "tuber.html" },
-];
+  ];
 
 let selectedIndex = -1;
-
-// ✅ Login check
 let isUserLoggedIn = null;
+
+
+searchBar.addEventListener("click",()=>{
+  searchBar.classList.add("scale")
+});
+
+// ✅ Check login
 async function checkLogin() {
   if (isUserLoggedIn !== null) return isUserLoggedIn;
   try {
@@ -596,20 +594,31 @@ async function checkLogin() {
   return isUserLoggedIn;
 }
 
-// ✅ Display suggestions
+// ✅ Login popup logic
+const loginPopup = document.getElementById("loginPopup");
+const goToLogin = document.getElementById("goToLogin");
+const closePopup = document.getElementById("closePopup");
+
+function showLoginPopup(redirectPage) {
+  loginPopup.style.display = "flex";
+  loginPopup.setAttribute("data-redirect", redirectPage || "");
+}
+
+closePopup.onclick = () => loginPopup.style.display = "none";
+goToLogin.onclick = () => {
+  const redirect = loginPopup.getAttribute("data-redirect");
+  window.location.href = redirect
+    ? `signin.html?redirect=${redirect}`
+    : "signin.html";
+};
+
+// ✅ Render suggestions
 function renderSuggestions(filtered) {
-  suggestionsBox.innerHTML = filtered
-    .map((item, i) => {
-      const q = searchInput.value.toLowerCase();
-      const highlighted = item.name.replace(
-        new RegExp(q, "gi"),
-        m => `<mark>${m}</mark>`
-      );
-      return `<div class="suggestion-item" data-link="${item.link}" data-index="${i}">
-        ${item.emoji} ${highlighted}
-      </div>`;
-    })
-    .join("");
+  suggestionsBox.innerHTML = filtered.map((item, i) => {
+    const q = searchInput.value.toLowerCase();
+    const highlighted = item.name.replace(new RegExp(q, "gi"), m => `<mark>${m}</mark>`);
+    return `<div class="suggestion-item" data-link="${item.link}" data-index="${i}">${item.emoji} ${highlighted}</div>`;
+  }).join("");
 
   suggestionsBox.classList.add("s-show");
   overlayEl.classList.add("show");
@@ -621,48 +630,24 @@ searchInput.addEventListener("input", () => {
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
     const query = searchInput.value.trim().toLowerCase();
-
-    // 🔹 Control animation size
     if (query !== "") searchBar.classList.add("scale");
     else searchBar.classList.remove("scale");
 
     if (!query) {
       suggestionsBox.classList.remove("s-show");
       overlayEl.classList.remove("show");
-      selectedIndex = -1;
       return;
     }
 
-    const filtered = items.filter(
-      item => item.name.toLowerCase().includes(query)
-    );
-
+    const filtered = items.filter(item => item.name.toLowerCase().includes(query));
     if (!filtered.length) {
       suggestionsBox.innerHTML = `<p class="no-result">No Items Found ❌</p>`;
       suggestionsBox.classList.add("s-show");
       overlayEl.classList.add("show");
       return;
     }
-
-    selectedIndex = -1;
     renderSuggestions(filtered);
   }, 120);
-});
-
-// ✅ Focus animation trigger
-searchInput.addEventListener("focus", () => {
-  searchBar.classList.add("scale");
-});
-
-// ✅ Blur behavior
-searchInput.addEventListener("blur", () => {
-  setTimeout(() => {
-    if (!searchInput.value.trim()) {
-      searchBar.classList.remove("scale");
-      suggestionsBox.classList.remove("s-show");
-      overlayEl.classList.remove("show");
-    }
-  }, 150);
 });
 
 // ✅ Click suggestion
@@ -675,17 +660,16 @@ suggestionsBox.addEventListener("click", async (e) => {
 
   if (!loggedIn) showLoginPopup(link);
   else window.location.href = link;
-});
 
-// ✅ Overlay click closes UI
-overlayEl.addEventListener("click", () => {
+  // Close suggestions
   suggestionsBox.classList.remove("s-show");
   overlayEl.classList.remove("show");
   searchBar.classList.remove("scale");
 });
 
-// ✅ Refresh if coming from page back
-window.addEventListener("pageshow", (ev) => {
-  if (ev.persisted) window.location.reload();
+// ✅ Overlay click closes suggestions
+overlayEl.addEventListener("click", () => {
+  suggestionsBox.classList.remove("s-show");
+  overlayEl.classList.remove("show");
+  searchBar.classList.remove("scale");
 });
-
