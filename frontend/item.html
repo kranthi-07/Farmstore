@@ -63,14 +63,14 @@
 
     .item-info h1 {
       font-size: 2rem;
-      padding-bottom:10px;
+      padding-bottom: 10px;
     }
 
-    .item-info .price{
-      padding:10px;
+    .item-info .price {
+      padding: 10px;
       font-size: 20px;
-      color:green;
-      font-weight:bold;
+      color: green;
+      font-weight: bold;
     }
 
     .labels {
@@ -90,7 +90,7 @@
     }
 
     .desc {
-      width:100%;
+      width: 100%;
       text-align: center;
       font-size: 1.2rem;
       color: #444;
@@ -333,6 +333,25 @@
     const cartBtn = document.getElementById("cartBtn");
     const pageLoader = document.getElementById("pageLoader");
 
+    // ✅ CHECK USER LOGGED IN
+    async function isLoggedIn() {
+      try {
+        const res = await fetch("http://localhost:5000/auth/check", {
+          credentials: "include"
+        });
+        const data = await res.json();
+        return data.loggedIn;
+      } catch {
+        return false;
+      }
+    }
+
+    // ✅ Show login popup (redirects user after login)
+    function showLoginPopup(redirectURL) {
+      sessionStorage.setItem("redirectAfterLogin", redirectURL);
+      window.location.href = "login.html";
+    }
+
     function showLoader() {
       pageLoader.classList.remove("hidden");
     }
@@ -348,6 +367,12 @@
         return;
       }
 
+      const loggedIn = await isLoggedIn();
+      if (!loggedIn) {
+        showLoginPopup(window.location.href);
+        return;
+      }
+
       const selectedPrice = parseInt(selected.value);
       const selectedQty = selected.dataset.qty;
 
@@ -360,7 +385,7 @@
 
       try {
         showLoader();
-        const res = await fetch("https://farmstore-1.onrender.com/cart/add", {
+        const res = await fetch("http://localhost:5000/cart/add", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -368,9 +393,7 @@
         });
 
         if (res.ok) {
-          cartBtn.textContent = "Remove from Cart";
-          cartBtn.style.background = "#38b725";
-          cartBtn.onclick = removeFromCart;
+          alert("Added to cart!");
         } else {
           alert("Failed to add item.");
         }
@@ -382,37 +405,22 @@
       }
     }
 
-    async function removeFromCart() {
-      try {
-        showLoader();
-        const res = await fetch("https://farmstore-1.onrender.com/cart/remove", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ name })
-        });
+    cartBtn.addEventListener("click", toggleCart);
 
-        if (res.ok) {
-          cartBtn.textContent = "Add to Cart";
-          cartBtn.style.background = "green";
-          cartBtn.onclick = toggleCart;
+    // ✅ CART ICON CLICK HANDLER (from your script)
+    const cartIcon = document.querySelector(".cart");
+    if (cartIcon) {
+      cartIcon.addEventListener("click", async (e) => {
+        e.preventDefault();
+        if (!(await isLoggedIn())) {
+          showLoginPopup("cart.html");
         } else {
-          alert("Failed to remove item.");
+          window.location.href = "cart.html";
         }
-      } catch (err) {
-        console.error(err);
-        alert("Error removing item.");
-      } finally {
-        hideLoader();
-      }
+      });
     }
-
-    // ✅ Init
-    window.addEventListener("load", () => {
-      hideLoader();
-      cartBtn.onclick = toggleCart;
-    });
   </script>
+
 </body>
 
 </html>
