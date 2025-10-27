@@ -21,6 +21,53 @@ let currentX = 0;
 let touchingSidebar = false;
 
 
+
+
+
+// _________________________________________AVATAR____________________________________
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const userIcon = document.getElementById("userIcon");
+
+  try {
+    const res = await fetch("/getUser", { credentials: "include" });
+    const data = await res.json();
+
+    if (!data.loggedIn) {
+      // User not logged in → redirect on click
+      userIcon.onclick = () => (window.location.href = "signin.html");
+      return;
+    }
+
+    // User logged in → show avatar
+    userIcon.innerHTML = `<div class="avatar">${data.name.charAt(0).toUpperCase()}</div>`;
+    const avatar = userIcon.querySelector(".avatar");
+
+    // Remove any previous onclick on userIcon
+    userIcon.onclick = null;
+
+    // Avatar click → open sidebar and load profile
+    avatar.addEventListener("click", async (e) => {
+      e.stopPropagation(); // Prevent triggering any parent click
+      sidebar.classList.add("open");
+      overlay.classList.add("on");
+      await loadProfile();
+    });
+
+    // Hide downbar if you have it
+    const downbar = document.querySelector(".downbar");
+    if (downbar) downbar.classList.remove("side");
+
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    userIcon.onclick = () => (window.location.href = "signin.html");
+  }
+});
+
+
+
+
 //__________________________________________SWIPER_________________________________________
 
 
@@ -500,46 +547,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// _________________________________________AVATAR____________________________________
-
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const userIcon = document.getElementById("userIcon");
-
-  try {
-    const res = await fetch("/getUser", { credentials: "include" });
-    const data = await res.json();
-
-    if (!data.loggedIn) {
-      // User not logged in → redirect on click
-      userIcon.onclick = () => (window.location.href = "signin.html");
-      return;
-    }
-
-    // User logged in → show avatar
-    userIcon.innerHTML = `<div class="avatar">${data.name.charAt(0).toUpperCase()}</div>`;
-    const avatar = userIcon.querySelector(".avatar");
-
-    // Remove any previous onclick on userIcon
-    userIcon.onclick = null;
-
-    // Avatar click → open sidebar and load profile
-    avatar.addEventListener("click", async (e) => {
-      e.stopPropagation(); // Prevent triggering any parent click
-      sidebar.classList.add("open");
-      overlay.classList.add("on");
-      await loadProfile();
-    });
-
-    // Hide downbar if you have it
-    const downbar = document.querySelector(".downbar");
-    if (downbar) downbar.classList.remove("side");
-
-  } catch (err) {
-    console.error("Error fetching user:", err);
-    userIcon.onclick = () => (window.location.href = "signin.html");
-  }
-});
 
 
 // _______________________________________SEARCH BAR________________________________________________
