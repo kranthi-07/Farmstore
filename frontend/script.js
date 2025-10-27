@@ -95,23 +95,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function showSidebarLoading() {
     // lightweight inline loader / placeholder while profile content is fetched
-    sidebarContent.innerHTML = `<div class="sidebar-loading" style="display:flex;align-items:center;justify-content:center;height:120px;font-weight:600;color:#2e7d32">Loading...</div>`;
+    sidebarContent.innerHTML = `  <div class="loader-overlay" id="loader">
+                                    <div class="loader"></div>
+                                  </div>`;
     sidebarContent.classList.add('show');
   }
 
   // Restore the menu (used by Back button)
   function restoreMenu() {
-    if (sidebarMenu) sidebarMenu.style.display = 'block';
-    sidebarMenuItems.forEach(i => i.classList.remove('active'));
-
+    sidebarContent.classList.remove('show');
     sidebarContent.style.opacity = '0';
+
     setTimeout(() => {
       sidebarContent.innerHTML = '';
-      sidebarContent.classList.remove('show');
+      sidebarContent.scrollTop = 0;
       sidebarContent.style.opacity = '1';
-      sidebarContent.scrollTop = 0; // ensure reset to top
-    }, 200);
+
+      if (sidebarMenu) sidebarMenu.style.display = 'block';
+      sidebarMenuItems.forEach(i => i.classList.remove('active'));
+    }, 150);
   }
+
 
 
   // Show content with a Back button (safe single place to render)
@@ -342,8 +346,8 @@ function setActiveSection(section) {
   if (section === "fruits") {
     fruitsBar.style.display = "flex";
     vegetablesBar.style.display = "none";
-    fruitsTab.classList.add("active");
-    vegetablesTab.classList.remove("active");
+    fruitsTab.classList.add("active-tab");
+    vegetablesTab.classList.remove("active-tab");
 
     mainContent.classList.remove('color');
     mainItems.classList.remove('color');
@@ -354,8 +358,8 @@ function setActiveSection(section) {
   } else {
     vegetablesBar.style.display = "flex";
     fruitsBar.style.display = "none";
-    vegetablesTab.classList.add("active");
-    fruitsTab.classList.remove("active");
+    vegetablesTab.classList.add("active-tab");
+    fruitsTab.classList.remove("active-tab");
 
     mainContent.classList.add('color');
     mainItems.classList.add('color');
@@ -577,7 +581,7 @@ let selectedIndex = -1;
 let isUserLoggedIn = null;
 
 
-searchBar.addEventListener("click",()=>{
+searchBar.addEventListener("click", () => {
   searchBar.classList.add("scale")
 });
 
