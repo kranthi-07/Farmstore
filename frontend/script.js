@@ -205,12 +205,12 @@ document.addEventListener("DOMContentLoaded", () => {
         await loadProfile();      // will replace content when done
       } else if (section === 'orders') {
         const os = document.getElementById('ordersSection');
-        const contentHtml = os ? os.innerHTML : `<h3>Orders</h3><p>No orders found.</p>`;
+        const contentHtml = os ? os.innerHTML : `<h3 class="content-head">Orders</h3><p>No orders found.</p>`;
         showWithBack(contentHtml);
       } else if (section === 'favorites') {
-        showWithBack(`<h3>Favorites</h3><p>Coming soon.</p>`);
+        showWithBack(`<h3 class="content-head">Favorites</h3><p>Coming soon.</p>`);
       } else if (section === 'contact') {
-        showWithBack(`<h3>Contact</h3><p>Email: support@farmstore.com<br>Phone: +91 98765 43210</p>`);
+        showWithBack(`<h3 class="content-head">Contact</h3><p>Email: support@farmstore.com<br>Phone: +91 98765 43210</p>`);
       } else if (section === 'logout') {
         await logout();
         return;
