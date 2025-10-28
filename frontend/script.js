@@ -28,61 +28,52 @@ let touchingSidebar = false;
 
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const userIcon = document.getElementById("userIcon");
+  const topUserIcon = document.querySelector(".signin"); // top bar user icon container
+  const sidebarAvatar = document.getElementById("sidebarAvatar");
+  const sidebarName = document.getElementById("sidebarName");
+  const sidebarEmail = document.getElementById("sidebarEmail");
+  const sidebar = document.getElementById("sidebar");
+  const sidebarOverlay = document.getElementById("sidebarOverlay");
 
-  try {
-    const res = await fetch("/getUser", { credentials: "include" });
-    const data = await res.json();
+  async function updateUserUI() {
+    try {
+      const res = await fetch("/getUser", { credentials: "include" });
+      const data = await res.json();
 
-    if (!data.loggedIn) {
-      // User not logged in → redirect on click
-      userIcon.onclick = () => (window.location.href = "signin.html");
-      return;
+      if (!data.loggedIn) {
+        topUserIcon.onclick = () => window.location.href = "signin.html";
+        return; // Not logged in → show default icon
+      }
+
+      const name = data.name || "U";
+      const firstLetter = name.charAt(0).toUpperCase();
+
+      // ✅ Top Bar gets Avatar
+      topUserIcon.innerHTML = `<div class="avatar">${firstLetter}</div>`;
+      topUserIcon.style.cursor = "pointer";
+      topUserIcon.onclick = () => openSidebar();
+
+      // ✅ Sidebar Header gets updated too
+      sidebarAvatar.innerHTML = `<div class="avatar">${firstLetter}</div>`;
+      sidebarName.textContent = name;
+      sidebarEmail.textContent = data.mobile
+        ? `+91 ${data.mobile}`
+        : (data.email || "user@farmstore.com");
+
+    } catch (err) {
+      console.error("User fetch failed", err);
+      topUserIcon.onclick = () => window.location.href = "signin.html";
     }
-
-    // User logged in → show avatar
-    userIcon.innerHTML = `<div class="avatar">${data.name.charAt(0).toUpperCase()}</div>`;
-    const avatar = userIcon.querySelector(".avatar");
-
-    // Remove any previous onclick on userIcon
-    userIcon.onclick = null;
-
-    // Avatar click → open sidebar and load profile
-    avatar.addEventListener("click", async (e) => {
-      e.stopPropagation(); // Prevent triggering any parent click
-      sidebar.classList.add("open");
-      overlay.classList.add("on");
-      await loadProfile();
-    });
-
-    // Hide downbar if you have it
-    const downbar = document.querySelector(".downbar");
-    if (downbar) downbar.classList.remove("side");
-
-  } catch (err) {
-    console.error("Error fetching user:", err);
-    userIcon.onclick = () => (window.location.href = "signin.html");
   }
+
+  function openSidebar() {
+    sidebar.classList.add("open");
+    sidebarOverlay.classList.add("show");
+    document.body.classList.add("sidebar-open");
+  }
+
+  updateUserUI();
 });
-
-
-
-
-//__________________________________________SWIPER_________________________________________
-
-
-var swiper = new Swiper('.mySwiper', {
-  slidePerView: 1,
-  loop: true,
-  spaceBetween: 20,
-  speed: 1000,
-
-  autoplay: {
-    delay: 1200,
-  },
-
-})
-
 
 
 
@@ -356,6 +347,10 @@ vegetables.addEventListener("click", () => switchTab("vegetables"));
 fruits.addEventListener("click", () => {
   fruits.classList.add('active');
   vegetables.classList.remove('active');
+
+  fruits_bar.classList.remove('display');
+  vegetables_bar.classList.add('display');
+
   if (mainContent.classList.contains('color')) {
     mainContent.classList.remove('color');
     mainItems.classList.remove('color');
@@ -365,22 +360,15 @@ fruits.addEventListener("click", () => {
 vegetables.addEventListener("click", () => {
   vegetables.classList.add('active');
   fruits.classList.remove('active');
+
+  fruits_bar.classList.add('display');
+  vegetables_bar.classList.remove('display');
+
   mainContent.classList.add('color');
   mainItems.classList.add('color');
 
 })
 
-
-fruits.addEventListener("click", () => {
-  fruits_bar.classList.remove('display');
-  vegetables_bar.classList.add('display');
-});
-
-
-vegetables.addEventListener("click", () => {
-  fruits_bar.classList.add('display');
-  vegetables_bar.classList.remove('display');
-});
 
 
 
