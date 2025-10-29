@@ -26,57 +26,121 @@ let touchingSidebar = false;
 
 // _________________________________________AVATAR____________________________________
 
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const topUserIcon = document.querySelector(".signin"); // top bar user icon container
-  const sidebarAvatar = document.getElementById("sidebarAvatar");
+// ---------- Unified Avatar & Sidebar Header Logic ----------
+document.addEventListener("DOMContentLoaded", () => {
+  const topUserIcon = document.getElementById("topUserIcon");      // top bar
+  const sidebarAvatar = document.getElementById("sidebarAvatar");  // sidebar avatar container
   const sidebarName = document.getElementById("sidebarName");
   const sidebarEmail = document.getElementById("sidebarEmail");
   const sidebar = document.getElementById("sidebar");
   const sidebarOverlay = document.getElementById("sidebarOverlay");
+  const closeSidebarBtn = document.getElementById("closeSidebarBtn");
+  const sidebarMenu = document.querySelector('.sidebar-menu');
 
+  // small helper to render a round avatar with a letter
+  function makeLetterAvatar(letter, size = 32) {
+    return `<div class="avatar" style="width:${size}px;height:${size}px">${letter}</div>`;
+  }
+
+  // open / close sidebar helpers
+  function openSidebar() {
+    if (!sidebar) return;
+    sidebar.classList.add("open");
+    if (sidebarOverlay) sidebarOverlay.classList.add("show");
+    sidebar.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('sidebar-open');
+    // optionally ensure menu visible
+    if (sidebarMenu) sidebarMenu.style.display = 'block';
+  }
+  function closeSidebar() {
+    if (!sidebar) return;
+    sidebar.classList.remove("open");
+    if (sidebarOverlay) sidebarOverlay.classList.remove("show");
+    sidebar.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('sidebar-open');
+  }
+
+  // Click handlers to close
+  closeSidebarBtn && closeSidebarBtn.addEventListener('click', closeSidebar);
+  sidebarOverlay && sidebarOverlay.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
+
+  // Main function to update top & sidebar UI based on login
   async function updateUserUI() {
     try {
       const res = await fetch("/getUser", { credentials: "include" });
+      // if your endpoint returns non-json on 401, guard it
       const data = await res.json();
 
-      if (!data.loggedIn) {
-        topUserIcon.onclick = () => window.location.href = "signin.html";
-        return; // Not logged in → show default icon
+      if (!data || data.loggedIn !== true) {
+        // Not logged in → show default icon & redirect on click
+        if (topUserIcon) {
+          topUserIcon.innerHTML = `<i class='bx bx-user'></i>`;
+          topUserIcon.style.cursor = "pointer";
+          topUserIcon.onclick = () => { window.location.href = "signin.html"; };
+        }
+        // Sidebar header defaults
+        if (sidebarAvatar) sidebarAvatar.innerHTML = `<i class='bx bx-user'></i>`;
+        if (sidebarName) sidebarName.textContent = "Guest";
+        if (sidebarEmail) sidebarEmail.textContent = "guest@farmstore.com";
+        return;
       }
 
-      const name = data.name || "U";
-      const firstLetter = name.charAt(0).toUpperCase();
+      // Logged in — render initial avatar (first letter)
+      const name = data.name || data.username || "User";
+      const first = (typeof name === "string" && name.length > 0) ? name.charAt(0).toUpperCase() : "U";
 
-      // ✅ Top Bar gets Avatar
-      topUserIcon.innerHTML = `<div class="avatar">${firstLetter}</div>`;
-      topUserIcon.style.cursor = "pointer";
-      topUserIcon.onclick = () => openSidebar();
+      if (topUserIcon) {
+        topUserIcon.innerHTML = makeLetterAvatar(first, 32);
+        topUserIcon.style.cursor = "pointer";
+        topUserIcon.onclick = (e) => {
+          e.stopPropagation();
+          openSidebar();
+        };
+      }
 
-      // ✅ Sidebar Header gets updated too
-      sidebarAvatar.innerHTML = `<div class="avatar">${firstLetter}</div>`;
-      sidebarName.textContent = name;
-      sidebarEmail.textContent = data.mobile
-        ? `+91 ${data.mobile}`
-        : (data.email || "user@farmstore.com");
+      if (sidebarAvatar) {
+        sidebarAvatar.innerHTML = makeLetterAvatar(first, 40);
+        sidebarAvatar.style.cursor = "pointer";
+        // clicking sidebar avatar should also open full profile (menu hidden, loadProfile can be called elsewhere)
+        sidebarAvatar.onclick = (e) => {
+          e.stopPropagation();
+          openSidebar();
+          // optional: hide menu and show loader+profile if you have loadProfile defined
+          if (typeof loadProfile === "function") {
+            const sidebarMenuEl = document.querySelector('.sidebar-menu');
+            if (sidebarMenuEl) sidebarMenuEl.style.display = 'none';
+            // show a loader while loading
+            const sidebarContent = document.getElementById('sidebarContent');
+            if (sidebarContent) {
+              sidebarContent.innerHTML = `<div class="loader-overlay"><div class="loader"></div></div>`;
+            }
+            // call your existing loadProfile func (it exists in your script earlier)
+            loadProfile();
+          }
+        };
+      }
+
+      if (sidebarName) sidebarName.textContent = data.name || "User";
+      if (sidebarEmail) sidebarEmail.textContent = data.mobile ? `+91 ${data.mobile}` : (data.email || "user@farmstore.com");
 
     } catch (err) {
-      console.error("User fetch failed", err);
-      topUserIcon.onclick = () => window.location.href = "signin.html";
+      console.error("updateUserUI error:", err);
+      // fallback to not-logged-in behavior
+      if (topUserIcon) {
+        topUserIcon.innerHTML = `<i class='bx bx-user'></i>`;
+        topUserIcon.onclick = () => { window.location.href = "signin.html"; };
+      }
     }
   }
 
-  function openSidebar() {
-    sidebar.classList.add("open");
-    sidebarOverlay.classList.add("show");
-    document.body.classList.add("sidebar-open");
-  }
-
+  // run once on load
   updateUserUI();
+
+  // Optional: If your app dynamically logs in/out without page reload,
+  // you can expose updateUserUI to window to call after login/logout flows.
+  window.updateUserUI = updateUserUI;
 });
-
-
-
 
 // ________________________________________SWITCHING TABS________________________________________
 
