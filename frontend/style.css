@@ -70,6 +70,7 @@
     justify-content: center;
     align-items: center;
     font-weight: bold;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
 
@@ -215,6 +216,7 @@ body.sidebar-open .main-content {
     padding: 14px 16px;
     background: #2e7d32;
     color: #fff;
+    box-shadow: -8px 3px 10px lightgray;
 }
 
 .sidebar-title {
@@ -229,6 +231,7 @@ body.sidebar-open .main-content {
     height: 55px;
     width: 55px;
     display: flex;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     align-items: center;
     justify-content: center;
     border-radius: 50px;
@@ -271,12 +274,37 @@ body.sidebar-open .main-content {
 }
 
 .sidebar-menu-item {
-    padding: 12px 18px;
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    gap:10px;
     cursor: pointer;
     color: #2b2b2b;
     transition: background 0.25s, color 0.25s;
     font-weight: 500;
 }
+
+
+.sidebar-menu-item i{
+    font-size: 20px;
+}
+
+.sidebar-menu-item.profile i {
+  color: #4CAF50; /* a fresh green for profile */
+}
+.sidebar-menu-item.orders i {
+  color: #FF9800; /* orange for orders */
+}
+.sidebar-menu-item.favorites i {
+  color: #E91E63; /* pink for favorites */
+}
+.sidebar-menu-item.contact i {
+  color: #2196F3; /* blue for contact */
+}
+.sidebar-menu-item.logout i {
+  color: #F44336; /* red for logout */
+}
+
 
 .sidebar-menu-item:hover,
 .sidebar-menu-item.active {

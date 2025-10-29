@@ -641,7 +641,15 @@ let isUserLoggedIn = null;
 
 
 searchBar.addEventListener("click", () => {
-  searchBar.classList.add("scale")
+  searchBar.classList.add("scale");
+  searchInput.focus();
+});
+
+
+document.addEventListener('click', (event) => {
+    if (!searchBar.contains(event.target)) {
+        searchBar.classList.remove('scale');
+    }
 });
 
 // ✅ Check login
