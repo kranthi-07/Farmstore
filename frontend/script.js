@@ -21,7 +21,16 @@ let currentX = 0;
 let touchingSidebar = false;
 
 
+//___________________________________________SWUPER___________________________________
 
+var swiper = new Swiper('.mySwiper',{
+  slidesPerView:1,
+  loop:true,
+
+  autoplay:{
+    delay:2200,
+  },
+})
 
 
 // _________________________________________AVATAR____________________________________
@@ -349,6 +358,35 @@ document.addEventListener("DOMContentLoaded", () => {
     sidebar.addEventListener('touchend', () => { touching = false; startX = null; });
   })();
 });
+
+
+// -------------------- Logout Function --------------------
+async function logout() {
+  try {
+    // Request backend to destroy the MongoDB session
+    const res = await fetch("https://farmstore-1.onrender.com/logout", {
+      method: "POST",
+      credentials: "include", // send cookies
+    });
+
+    // Parse JSON safely (some backends send plain text)
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && (data.success || data.message || data.status === "logged_out")) {
+      console.log("Logout successful");
+    } else {
+      console.warn("Unexpected logout response:", data);
+    }
+
+    // Redirect user to signin page after logout
+    window.location.href = "/signin.html";
+  } catch (err) {
+    console.error("Logout failed:", err);
+
+    // Still redirect (session likely invalid already)
+    window.location.href = "/signin.html";
+  }
+}
 
 // ___________________________________________LOADER_______________________________________________
 

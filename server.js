@@ -243,9 +243,16 @@ app.get("/profile", (req, res) => {
 
 // 🔹 Logout
 app.post("/logout", (req, res) => {
-  req.session.destroy();
-  res.json({ success: true, message: "Logged out" });
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error destroying session:", err);
+      return res.status(500).json({ success: false, message: "Logout failed" });
+    }
+    res.clearCookie("connect.sid"); // replace with your actual session cookie name
+    res.json({ success: true, message: "Logged out" });
+  });
 });
+
 
 // ✅ Serve frontend files
 app.use(express.static(path.join(__dirname, "frontend")));
