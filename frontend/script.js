@@ -209,12 +209,12 @@ document.addEventListener("DOMContentLoaded", () => {
     sidebarContent.innerHTML = `  <div class="loader-overlay" id="loader">
                                     <div class="loader"></div>
                                   </div>`;
-    sidebarContent.classList.add('show');
+    sidebarContent.classList.add('side-show');
   }
 
   // Restore the menu (used by Back button)
   function restoreMenu() {
-    sidebarContent.classList.remove('show');
+    sidebarContent.classList.remove('side-show');
     sidebarContent.style.opacity = '0';
 
     setTimeout(() => {
@@ -232,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Show content with a Back button (safe single place to render)
   function showWithBack(innerHtml) {
     sidebarContent.innerHTML = `<div class="back-btn" id="sidebarBackBtn">← Back</div>` + innerHtml;
-    sidebarContent.classList.add('show');
+    sidebarContent.classList.add('side-show');
     const backBtn = document.getElementById('sidebarBackBtn');
     if (backBtn) backBtn.addEventListener('click', restoreMenu);
   }
@@ -275,7 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Sidebar open / close
   function openSidebar() {
     sidebar.classList.add('open');
-    sidebarOverlay.classList.add('show');
+    sidebarOverlay.classList.add('side-show');
     sidebar.setAttribute('aria-hidden', 'false');
     sidebarOverlay.setAttribute('aria-hidden', 'false');
     document.documentElement.style.overflow = 'hidden';
@@ -286,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function closeSidebar() {
     sidebar.classList.remove('open');
-    sidebarOverlay.classList.remove('show');
+    sidebarOverlay.classList.remove('side-show');
     sidebar.setAttribute('aria-hidden', 'true');
     sidebarOverlay.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
@@ -444,111 +444,52 @@ vegetables.addEventListener("click", () => switchTab("vegetables"));
 // ______________________________________________MAIN________________________________________________
 
 
-
-
-fruits.addEventListener("click", () => {
-  fruits.classList.add('active');
-  vegetables.classList.remove('active');
-
-  fruits_bar.classList.remove('display');
-  vegetables_bar.classList.add('display');
-
-  if (mainContent.classList.contains('color')) {
-    mainContent.classList.remove('color');
-    mainItems.classList.remove('color');
-  }
-})
-
-vegetables.addEventListener("click", () => {
-  vegetables.classList.add('active');
-  fruits.classList.remove('active');
-
-  fruits_bar.classList.add('display');
-  vegetables_bar.classList.remove('display');
-
-  mainContent.classList.add('color');
-  mainItems.classList.add('color');
-
-})
-
-
-
-
-const fruitsTab = document.querySelector(".fruits");
-const vegetablesTab = document.querySelector(".vegetables");
-const fruitsBar = document.querySelector(".fruits-bar");
-const vegetablesBar = document.querySelector(".vegetables-bar");
-
-function setActiveSection(section) {
-  if (section === "fruits") {
-    fruitsBar.style.display = "flex";
-    vegetablesBar.style.display = "none";
-    fruitsTab.classList.add("active-tab");
-    vegetablesTab.classList.remove("active-tab");
-
-    mainContent.classList.remove('color');
-    mainItems.classList.remove('color');
-
-    // Save section + color state
-    sessionStorage.setItem("activeSection", "fruits");
-    sessionStorage.setItem("mainColor", "default"); // default = fruits
-  } else {
-    vegetablesBar.style.display = "flex";
-    fruitsBar.style.display = "none";
-    vegetablesTab.classList.add("active-tab");
-    fruitsTab.classList.remove("active-tab");
-
-    mainContent.classList.add('color');
-    mainItems.classList.add('color');
-
-    // Save section + color state
-    sessionStorage.setItem("activeSection", "vegetables");
-    sessionStorage.setItem("mainColor", "vegetables");
-  }
-}
-
-// On page load → restore both section and color
 document.addEventListener("DOMContentLoaded", () => {
-  let lastSection = sessionStorage.getItem("activeSection");
-  let lastColor = sessionStorage.getItem("mainColor");
+  const fruitsTab = document.querySelector(".fruits");
+  const vegetablesTab = document.querySelector(".vegetables");
+  const fruitsContent = document.querySelector(".fruits-bar");
+  const vegetablesContent = document.querySelector(".vegetables-bar");
 
-  if (!lastSection) {
-    setActiveSection("fruits");
-  } else {
-    setActiveSection(lastSection);
+  function switchTab(tabName) {
+    const showContent =
+      tabName === "fruits" ? fruitsContent : vegetablesContent;
+    const hideContent =
+      tabName === "fruits" ? vegetablesContent : fruitsContent;
 
-    // Restore color classes
-    if (lastColor === "vegetables") {
-      mainContent.classList.add('color');
-      mainItems.classList.add('color');
-    } else {
-      mainContent.classList.remove('color');
-      mainItems.classList.remove('color');
-    }
+    // Skip if already active
+    if (showContent.classList.contains("show")) return;
+
+    // Update tab highlight
+    fruitsTab.classList.toggle("tab", tabName === "fruits");
+    vegetablesTab.classList.toggle("tab", tabName === "vegetables");
+
+    // Determine directions
+    const isFruits = tabName === "fruits";
+    hideContent.classList.remove("from-left", "from-right", "to-left", "to-right", "show");
+    showContent.classList.remove("from-left", "from-right", "to-left", "to-right", "show");
+
+    // Assign correct animations
+    hideContent.classList.add(isFruits ? "to-right" : "to-left");
+    showContent.classList.add(isFruits ? "from-left" : "from-right");
+
+    // Trigger reflow to reset animation
+    void showContent.offsetWidth;
+
+    // Show the new tab
+    showContent.classList.add("show");
+
+    // After animation cleanup
+    setTimeout(() => {
+      hideContent.classList.remove("to-left", "to-right");
+      showContent.classList.remove("from-left", "from-right");
+    }, 500);
   }
+
+  fruitsTab.addEventListener("click", () => switchTab("fruits"));
+  vegetablesTab.addEventListener("click", () => switchTab("vegetables"));
 });
 
 
-
-
-// window.onload = async function () {
-//   const mobile = localStorage.getItem("loggedInUser");
-
-//   if (!mobile) {
-//     alert("Please login first ❌");
-//     window.location.href = "signin.html"; // redirect back if not logged in
-//     return;
-//   }
-
-//   // ✅ Fetch user cart
-//   const response = await fetch(`http://localhost:5000/cart/${mobile}`);
-//   const result = await response.json();
-
-//   if (result.cart) {
-//     console.log("User Cart:", result.cart);
-//     // TODO: render cart items on page
-//   }
-// }
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -730,7 +671,7 @@ function renderSuggestions(filtered) {
   }).join("");
 
   suggestionsBox.classList.add("s-show");
-  overlayEl.classList.add("show");
+  overlayEl.classList.add("search-show");
 }
 
 // ✅ Input behavior
@@ -744,7 +685,7 @@ searchInput.addEventListener("input", () => {
 
     if (!query) {
       suggestionsBox.classList.remove("s-show");
-      overlayEl.classList.remove("show");
+      overlayEl.classList.remove("search-show");
       return;
     }
 
