@@ -23,12 +23,12 @@ let touchingSidebar = false;
 
 //___________________________________________SWUPER___________________________________
 
-var swiper = new Swiper('.mySwiper',{
-  slidesPerView:1,
-  loop:true,
+var swiper = new Swiper('.mySwiper', {
+  slidesPerView: 1,
+  loop: true,
 
-  autoplay:{
-    delay:2200,
+  autoplay: {
+    delay: 2200,
   },
 })
 
@@ -626,9 +626,9 @@ searchBar.addEventListener("click", () => {
 
 
 document.addEventListener('click', (event) => {
-    if (!searchBar.contains(event.target)) {
-        searchBar.classList.remove('scale');
-    }
+  if (!searchBar.contains(event.target)) {
+    searchBar.classList.remove('scale');
+  }
 });
 
 // ✅ Check login
@@ -722,4 +722,82 @@ overlayEl.addEventListener("click", () => {
   suggestionsBox.classList.remove("s-show");
   overlayEl.classList.remove("show");
   searchBar.classList.remove("scale");
+});
+
+
+
+//=-------------------------------- LOADER --------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  const loader = document.getElementById("loader");
+  const loginPopup = document.getElementById("loginPopup");
+  const cancelPopup = document.getElementById("cancelPopup");
+  const goToLogin = document.getElementById("goToLogin");
+
+  // Helper: Detect login status (adjust if needed)
+  function isUserLoggedIn() {
+    // Example check if you store user info in localStorage/session
+    return sessionStorage.getItem("user") || localStorage.getItem("user");
+    // If backend session only, you could check a global variable like window.isLoggedIn
+  }
+
+  // Show loader and navigate
+  function showLoaderAndGo(url) {
+    loader.style.display = "flex";
+    setTimeout(() => {
+      window.location.href = url;
+    }, 600);
+  }
+
+  // Show login popup
+  function showLoginPopup() {
+    loginPopup.style.display = "flex";
+  }
+
+  // Hide login popup on cancel
+  if (cancelPopup) {
+    cancelPopup.addEventListener("click", () => {
+      loginPopup.style.display = "none";
+    });
+  }
+
+  // Go to login page if user clicks "Login"
+  if (goToLogin) {
+    goToLogin.addEventListener("click", () => {
+      loginPopup.style.display = "none";
+      showLoaderAndGo("signin.html");
+    });
+  }
+
+  // Handle card clicks
+  const cards = document.querySelectorAll(".card");
+  cards.forEach(card => {
+    card.addEventListener("click", () => {
+      const link = card.getAttribute("data-link");
+      if (isUserLoggedIn()) {
+        showLoaderAndGo(link);
+      } else {
+        showLoginPopup();
+      }
+    });
+  });
+
+  // Handle cart click
+  const cartIcon = document.querySelector(".cart i");
+  if (cartIcon) {
+    cartIcon.addEventListener("click", () => {
+      if (isUserLoggedIn()) {
+        showLoaderAndGo("cart.html");
+      } else {
+        showLoginPopup();
+      }
+    });
+  }
+
+  // Handle signin icon
+  const signinBtn = document.getElementById("topUserIcon");
+  if (signinBtn) {
+    signinBtn.addEventListener("click", () => {
+      showLoaderAndGo("signin.html");
+    });
+  }
 });
