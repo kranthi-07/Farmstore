@@ -254,6 +254,16 @@ app.post("/logout", (req, res) => {
 });
 
 
+
+app.get("/api/check-session", (req, res) => {
+  if (req.session && req.session.user) {
+    res.json({ loggedIn: true });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
+
+
 // ✅ Serve frontend files
 app.use(express.static(path.join(__dirname, "frontend")));
 

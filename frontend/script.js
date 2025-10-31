@@ -727,20 +727,24 @@ overlayEl.addEventListener("click", () => {
 
 
 //=-------------------------------- LOADER --------------------------------------
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const loader = document.getElementById("loader");
   const loginPopup = document.getElementById("loginPopup");
   const cancelPopup = document.getElementById("cancelPopup");
   const goToLogin = document.getElementById("goToLogin");
 
-  // Helper: Detect login status (adjust if needed)
-  function isUserLoggedIn() {
-    // Example check if you store user info in localStorage/session
-    return sessionStorage.getItem("user") || localStorage.getItem("user");
-    // If backend session only, you could check a global variable like window.isLoggedIn
+  // Helper: Check login status from backend
+  async function isUserLoggedIn() {
+    try {
+      const response = await fetch("/api/check-session", { credentials: "include" });
+      const data = await response.json();
+      return data.loggedIn === true;
+    } catch (err) {
+      console.error("Session check failed:", err);
+      return false;
+    }
   }
 
-  // Show loader and navigate
   function showLoaderAndGo(url) {
     loader.style.display = "flex";
     setTimeout(() => {
@@ -748,19 +752,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 600);
   }
 
-  // Show login popup
   function showLoginPopup() {
     loginPopup.style.display = "flex";
   }
 
-  // Hide login popup on cancel
   if (cancelPopup) {
     cancelPopup.addEventListener("click", () => {
       loginPopup.style.display = "none";
     });
   }
 
-  // Go to login page if user clicks "Login"
   if (goToLogin) {
     goToLogin.addEventListener("click", () => {
       loginPopup.style.display = "none";
@@ -771,9 +772,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handle card clicks
   const cards = document.querySelectorAll(".card");
   cards.forEach(card => {
-    card.addEventListener("click", () => {
+    card.addEventListener("click", async () => {
       const link = card.getAttribute("data-link");
-      if (isUserLoggedIn()) {
+      const loggedIn = await isUserLoggedIn();
+
+      if (loggedIn) {
         showLoaderAndGo(link);
       } else {
         showLoginPopup();
@@ -784,8 +787,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handle cart click
   const cartIcon = document.querySelector(".cart i");
   if (cartIcon) {
-    cartIcon.addEventListener("click", () => {
-      if (isUserLoggedIn()) {
+    cartIcon.addEventListener("click", async () => {
+      const loggedIn = await isUserLoggedIn();
+      if (loggedIn) {
         showLoaderAndGo("cart.html");
       } else {
         showLoginPopup();
