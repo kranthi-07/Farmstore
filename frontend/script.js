@@ -733,7 +733,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const cancelPopup = document.getElementById("cancelPopup");
   const goToLogin = document.getElementById("goToLogin");
 
-  // Helper: Check login status from backend
+  let navigating = false; // Prevent loader from showing on browser back
+
+  // Check login from backend
   async function isUserLoggedIn() {
     try {
       const response = await fetch("/api/check-session", { credentials: "include" });
@@ -746,6 +748,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function showLoaderAndGo(url) {
+    navigating = true;
     loader.style.display = "flex";
     setTimeout(() => {
       window.location.href = url;
@@ -769,13 +772,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Handle card clicks
+  // Cards
   const cards = document.querySelectorAll(".card");
   cards.forEach(card => {
-    card.addEventListener("click", async () => {
+    card.addEventListener("click", async e => {
+      e.preventDefault();
+      if (navigating) return; // prevent double click spam
+
       const link = card.getAttribute("data-link");
       const loggedIn = await isUserLoggedIn();
-
       if (loggedIn) {
         showLoaderAndGo(link);
       } else {
@@ -784,10 +789,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // Handle cart click
+  // Cart
   const cartIcon = document.querySelector(".cart i");
   if (cartIcon) {
-    cartIcon.addEventListener("click", async () => {
+    cartIcon.addEventListener("click", async e => {
+      e.preventDefault();
+      if (navigating) return;
+
       const loggedIn = await isUserLoggedIn();
       if (loggedIn) {
         showLoaderAndGo("cart.html");
@@ -797,11 +805,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Handle signin icon
+  // Signin
   const signinBtn = document.getElementById("topUserIcon");
   if (signinBtn) {
-    signinBtn.addEventListener("click", () => {
+    signinBtn.addEventListener("click", e => {
+      e.preventDefault();
+      if (navigating) return;
       showLoaderAndGo("signin.html");
     });
   }
+
+  // Prevent loader on back navigation
+  window.addEventListener("pageshow", event => {
+    if (event.persisted) {
+      loader.style.display = "none";
+      navigating = false;
+    }
+  });
 });
