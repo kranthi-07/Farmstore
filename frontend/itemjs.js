@@ -62,61 +62,23 @@ function goToItem(name) {
 
 
 
+// Prevent navigation duplication on item pages
+window.addEventListener("pageshow", (event) => {
+  // If page is loaded from bfcache (Back-Forward Cache)
+  if (event.persisted) {
+    // Optional: hide loader if visible
+    const loader = document.getElementById("loader");
+    if (loader) loader.style.display = "none";
+  }
+
+  // Prevent re-navigation loop
+  if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
+    history.replaceState(null, null, window.location.href);
+  }
+});
 
 
 
-
-
-
-
-
-// document.querySelectorAll(".add").forEach(btn => {
-//     btn.addEventListener("click", async () => {
-//         const itemName = btn.getAttribute("data-item");
-//         const img = btn.getAttribute("data-img");
-
-//         const selected = btn.parentElement.querySelector("input[type='radio']:checked");
-//         if (!selected) {
-//             alert("Please select a quantity before adding!");
-//             return;
-//         }
-
-//         const price = parseInt(selected.value);
-//         const quantity = 1;
-//         const detail = selected.getAttribute("data-qty");
-
-//         try {
-//             const res = await fetch("http://localhost:5000/cart/add", {
-//                 method: "POST",
-//                 headers: { "Content-Type": "application/json" },
-//                 credentials: "include",
-//                 body: JSON.stringify({
-//                     name: itemName + " (" + detail + ")",
-//                     price,
-//                     quantity,
-//                     image: img
-//                 })
-//             });
-
-//             const data = await res.json();
-//             if (data.success) {
-//                 alert(itemName + " added to cart ✅");
-//                 updateCartCount();
-//             } else {
-//                 alert("❌ " + data.message);
-//             }
-//         } catch (err) {
-//             console.error("Error adding to cart:", err);
-//         }
-//     });
-// });
-
-// document.getElementById("goCart").addEventListener("click", () => {
-//     window.location.href = "cart.html";
-// });
-
-// // load count on page load
-// updateCartCount();
 
 
 function goHome() {
