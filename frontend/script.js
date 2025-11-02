@@ -806,14 +806,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Signin
-  const signinBtn = document.getElementById("topUserIcon");
-  if (signinBtn) {
-    signinBtn.addEventListener("click", e => {
-      e.preventDefault();
-      if (navigating) return;
+  // Signin / Profile icon logic
+const signinBtn = document.getElementById("topUserIcon");
+if (signinBtn) {
+  signinBtn.addEventListener("click", async e => {
+    e.preventDefault();
+    if (navigating) return;
+
+    const loggedIn = await isUserLoggedIn();
+    if (loggedIn) {
+      // User is logged in — go to profile page or open sidebar
+      showLoaderAndGo("profile.html"); // change if your profile page has a different name
+    } else {
+      // Not logged in — go to signin
       showLoaderAndGo("signin.html");
-    });
-  }
+    }
+  });
+}
+
 
   // Prevent loader on back navigation
   window.addEventListener("pageshow", event => {
