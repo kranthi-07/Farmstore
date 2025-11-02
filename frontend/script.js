@@ -854,13 +854,13 @@ if (signinBtn) {
 
 
 
+// ================== CARD CLICK WITH LOADER FIX ==================
+
 document.addEventListener("DOMContentLoaded", () => {
   const loader = document.getElementById("loader");
   const loginPopup = document.getElementById("loginPopup");
-  const cancelPopup = document.getElementById("cancelPopup");
-  const goToLogin = document.getElementById("goToLogin");
 
-  // ✅ Show Loader
+  // show/hide helpers
   function showLoader() {
     if (loader) {
       loader.style.display = "flex";
@@ -868,86 +868,48 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ✅ Hide Loader
   function hideLoader() {
     if (loader) {
       loader.style.opacity = "0";
-      setTimeout(() => (loader.style.display = "none"), 300);
+      setTimeout(() => {
+        loader.style.display = "none";
+      }, 300);
     }
   }
 
-  // ✅ Check Login (MongoDB session)
+  // check login status (MongoDB session backend)
   async function isUserLoggedIn() {
     try {
       const res = await fetch("/api/check-session", { credentials: "include" });
       const data = await res.json();
       return data.loggedIn === true;
-    } catch (err) {
-      console.error("Session check failed:", err);
+    } catch {
       return false;
     }
   }
 
-  // ✅ Navigate with Loader
-  function showLoaderAndGo(url) {
-    showLoader();
-    setTimeout(() => {
-      window.location.href = url;
-    }, 600);
-  }
-
-  // ✅ Popup Controls
-  if (cancelPopup) {
-    cancelPopup.addEventListener("click", () => {
-      loginPopup.style.display = "none";
-    });
-  }
-
-  if (goToLogin) {
-    goToLogin.addEventListener("click", () => {
-      loginPopup.style.display = "none";
-      showLoaderAndGo("signin.html");
-    });
-  }
-
-  // ✅ Handle Card Clicks
+  // attach click listener to every card
   const cards = document.querySelectorAll(".card");
   cards.forEach(card => {
-    card.addEventListener("click", async () => {
-      const link = card.getAttribute("data-link");
-      if (!link) return;
+    card.addEventListener("click", async e => {
+      e.preventDefault();
+
+      const targetPage = card.getAttribute("data-link");
+      showLoader(); // loader appears instantly
 
       const loggedIn = await isUserLoggedIn();
-      if (loggedIn) {
-        showLoaderAndGo(link);
-      } else {
+
+      if (!loggedIn) {
+        hideLoader();
         loginPopup.style.display = "flex";
+        loginPopup.setAttribute("data-redirect", targetPage);
+        return;
       }
+
+      // Smoothly navigate after showing loader
+      setTimeout(() => {
+        window.location.href = targetPage;
+      }, 600);
     });
   });
-
-  // ✅ Handle Cart Click
-  const cartIcon = document.querySelector(".cart i");
-  if (cartIcon) {
-    cartIcon.addEventListener("click", async () => {
-      const loggedIn = await isUserLoggedIn();
-      if (loggedIn) {
-        showLoaderAndGo("cart.html");
-      } else {
-        loginPopup.style.display = "flex";
-      }
-    });
-  }
-
-  // ✅ Handle Signin Icon
-  const signinBtn = document.getElementById("topUserIcon");
-  if (signinBtn) {
-    signinBtn.addEventListener("click", () => {
-      showLoaderAndGo("signin.html");
-    });
-  }
-
-  // ✅ Hide Loader when page is restored or loaded
-  window.addEventListener("pageshow", () => hideLoader());
-  window.addEventListener("load", () => hideLoader());
 });
