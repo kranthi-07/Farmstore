@@ -40,7 +40,7 @@ const itemData = {
     Potato: { price: 25, desc: "Vegetable", image: "assets/potato.png" },
     Onion: { price: 25, desc: "Vegetable", image: "assets/onion.png" },
     Garlic: { price: 25, desc: "Vegetable", image: "assets/garlic.png" },
-    
+
 
 
 };
@@ -64,17 +64,17 @@ function goToItem(name) {
 
 // Prevent navigation duplication on item pages
 window.addEventListener("pageshow", (event) => {
-  // If page is loaded from bfcache (Back-Forward Cache)
-  if (event.persisted) {
-    // Optional: hide loader if visible
-    const loader = document.getElementById("loader");
-    if (loader) loader.style.display = "none";
-  }
+    // If page is loaded from bfcache (Back-Forward Cache)
+    if (event.persisted) {
+        // Optional: hide loader if visible
+        const loader = document.getElementById("loader");
+        if (loader) loader.style.display = "none";
+    }
 
-  // Prevent re-navigation loop
-  if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
-    history.replaceState(null, null, window.location.href);
-  }
+    // Prevent re-navigation loop
+    if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
+        history.replaceState(null, null, window.location.href);
+    }
 });
 
 
@@ -87,23 +87,38 @@ function goHome() {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-  const backBtn = document.getElementById("backBtn");
+    const backBtn = document.getElementById("backBtn");
 
 
-  // ✅ Handle Back Button — go back to index.html cleanly
-  if (backBtn) {
-    backBtn.addEventListener("click", (e) => {
-      e.preventDefault();
+    // ✅ Handle Back Button — go back to index.html cleanly
+    if (backBtn) {
+        backBtn.addEventListener("click", (e) => {
+            e.preventDefault();
 
 
-      setTimeout(() => {
-        // Use assign() so it goes back in history, not reload
-        window.location.assign("index.html");
-      }, 400);
-    });
-  }
+            setTimeout(() => {
+                // Use assign() so it goes back in history, not reload
+                window.location.assign("index.html");
+            }, 400);
+        });
+    }
 
-  
+
 
 
 });
+
+
+window.addEventListener("pageshow", (event) => {
+    // Stop the page from reloading when navigating back
+    if (event.persisted) {
+        const loader = document.getElementById("loader");
+        if (loader) loader.style.display = "none";
+    }
+
+    // Ensure browser doesn't re-run navigation logic
+    if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
+        history.go(-1); // go back cleanly to previous page instead of reloading
+    }
+});
+
