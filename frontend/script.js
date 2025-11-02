@@ -809,37 +809,37 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
   // Signin / Profile icon logic
-const signinBtn = document.getElementById("topUserIcon");
-const sidebar = document.getElementById("sidebar");
-const sidebarOverlay = document.getElementById("sidebarOverlay");
+  const signinBtn = document.getElementById("topUserIcon");
+  const sidebar = document.getElementById("sidebar");
+  const sidebarOverlay = document.getElementById("sidebarOverlay");
 
-if (signinBtn) {
-  signinBtn.addEventListener("click", async e => {
-    e.preventDefault();
-    if (navigating) return;
+  if (signinBtn) {
+    signinBtn.addEventListener("click", async e => {
+      e.preventDefault();
+      if (navigating) return;
 
-    const loggedIn = await isUserLoggedIn();
-    if (loggedIn) {
-      // Logged in → open sidebar and focus on Profile
-      sidebar.classList.add("active");
-      sidebarOverlay.classList.add("active");
+      const loggedIn = await isUserLoggedIn();
+      if (loggedIn) {
+        // Logged in → open sidebar and focus on Profile
+        sidebar.classList.add("active");
+        sidebarOverlay.classList.add("active");
 
-      // Optional: highlight profile section if you have one
-      const profileSection = document.querySelector('[data-section="profile"]');
-      if (profileSection) {
-        profileSection.classList.add("active");
+        // Optional: highlight profile section if you have one
+        const profileSection = document.querySelector('[data-section="profile"]');
+        if (profileSection) {
+          profileSection.classList.add("active");
+        }
+
+        // Optional: hide other sections
+        document.querySelectorAll(".sidebar-section").forEach(sec => {
+          if (sec !== profileSection) sec.classList.remove("active");
+        });
+      } else {
+        // Not logged in → go to signin
+        showLoaderAndGo("signin.html");
       }
-
-      // Optional: hide other sections
-      document.querySelectorAll(".sidebar-section").forEach(sec => {
-        if (sec !== profileSection) sec.classList.remove("active");
-      });
-    } else {
-      // Not logged in → go to signin
-      showLoaderAndGo("signin.html");
-    }
-  });
-}
+    });
+  }
 
 
   // Prevent loader on back navigation
@@ -950,4 +950,67 @@ document.addEventListener("DOMContentLoaded", () => {
   // ✅ Hide Loader when page is restored or loaded
   window.addEventListener("pageshow", () => hideLoader());
   window.addEventListener("load", () => hideLoader());
-});  
+});
+
+
+
+
+// ================== CARD CLICK WITH LOADER FIX ==================
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loader = document.getElementById("loader");
+  const loginPopup = document.getElementById("loginPopup");
+
+  // show/hide helpers
+  function showLoader() {
+    if (loader) {
+      loader.style.display = "flex";
+      loader.style.opacity = "1";
+    }
+  }
+
+  function hideLoader() {
+    if (loader) {
+      loader.style.opacity = "0";
+      setTimeout(() => {
+        loader.style.display = "none";
+      }, 300);
+    }
+  }
+
+  // check login status (MongoDB session backend)
+  async function isUserLoggedIn() {
+    try {
+      const res = await fetch("/api/check-session", { credentials: "include" });
+      const data = await res.json();
+      return data.loggedIn === true;
+    } catch {
+      return false;
+    }
+  }
+
+  // attach click listener to every card
+  const cards = document.querySelectorAll(".card");
+  cards.forEach(card => {
+    card.addEventListener("click", async e => {
+      e.preventDefault();
+
+      const targetPage = card.getAttribute("data-link");
+      showLoader(); // loader appears instantly
+
+      const loggedIn = await isUserLoggedIn();
+
+      if (!loggedIn) {
+        hideLoader();
+        loginPopup.style.display = "flex";
+        loginPopup.setAttribute("data-redirect", targetPage);
+        return;
+      }
+
+      // Smoothly navigate after showing loader
+      setTimeout(() => {
+        window.location.href = targetPage;
+      }, 600);
+    });
+  });
+});

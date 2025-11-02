@@ -60,20 +60,54 @@ function goToItem(name) {
 }
 
 
+// Navigate to item page with loader support and no reload glitch
+function goToItem(name) {
+    const data = itemData[name];
+    if (!data) {
+        alert("Item details not found!");
+        return;
+    }
 
+    const params = new URLSearchParams({
+        name,
+        price: `₹${data.price}`,
+        desc: data.desc,
+        image: data.image
+    });
 
-// Prevent navigation duplication on item pages
+    // show loader briefly before navigating
+    const loader = document.getElementById("loader");
+    if (loader) {
+        loader.style.display = "flex";
+        loader.style.opacity = "1";
+    }
+
+    // small delay to let loader visibly show
+    setTimeout(() => {
+        window.location.assign(`item.html?${params.toString()}`);
+    }, 400);
+}
+
+// Back-navigation handling
 window.addEventListener("pageshow", (event) => {
-    // If page is loaded from bfcache (Back-Forward Cache)
-    if (event.persisted) {
-        // Optional: hide loader if visible
-        const loader = document.getElementById("loader");
+    const loader = document.getElementById("loader");
+
+    // Hide loader if coming from cache
+    if (event.persisted && loader) {
+        loader.style.display = "none";
+    }
+
+    // Prevent loader flicker or reloading same page
+    const navType = performance.getEntriesByType("navigation")[0]?.type;
+    if (navType === "reload" || navType === "navigate") {
         if (loader) loader.style.display = "none";
     }
 
-    // Prevent re-navigation loop
-    if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
-        history.replaceState(null, null, window.location.href);
+    // Optional: ensure back button doesn't reload the same page
+    if (window.history.state === "itemLoaded") {
+        history.replaceState(null, null, "index.html");
+    } else {
+        history.pushState("itemLoaded", null, window.location.href);
     }
 });
 
