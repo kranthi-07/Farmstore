@@ -87,24 +87,14 @@ function goHome() {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-  const loader = document.getElementById("loader");
   const backBtn = document.getElementById("backBtn");
 
-  // ✅ Hide loader after page loads
-  if (loader) {
-    loader.style.display = "none";
-  }
 
   // ✅ Handle Back Button — go back to index.html cleanly
   if (backBtn) {
     backBtn.addEventListener("click", (e) => {
       e.preventDefault();
 
-      // Show loader briefly before navigation
-      if (loader) {
-        loader.style.display = "flex";
-        loader.style.opacity = "1";
-      }
 
       setTimeout(() => {
         // Use assign() so it goes back in history, not reload
@@ -113,31 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ✅ Prevent duplicate reload when user presses browser Back
-  window.addEventListener("pageshow", (event) => {
-    if (event.persisted) {
-      // Coming from browser cache — hide loader instantly
-      if (loader) loader.style.display = "none";
-    }
+  
 
-    // Stop unwanted reload on back/forward cache
-    const navType = performance.getEntriesByType("navigation")[0]?.type;
-    if (navType === "reload" && loader) {
-      loader.style.display = "none";
-    }
-  });
 
-  // Optional: parse item info from URL
-  const params = new URLSearchParams(window.location.search);
-  const name = params.get("name");
-  const price = params.get("price");
-  const desc = params.get("desc");
-  const image = params.get("image");
-
-  if (name && price && image) {
-    document.querySelector(".item-name").textContent = name;
-    document.querySelector(".item-price").textContent = price;
-    document.querySelector(".item-desc").textContent = desc || "";
-    document.querySelector(".item-img").src = image;
-  }
 });
