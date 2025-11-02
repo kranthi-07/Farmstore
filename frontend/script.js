@@ -727,48 +727,128 @@ overlayEl.addEventListener("click", () => {
 
 
 //=-------------------------------- LOADER --------------------------------------
+document.addEventListener("DOMContentLoaded", async () => {
+  const loader = document.getElementById("loader");
+  const loginPopup = document.getElementById("loginPopup");
+  const cancelPopup = document.getElementById("cancelPopup");
+  const goToLogin = document.getElementById("goToLogin");
 
+  let navigating = false; // Prevent loader from showing on browser back
 
+  // Check login from backend
+  async function isUserLoggedIn() {
+    try {
+      const response = await fetch("/api/check-session", { credentials: "include" });
+      const data = await response.json();
+      return data.loggedIn === true;
+    } catch (err) {
+      console.error("Session check failed:", err);
+      return false;
+    }
+  }
 
-// Signin / Profile icon logic
-const signinBtn = document.getElementById("topUserIcon");
-const sidebarOverlay = document.getElementById("sidebarOverlay");
+  function showLoaderAndGo(url) {
+    navigating = true;
+    loader.style.display = "flex";
+    setTimeout(() => {
+      window.location.assign(url);
+    }, 600);
+  }
 
-if (signinBtn) {
-  signinBtn.addEventListener("click", async e => {
-    e.preventDefault();
-    if (navigating) return;
+  function showLoginPopup() {
+    loginPopup.style.display = "flex";
+  }
 
-    const loggedIn = await isUserLoggedIn();
-    if (loggedIn) {
-      // Logged in → open sidebar and focus on Profile
-      sidebar.classList.add("active");
-      sidebarOverlay.classList.add("active");
+  if (cancelPopup) {
+    cancelPopup.addEventListener("click", () => {
+      loginPopup.style.display = "none";
+    });
+  }
 
-      // Optional: highlight profile section if you have one
-      const profileSection = document.querySelector('[data-section="profile"]');
-      if (profileSection) {
-        profileSection.classList.add("active");
-      }
-
-      // Optional: hide other sections
-      document.querySelectorAll(".sidebar-section").forEach(sec => {
-        if (sec !== profileSection) sec.classList.remove("active");
-      });
-    } else {
-      // Not logged in → go to signin
+  if (goToLogin) {
+    goToLogin.addEventListener("click", () => {
+      loginPopup.style.display = "none";
       showLoaderAndGo("signin.html");
+    });
+  }
+
+  // Cards
+  const cards = document.querySelectorAll(".card");
+  cards.forEach(card => {
+    card.addEventListener("click", async e => {
+      e.preventDefault();
+      if (navigating) return; // prevent double click spam
+
+      const link = card.getAttribute("data-link");
+      const loggedIn = await isUserLoggedIn();
+      if (loggedIn) {
+        showLoaderAndGo(link);
+      } else {
+        showLoginPopup();
+      }
+    });
+  });
+
+  // Cart
+  const cartIcon = document.querySelector(".cart i");
+  if (cartIcon) {
+    cartIcon.addEventListener("click", async e => {
+      e.preventDefault();
+      if (navigating) return;
+
+      const loggedIn = await isUserLoggedIn();
+      if (loggedIn) {
+        showLoaderAndGo("cart.html");
+      } else {
+        showLoginPopup();
+      }
+    });
+  }
+
+
+
+
+  // Signin / Profile icon logic
+  const signinBtn = document.getElementById("topUserIcon");
+  const sidebar = document.getElementById("sidebar");
+  const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+  if (signinBtn) {
+    signinBtn.addEventListener("click", async e => {
+      e.preventDefault();
+      if (navigating) return;
+
+      const loggedIn = await isUserLoggedIn();
+      if (loggedIn) {
+        // Logged in → open sidebar and focus on Profile
+        sidebar.classList.add("active");
+        sidebarOverlay.classList.add("active");
+
+        // Optional: highlight profile section if you have one
+        const profileSection = document.querySelector('[data-section="profile"]');
+        if (profileSection) {
+          profileSection.classList.add("active");
+        }
+
+        // Optional: hide other sections
+        document.querySelectorAll(".sidebar-section").forEach(sec => {
+          if (sec !== profileSection) sec.classList.remove("active");
+        });
+      } else {
+        // Not logged in → go to signin
+        showLoaderAndGo("signin.html");
+      }
+    });
+  }
+
+
+  // Prevent loader on back navigation
+  window.addEventListener("pageshow", event => {
+    if (event.persisted) {
+      loader.style.display = "none";
+      navigating = false;
     }
   });
-}
-
-
-// Prevent loader on back navigation
-window.addEventListener("pageshow", event => {
-  if (event.persisted) {
-    loader.style.display = "none";
-    navigating = false;
-  }
 });
 
 
