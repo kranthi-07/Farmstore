@@ -805,9 +805,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Signin
+
+
+
   // Signin / Profile icon logic
 const signinBtn = document.getElementById("topUserIcon");
+const sidebar = document.getElementById("sidebar");
+const sidebarOverlay = document.getElementById("sidebarOverlay");
+
 if (signinBtn) {
   signinBtn.addEventListener("click", async e => {
     e.preventDefault();
@@ -815,10 +820,22 @@ if (signinBtn) {
 
     const loggedIn = await isUserLoggedIn();
     if (loggedIn) {
-      // User is logged in — go to profile page or open sidebar
-      showLoaderAndGo("profile.html"); // change if your profile page has a different name
+      // Logged in → open sidebar and focus on Profile
+      sidebar.classList.add("active");
+      sidebarOverlay.classList.add("active");
+
+      // Optional: highlight profile section if you have one
+      const profileSection = document.querySelector('[data-section="profile"]');
+      if (profileSection) {
+        profileSection.classList.add("active");
+      }
+
+      // Optional: hide other sections
+      document.querySelectorAll(".sidebar-section").forEach(sec => {
+        if (sec !== profileSection) sec.classList.remove("active");
+      });
     } else {
-      // Not logged in — go to signin
+      // Not logged in → go to signin
       showLoaderAndGo("signin.html");
     }
   });
@@ -833,3 +850,170 @@ if (signinBtn) {
     }
   });
 });
+
+
+
+
+// ------------------------
+// Loader + navigation guard
+// ------------------------
+(function () {
+  const loader = document.getElementById("loader");
+  const loginPopup = document.getElementById("loginPopup");
+  const cancelPopup = document.getElementById("cancelPopup");
+  const goToLogin = document.getElementById("goToLogin");
+
+  // small utility: show loader
+  function showLoader() {
+    if (!loader) return;
+    loader.style.display = "flex";
+    loader.style.opacity = "1";
+  }
+
+  // small utility: hide loader
+  function hideLoader() {
+    if (!loader) return;
+    loader.style.opacity = "0";
+    // keep a tiny delay so fade can run (if you add CSS), then hide
+    setTimeout(() => {
+      if (loader) loader.style.display = "none";
+    }, 300);
+  }
+
+  // Navigation helper: mark that we initiated forward navigation
+  function markNavigating() {
+    try { sessionStorage.setItem("navigating", "1"); } catch (e) {}
+  }
+  function clearNavigating() {
+    try { sessionStorage.removeItem("navigating"); } catch (e) {}
+  }
+  function isNavigating() {
+    return sessionStorage.getItem("navigating") === "1";
+  }
+
+  // IMPORTANT: your backend session check - update URL if needed
+  async function isUserLoggedIn() {
+    try {
+      const res = await fetch("/api/check-session", { credentials: "include" });
+      const d = await res.json();
+      return d.loggedIn === true;
+    } catch (err) {
+      console.error("session check error:", err);
+      return false;
+    }
+  }
+
+  // Navigate with loader — only call this when you want forward navigation
+  function showLoaderAndGo(url) {
+    // prevent re-entrancy
+    if (isNavigating()) return;
+    markNavigating();
+    showLoader();
+    // small delay so the loader is visible (adjust 300-700ms as you like)
+    setTimeout(() => {
+      window.location.href = url;
+    }, 350);
+  }
+
+  // Show login popup
+  function showLoginPopup() {
+    if (!loginPopup) return;
+    loginPopup.style.display = "flex";
+  }
+
+  // Wire popup buttons
+  if (cancelPopup) cancelPopup.addEventListener("click", () => (loginPopup.style.display = "none"));
+  if (goToLogin) goToLogin.addEventListener("click", () => {
+    loginPopup.style.display = "none";
+    showLoaderAndGo("signin.html");
+  });
+
+  // Cards: only forward navigate if logged in
+  document.querySelectorAll(".card").forEach(card => {
+    card.addEventListener("click", async (e) => {
+      e.preventDefault();
+      if (isNavigating()) return; // avoid double
+      const link = card.getAttribute("data-link");
+      if (!link) return;
+      const logged = await isUserLoggedIn();
+      if (logged) {
+        showLoaderAndGo(link);
+      } else {
+        showLoginPopup();
+      }
+    });
+  });
+
+  // Cart click
+  const cartBtn = document.querySelector(".cart");
+  if (cartBtn) {
+    cartBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      if (isNavigating()) return;
+      const logged = await isUserLoggedIn();
+      if (logged) showLoaderAndGo("cart.html");
+      else showLoginPopup();
+    });
+  }
+
+  // Signin top icon — if not logged in navigate to signin; if logged in open sidebar (no navigation)
+  const topUserIcon = document.getElementById("topUserIcon");
+  const sidebarEl = document.getElementById("sidebar");
+  const sidebarOverlay = document.getElementById("sidebarOverlay");
+  if (topUserIcon) {
+    topUserIcon.addEventListener("click", async (e) => {
+      e.preventDefault();
+      if (isNavigating()) return;
+      const logged = await isUserLoggedIn();
+      if (logged) {
+        // open sidebar (no page navigation)
+        if (sidebarEl) {
+          sidebarEl.classList.add("open");
+          if (sidebarOverlay) sidebarOverlay.classList.add("show");
+          // optionally call your loadProfile() if defined
+          if (typeof loadProfile === "function") loadProfile();
+        }
+      } else {
+        showLoaderAndGo("signin.html");
+      }
+    });
+  }
+
+  // If your item content pages have a back button (class .back-btn or .back-button),
+  // ensure it simply goes back in history without triggering loader.
+  document.querySelectorAll(".back-btn, .back-button, .item-back").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      // don't set navigating; just go back
+      history.back();
+    });
+  });
+
+  // When the page is shown (could be from bfcache), avoid showing loader on back/restore.
+  window.addEventListener("pageshow", (event) => {
+    // If this page was restored from bfcache OR navigation type is back_forward,
+    // then hide loader and clear navigating flag.
+    const navEntries = performance.getEntriesByType && performance.getEntriesByType("navigation");
+    const navType = (navEntries && navEntries[0] && navEntries[0].type) || "";
+    if (event.persisted || navType === "back_forward") {
+      hideLoader();
+      clearNavigating();
+    }
+  });
+
+  // Also handle popstate (user pressed back/forward)
+  window.addEventListener("popstate", () => {
+    hideLoader();
+    clearNavigating();
+  });
+
+  // Just in case the page loaded normally and we had a lingering navigating flag, clear it.
+  window.addEventListener("load", () => {
+    if (isNavigating()) {
+      // If we loaded normally after our own forward navigation, keep loader hidden
+      hideLoader();
+      clearNavigating();
+    }
+  });
+
+})();
