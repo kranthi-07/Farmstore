@@ -44,117 +44,104 @@ document.addEventListener("DOMContentLoaded", () => {
   const sidebar = document.getElementById("sidebar");
   const sidebarOverlay = document.getElementById("sidebarOverlay");
   const closeSidebarBtn = document.getElementById("closeSidebarBtn");
-  const sidebarMenu = document.querySelector('.sidebar-menu');
+  const sidebarMenu = document.querySelector(".sidebar-menu");
 
-  // small helper to render a round avatar with a letter
+  // --- Helper to make letter avatar ---
   function makeLetterAvatar(letter, size = 32) {
     return `<div class="avatar" style="width:${size}px;height:${size}px">${letter}</div>`;
   }
 
-  // open / close sidebar helpers
+  // --- Sidebar open/close ---
   function openSidebar() {
-    if (!sidebar) return;
-    sidebar.classList.add("open");
-    if (sidebarOverlay) sidebarOverlay.classList.add("show");
-    sidebar.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('sidebar-open');
-    // optionally ensure menu visible
-    if (sidebarMenu) sidebarMenu.style.display = 'block';
+    sidebar?.classList.add("open");
+    sidebarOverlay?.classList.add("show");
+    document.body.classList.add("sidebar-open");
+    sidebarMenu && (sidebarMenu.style.display = "block");
   }
   function closeSidebar() {
-    if (!sidebar) return;
-    sidebar.classList.remove("open");
-    if (sidebarOverlay) sidebarOverlay.classList.remove("show");
-    sidebar.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('sidebar-open');
+    sidebar?.classList.remove("open");
+    sidebarOverlay?.classList.remove("show");
+    document.body.classList.remove("sidebar-open");
   }
 
-  // Click handlers to close
-  closeSidebarBtn && closeSidebarBtn.addEventListener('click', closeSidebar);
-  sidebarOverlay && sidebarOverlay.addEventListener('click', closeSidebar);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
+  closeSidebarBtn?.addEventListener("click", closeSidebar);
+  sidebarOverlay?.addEventListener("click", closeSidebar);
+  document.addEventListener("keydown", (e) => e.key === "Escape" && closeSidebar());
 
-  // Main function to update top & sidebar UI based on login
+  // --- MAIN LOGIC ---
   async function updateUserUI() {
     try {
       const res = await fetch("/getUser", { credentials: "include" });
-      // if your endpoint returns non-json on 401, guard it
       const data = await res.json();
 
+      // 🔹 Default (not logged in)
       if (!data || data.loggedIn !== true) {
-        // Not logged in → show default icon & redirect on click
         if (topUserIcon) {
           topUserIcon.innerHTML = `<i class='bx bx-user'></i>`;
           topUserIcon.style.cursor = "pointer";
-          topUserIcon.onclick = () => { window.location.href = "signin.html"; };
+          topUserIcon.onclick = (e) => {
+            e.preventDefault();
+            window.location.assign("signin.html");
+          };
         }
-        // Sidebar header defaults
-        if (sidebarAvatar) sidebarAvatar.innerHTML = `<i class='bx bx-user'></i>`;
-        if (sidebarName) sidebarName.textContent = "Guest";
-        if (sidebarEmail) sidebarEmail.textContent = "guest@farmstore.com";
+
+        sidebarAvatar && (sidebarAvatar.innerHTML = `<i class='bx bx-user'></i>`);
+        sidebarName && (sidebarName.textContent = "Guest");
+        sidebarEmail && (sidebarEmail.textContent = "guest@farmstore.com");
         return;
       }
 
-      // Logged in — render initial avatar (first letter)
+      // ✅ Logged in
       const name = data.name || data.username || "User";
-      const first = (typeof name === "string" && name.length > 0) ? name.charAt(0).toUpperCase() : "U";
+      const first = name.charAt(0).toUpperCase();
 
+      // --- TOPBAR ICON ---
       if (topUserIcon) {
         topUserIcon.innerHTML = makeLetterAvatar(first, 32);
         topUserIcon.style.cursor = "pointer";
         topUserIcon.onclick = (e) => {
-          e.stopPropagation();
+          e.preventDefault();
           openSidebar();
         };
       }
 
+      // --- SIDEBAR HEADER ---
       if (sidebarAvatar) {
         sidebarAvatar.innerHTML = makeLetterAvatar(first, 40);
         sidebarAvatar.style.cursor = "pointer";
-        // clicking sidebar avatar should also open full profile (menu hidden, loadProfile can be called elsewhere)
         sidebarAvatar.onclick = (e) => {
-          e.stopPropagation();
+          e.preventDefault();
           openSidebar();
-          // optional: hide menu and show loader+profile if you have loadProfile defined
+
+          // If loadProfile() exists, show loader & load content
           if (typeof loadProfile === "function") {
-            const sidebarMenuEl = document.querySelector('.sidebar-menu');
-            if (sidebarMenuEl) sidebarMenuEl.style.display = 'none';
-            // show a loader while loading
-            const sidebarContent = document.getElementById('sidebarContent');
-            if (sidebarContent) {
+            const sidebarMenuEl = document.querySelector(".sidebar-menu");
+            if (sidebarMenuEl) sidebarMenuEl.style.display = "none";
+            const sidebarContent = document.getElementById("sidebarContent");
+            if (sidebarContent)
               sidebarContent.innerHTML = `<div class="loader-overlay"><div class="loader"></div></div>`;
-            }
-            // call your existing loadProfile func (it exists in your script earlier)
             loadProfile();
           }
         };
       }
 
-      if (sidebarName) sidebarName.textContent = data.name || "User";
-      if (sidebarEmail) sidebarEmail.textContent = data.mobile ? `+91 ${data.mobile}` : (data.email || "user@farmstore.com");
-
+      sidebarName && (sidebarName.textContent = name);
+      sidebarEmail && (sidebarEmail.textContent = data.mobile ? `+91 ${data.mobile}` : (data.email || "user@farmstore.com"));
     } catch (err) {
       console.error("updateUserUI error:", err);
-      // fallback to not-logged-in behavior
       if (topUserIcon) {
         topUserIcon.innerHTML = `<i class='bx bx-user'></i>`;
-        topUserIcon.onclick = () => { window.location.href = "signin.html"; };
+        topUserIcon.onclick = () => window.location.assign("signin.html");
       }
     }
   }
 
-  // run once on load
+  // 🟢 Run on page load
   updateUserUI();
 
-  // Optional: If your app dynamically logs in/out without page reload,
-  // you can expose updateUserUI to window to call after login/logout flows.
+  // Optional: allow re-use after login/logout
   window.updateUserUI = updateUserUI;
 });
-
-// ________________________________________SWITCHING TABS________________________________________
-
-
-
 
 
 
@@ -1000,6 +987,30 @@ document.addEventListener("DOMContentLoaded", () => {
       loader.style.display = "flex";
 
       setTimeout(() => loader.classList.add("hidden"), 1000);
+    });
+  });
+});
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loader = document.getElementById("loader");
+  const productCards = document.querySelectorAll(".product-card");
+
+  // show loader on card click
+  productCards.forEach(card => {
+    card.addEventListener("click", e => {
+      // prevent duplicate triggers
+      if (!loader) return;
+
+      // show loader immediately
+      loader.classList.remove("hidden");
+      loader.style.display = "flex";
+
+      // optional: simulate delay if navigation is instant
+      // remove this block if your navigation already takes time
+      setTimeout(() => {
+        loader.classList.add("hidden");
+      }, 1200);
     });
   });
 });

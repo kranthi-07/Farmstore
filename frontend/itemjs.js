@@ -1,158 +1,102 @@
+// --- CART COUNT FUNCTION ---
 async function updateCartCount() {
-    try {
-        const res = await fetch("https://farmstore-1.onrender.com/cart", {
-            method: "GET",
-            credentials: "include"
-        });
-        const data = await res.json();
-        if (data.success) {
-            document.querySelector(".count").textContent = data.cart.length;
-        }
-    } catch (err) {
-        console.error("Cart count fetch failed:", err);
+  try {
+    const res = await fetch("https://farmstore-1.onrender.com/cart", {
+      method: "GET",
+      credentials: "include",
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.querySelector(".count").textContent = data.cart.length;
     }
+  } catch (err) {
+    console.error("Cart count fetch failed:", err);
+  }
 }
 
-
-
-
+// --- ITEM DATA ---
 const itemData = {
-    Orange: { price: 25, desc: "Juicy Fruit", image: "assets/orange.png" },
-    Lemon: { price: 25, desc: "Juicy Fruit", image: "assets/lemon.png" },
-    Mosambi: { price: 25, desc: "Juicy Fruit", image: "assets/mosambi.png" },
-    Mango: { price: 25, desc: "Juicy Fruit", image: "assets/mango.png" },
-    Banana: { price: 25, desc: "Juicy Fruit", image: "assets/banana.png" },
-    Papaya: { price: 25, desc: "Juicy Fruit", image: "assets/papaya.png" },
-    Guava: { price: 25, desc: "Juicy Fruit", image: "assets/guava.png" },
-    Strawberry: { price: 25, desc: "Juicy Fruit", image: "assets/strawberry.png" },
-    Coconut: { price: 25, desc: "Juicy Fruit", image: "assets/coconut.png" },
-    Jackfruit: { price: 25, desc: "Juicy Fruit", image: "assets/jackfruit.png" },
-    Watermelon: { price: 25, desc: "Juicy Fruit", image: "assets/watermelon.png" },
-    Muskmelon: { price: 25, desc: "Juicy Fruit", image: "assets/muskmelon.png" },
-
-    Spinach: { price: 25, desc: "Leafy Vegetable", image: "assets/spinach.png" },
-    Coriander: { price: 25, desc: "Leafy Vegetable", image: "assets/coriander.png" },
-    Carrot: { price: 25, desc: "Vegetable", image: "assets/carrot.png" },
-    Beetroot: { price: 25, desc: "Vegetable", image: "assets/beetroot.png" },
-    Tomato: { price: 25, desc: "Vegetable", image: "assets/tomato.png" },
-    Brinjal: { price: 25, desc: "Vegetable", image: "assets/brinjal.png" },
-    Ladysfinger: { price: 25, desc: "Vegetable", image: "assets/ladysfinger.jpeg" },
-    Potato: { price: 25, desc: "Vegetable", image: "assets/potato.png" },
-    Onion: { price: 25, desc: "Vegetable", image: "assets/onion.png" },
-    Garlic: { price: 25, desc: "Vegetable", image: "assets/garlic.png" },
-
-
-
+  Orange: { price: 25, desc: "Juicy Fruit", image: "assets/orange.png" },
+  Lemon: { price: 25, desc: "Juicy Fruit", image: "assets/lemon.png" },
+  Mosambi: { price: 25, desc: "Juicy Fruit", image: "assets/mosambi.png" },
+  Mango: { price: 25, desc: "Juicy Fruit", image: "assets/mango.png" },
+  Banana: { price: 25, desc: "Juicy Fruit", image: "assets/banana.png" },
+  Papaya: { price: 25, desc: "Juicy Fruit", image: "assets/papaya.png" },
+  Guava: { price: 25, desc: "Juicy Fruit", image: "assets/guava.png" },
+  Strawberry: { price: 25, desc: "Juicy Fruit", image: "assets/strawberry.png" },
+  Coconut: { price: 25, desc: "Juicy Fruit", image: "assets/coconut.png" },
+  Jackfruit: { price: 25, desc: "Juicy Fruit", image: "assets/jackfruit.png" },
+  Watermelon: { price: 25, desc: "Juicy Fruit", image: "assets/watermelon.png" },
+  Muskmelon: { price: 25, desc: "Juicy Fruit", image: "assets/muskmelon.png" },
+  Spinach: { price: 25, desc: "Leafy Vegetable", image: "assets/spinach.png" },
+  Coriander: { price: 25, desc: "Leafy Vegetable", image: "assets/coriander.png" },
+  Carrot: { price: 25, desc: "Vegetable", image: "assets/carrot.png" },
+  Beetroot: { price: 25, desc: "Vegetable", image: "assets/beetroot.png" },
+  Tomato: { price: 25, desc: "Vegetable", image: "assets/tomato.png" },
+  Brinjal: { price: 25, desc: "Vegetable", image: "assets/brinjal.png" },
+  Ladysfinger: { price: 25, desc: "Vegetable", image: "assets/ladysfinger.jpeg" },
+  Potato: { price: 25, desc: "Vegetable", image: "assets/potato.png" },
+  Onion: { price: 25, desc: "Vegetable", image: "assets/onion.png" },
+  Garlic: { price: 25, desc: "Vegetable", image: "assets/garlic.png" },
 };
-const items = Object.keys(itemData);
 
-
-function goToItem(name) {
-    const data = itemData[name];
-    if (!data) return alert("Item details not found!");
-    const params = new URLSearchParams({
-        name,
-        price: `₹${data.price}`,
-        desc: data.desc,
-        image: data.image
-    });
-    window.location.href = `item.html?${params.toString()}`;
-}
-
-
-// Navigate to item page with loader support and no reload glitch
-function goToItem(name) {
-    const data = itemData[name];
-    if (!data) {
-        alert("Item details not found!");
-        return;
-    }
-
-    const params = new URLSearchParams({
-        name,
-        price: `₹${data.price}`,
-        desc: data.desc,
-        image: data.image
-    });
-
-    // show loader briefly before navigating
-    const loader = document.getElementById("loader");
-    if (loader) {
-        loader.style.display = "flex";
-        loader.style.opacity = "1";
-    }
-
-    // small delay to let loader visibly show
-    setTimeout(() => {
-        window.location.assign(`item.html?${params.toString()}`);
-    }, 400);
-}
-
-// Back-navigation handling
-window.addEventListener("pageshow", (event) => {
-    const loader = document.getElementById("loader");
-
-    // Hide loader if coming from cache
-    if (event.persisted && loader) {
-        loader.style.display = "none";
-    }
-
-    // Prevent loader flicker or reloading same page
-    const navType = performance.getEntriesByType("navigation")[0]?.type;
-    if (navType === "reload" || navType === "navigate") {
-        if (loader) loader.style.display = "none";
-    }
-
-    // Optional: ensure back button doesn't reload the same page
-    if (window.history.state === "itemLoaded") {
-        history.replaceState(null, null, "index.html");
-    } else {
-        history.pushState("itemLoaded", null, window.location.href);
-    }
+// --- FULL SCREEN LOADER CONTROL ---
+window.addEventListener("load", () => {
+  const loader = document.getElementById("loader");
+  if (loader) {
+    loader.style.opacity = "0";
+    setTimeout(() => (loader.style.display = "none"), 500);
+  }
 });
 
+// --- CARD CLICK NAVIGATION ---
+function goToItem(name) {
+  const data = itemData[name];
+  if (!data) return alert("Item details not found!");
 
+  const params = new URLSearchParams({
+    name,
+    price: `₹${data.price}`,
+    desc: data.desc,
+    image: data.image,
+  });
 
+  const loader = document.getElementById("loader");
+  if (loader) {
+    loader.style.display = "flex";
+    loader.style.opacity = "1";
+  }
 
-
-function goHome() {
-    window.location.replace('index.html');
+  // Delay for smooth loader display
+  setTimeout(() => {
+    window.location.assign(`item.html?${params.toString()}`);
+  }, 400);
 }
 
-
+// --- HANDLE BACK BUTTON ---
 document.addEventListener("DOMContentLoaded", () => {
-    const backBtn = document.getElementById("backBtn");
+  const backBtn = document.getElementById("backBtn");
 
+  if (backBtn) {
+    backBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const loader = document.getElementById("loader");
+      if (loader) loader.style.display = "flex";
 
-    // ✅ Handle Back Button — go back to index.html cleanly
-    if (backBtn) {
-        backBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-
-
-            setTimeout(() => {
-                // Use assign() so it goes back in history, not reload
-                window.location.assign("index.html");
-            }, 400);
-        });
-    }
-
-
-
-
+      setTimeout(() => {
+        window.location.assign("index.html");
+      }, 400);
+    });
+  }
 });
 
-
+// --- FIX PAGE NAVIGATION ISSUES ---
 window.addEventListener("pageshow", (event) => {
-    // Stop the page from reloading when navigating back
-    if (event.persisted) {
-        const loader = document.getElementById("loader");
-        if (loader) loader.style.display = "none";
-    }
+  const loader = document.getElementById("loader");
 
-    // Ensure browser doesn't re-run navigation logic
-    if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
-        history.go(-1); // go back cleanly to previous page instead of reloading
-    }
+  // If coming back from cache, hide loader instantly
+  if (event.persisted && loader) loader.style.display = "none";
+
+  const navType = performance.getEntriesByType("navigation")[0]?.type;
+  if (navType === "back_forward" && loader) loader.style.display = "none";
 });
-
