@@ -36,114 +36,69 @@ var swiper = new Swiper('.mySwiper', {
 // _________________________________________AVATAR____________________________________
 
 // ---------- Unified Avatar & Sidebar Header Logic ----------
-document.addEventListener("DOMContentLoaded", () => {
-  const topUserIcon = document.getElementById("topUserIcon");      // top bar
-  const sidebarAvatar = document.getElementById("sidebarAvatar");  // sidebar avatar container
-  const sidebarName = document.getElementById("sidebarName");
-  const sidebarEmail = document.getElementById("sidebarEmail");
-  const sidebar = document.getElementById("sidebar");
-  const sidebarOverlay = document.getElementById("sidebarOverlay");
-  const closeSidebarBtn = document.getElementById("closeSidebarBtn");
-  const sidebarMenu = document.querySelector(".sidebar-menu");
+async function updateUserUI() {
+  try {
+    const res = await fetch("/getUser", { credentials: "include" });
+    const data = await res.json();
 
-  // --- Helper to make letter avatar ---
-  function makeLetterAvatar(letter, size = 32) {
-    return `<div class="avatar" style="width:${size}px;height:${size}px">${letter}</div>`;
-  }
-
-  // --- Sidebar open/close ---
-  function openSidebar() {
-    sidebar?.classList.add("open");
-    sidebarOverlay?.classList.add("show");
-    document.body.classList.add("sidebar-open");
-    sidebarMenu && (sidebarMenu.style.display = "block");
-  }
-  function closeSidebar() {
-    sidebar?.classList.remove("open");
-    sidebarOverlay?.classList.remove("show");
-    document.body.classList.remove("sidebar-open");
-  }
-
-  closeSidebarBtn?.addEventListener("click", closeSidebar);
-  sidebarOverlay?.addEventListener("click", closeSidebar);
-  document.addEventListener("keydown", (e) => e.key === "Escape" && closeSidebar());
-
-  // --- MAIN LOGIC ---
-  async function updateUserUI() {
-    try {
-      const res = await fetch("/getUser", { credentials: "include" });
-      const data = await res.json();
-
-      // 🔹 Default (not logged in)
-      if (!data || data.loggedIn !== true) {
-        if (topUserIcon) {
-          topUserIcon.innerHTML = `<i class='bx bx-user'></i>`;
-          topUserIcon.style.cursor = "pointer";
-          topUserIcon.onclick = (e) => {
-            e.preventDefault();
-            window.location.assign("signin.html");
-          };
-        }
-
-        sidebarAvatar && (sidebarAvatar.innerHTML = `<i class='bx bx-user'></i>`);
-        sidebarName && (sidebarName.textContent = "Guest");
-        sidebarEmail && (sidebarEmail.textContent = "guest@farmstore.com");
-        return;
-      }
-
-      // ✅ Logged in
+    // 🟢 Logged in
+    if (data && data.loggedIn === true) {
       const name = data.name || data.username || "User";
       const first = name.charAt(0).toUpperCase();
 
-      // --- TOPBAR ICON ---
+      // Top avatar → open sidebar
       if (topUserIcon) {
         topUserIcon.innerHTML = makeLetterAvatar(first, 32);
         topUserIcon.style.cursor = "pointer";
         topUserIcon.onclick = (e) => {
-          e.preventDefault();
+          e.stopPropagation();
           openSidebar();
         };
       }
 
-      // --- SIDEBAR HEADER ---
+      // Sidebar avatar
       if (sidebarAvatar) {
         sidebarAvatar.innerHTML = makeLetterAvatar(first, 40);
         sidebarAvatar.style.cursor = "pointer";
         sidebarAvatar.onclick = (e) => {
-          e.preventDefault();
+          e.stopPropagation();
           openSidebar();
-
-          // If loadProfile() exists, show loader & load content
-          if (typeof loadProfile === "function") {
-            const sidebarMenuEl = document.querySelector(".sidebar-menu");
-            if (sidebarMenuEl) sidebarMenuEl.style.display = "none";
-            const sidebarContent = document.getElementById("sidebarContent");
-            if (sidebarContent)
-              sidebarContent.innerHTML = `<div class="loader-overlay"><div class="loader"></div></div>`;
-            loadProfile();
-          }
         };
       }
 
-      sidebarName && (sidebarName.textContent = name);
-      sidebarEmail && (sidebarEmail.textContent = data.mobile ? `+91 ${data.mobile}` : (data.email || "user@farmstore.com"));
-    } catch (err) {
-      console.error("updateUserUI error:", err);
+      if (sidebarName) sidebarName.textContent = name;
+      if (sidebarEmail)
+        sidebarEmail.textContent =
+          data.mobile
+            ? `+91 ${data.mobile}`
+            : data.email || "user@farmstore.com";
+    }
+
+    // 🔴 Not logged in
+    else {
       if (topUserIcon) {
         topUserIcon.innerHTML = `<i class='bx bx-user'></i>`;
-        topUserIcon.onclick = () => window.location.assign("signin.html");
+        topUserIcon.style.cursor = "pointer";
+        topUserIcon.onclick = () => {
+          window.location.href = "signin.html";
+        };
       }
+
+      if (sidebarAvatar)
+        sidebarAvatar.innerHTML = `<i class='bx bx-user'></i>`;
+      if (sidebarName) sidebarName.textContent = "Guest";
+      if (sidebarEmail) sidebarEmail.textContent = "guest@farmstore.com";
+    }
+  } catch (err) {
+    console.error("updateUserUI error:", err);
+    if (topUserIcon) {
+      topUserIcon.innerHTML = `<i class='bx bx-user'></i>`;
+      topUserIcon.onclick = () => {
+        window.location.href = "signin.html";
+      };
     }
   }
-
-  // 🟢 Run on page load
-  updateUserUI();
-
-  // Optional: allow re-use after login/logout
-  window.updateUserUI = updateUserUI;
-});
-
-
+}
 
 
 
