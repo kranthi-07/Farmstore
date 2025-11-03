@@ -956,61 +956,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // ================== CARD CLICK WITH LOADER FIX ==================
-
 document.addEventListener("DOMContentLoaded", () => {
   const loader = document.getElementById("loader");
-  const loginPopup = document.getElementById("loginPopup");
+  const loginPopup = document.getElementById("loginPopup"); // your login popup ID
+  const loginBtn = document.getElementById("loginBtn"); // your login button
+  const productCards = document.querySelectorAll(".product-card"); // all clickable cards
 
-  // show/hide helpers
-  function showLoader() {
-    if (loader) {
-      loader.style.display = "flex";
-      loader.style.opacity = "1";
-    }
-  }
+  // Hide loader initially
+  loader.style.display = "none";
 
-  function hideLoader() {
-    if (loader) {
-      loader.style.opacity = "0";
+  // When login popup appears — always hide loader
+  const showLoginPopup = () => {
+    loader.style.display = "none";
+    if (loginPopup) loginPopup.style.display = "block";
+  };
+
+  // When login successful — show loader briefly
+  if (loginBtn) {
+    loginBtn.addEventListener("click", () => {
+      // Example: Validate login logic here
+      loader.style.display = "block";
+
+      // Simulate delay for content loading
       setTimeout(() => {
         loader.style.display = "none";
-      }, 300);
-    }
+        if (loginPopup) loginPopup.style.display = "none";
+        console.log("Login successful, loader hidden");
+      }, 1200);
+    });
   }
 
-  // check login status (MongoDB session backend)
-  async function isUserLoggedIn() {
-    try {
-      const res = await fetch("/api/check-session", { credentials: "include" });
-      const data = await res.json();
-      return data.loggedIn === true;
-    } catch {
-      return false;
-    }
-  }
-
-  // attach click listener to every card
-  const cards = document.querySelectorAll(".card");
-  cards.forEach(card => {
-    card.addEventListener("click", async e => {
-      e.preventDefault();
-
-      const targetPage = card.getAttribute("data-link");
-      showLoader(); // loader appears instantly
-
-      const loggedIn = await isUserLoggedIn();
-
-      if (!loggedIn) {
-        hideLoader();
-        loginPopup.style.display = "flex";
-        loginPopup.setAttribute("data-redirect", targetPage);
-        return;
-      }
-
-      // Smoothly navigate after showing loader
-      setTimeout(() => {
-        window.location.href = targetPage;
-      }, 600);
+  // Show loader only when a product card is clicked (after login)
+  productCards.forEach(card => {
+    card.addEventListener("click", () => {
+      loader.style.display = "block";
+      // Simulate navigation delay
+      setTimeout(() => loader.style.display = "none", 1000);
     });
   });
 });
