@@ -958,40 +958,49 @@ document.addEventListener("DOMContentLoaded", () => {
 // ================== CARD CLICK WITH LOADER FIX ==================
 document.addEventListener("DOMContentLoaded", () => {
   const loader = document.getElementById("loader");
-  const loginPopup = document.getElementById("loginPopup"); // your login popup ID
-  const loginBtn = document.getElementById("loginBtn"); // your login button
-  const productCards = document.querySelectorAll(".product-card"); // all clickable cards
+  const loginPopup = document.getElementById("loginPopup"); // adjust ID if different
+  const loginBtn = document.getElementById("loginBtn");
+  const productCards = document.querySelectorAll(".product-card");
 
-  // Hide loader initially
-  loader.style.display = "none";
+  // 1️⃣ Show loader immediately while DOM is loading
+  loader.style.display = "flex";
 
-  // When login popup appears — always hide loader
-  const showLoginPopup = () => {
-    loader.style.display = "none";
+  // 2️⃣ When all resources (images, scripts, etc.) are fully loaded, hide loader
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      loader.classList.add("hidden"); // fade out smoothly
+    }, 500); // small delay for smoothness
+  });
+
+  // 3️⃣ When login popup appears — hide loader
+  function showLoginPopup() {
+    loader.classList.add("hidden");
     if (loginPopup) loginPopup.style.display = "block";
-  };
+  }
 
-  // When login successful — show loader briefly
+  // 4️⃣ When user logs in — show loader briefly
   if (loginBtn) {
     loginBtn.addEventListener("click", () => {
-      // Example: Validate login logic here
-      loader.style.display = "block";
+      loader.classList.remove("hidden");
+      loader.style.display = "flex";
 
-      // Simulate delay for content loading
+      // simulate load delay (replace with your real login logic)
       setTimeout(() => {
-        loader.style.display = "none";
+        loader.classList.add("hidden");
         if (loginPopup) loginPopup.style.display = "none";
         console.log("Login successful, loader hidden");
       }, 1200);
     });
   }
 
-  // Show loader only when a product card is clicked (after login)
+  // 5️⃣ When clicking a product card — show loader
   productCards.forEach(card => {
     card.addEventListener("click", () => {
-      loader.style.display = "block";
-      // Simulate navigation delay
-      setTimeout(() => loader.style.display = "none", 1000);
+      loader.classList.remove("hidden");
+      loader.style.display = "flex";
+
+      setTimeout(() => loader.classList.add("hidden"), 1000);
     });
   });
 });
+
