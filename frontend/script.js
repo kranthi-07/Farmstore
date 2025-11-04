@@ -80,8 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("sidebar");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
     const sidebarMenu = document.querySelector(".sidebar-menu");
-    sidebar?.classList.add("open");
-    sidebarOverlay?.classList.add("show");
+    sidebar.classList.add("open");
+    sidebarOverlay.classList.add("show");
     document.body.classList.add("sidebar-open");
     if (sidebarMenu) sidebarMenu.style.display = "block";
     // populate header quickly
@@ -90,8 +90,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function closeSidebar() {
     const sidebar = document.getElementById("sidebar");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
-    sidebar?.classList.remove("open");
-    sidebarOverlay?.classList.remove("show");
+    sidebar.classList.remove("open");
+    sidebarOverlay.classList.remove("show");
     document.body.classList.remove("sidebar-open");
     restoreMenu();
   }
@@ -101,8 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Close handlers
   const closeSidebarBtn = document.getElementById("closeSidebarBtn");
   const sidebarOverlay = document.getElementById("sidebarOverlay");
-  closeSidebarBtn?.addEventListener("click", closeSidebar);
-  sidebarOverlay?.addEventListener("click", closeSidebar);
+  closeSidebarBtn.addEventListener("click", closeSidebar);
+  sidebarOverlay.addEventListener("click", closeSidebar);
   document.addEventListener("keydown", (e) => e.key === "Escape" && closeSidebar());
 
   // MAIN: update UI based on login
