@@ -1,113 +1,142 @@
-
-const body = document.querySelector('body');
-const menu = body.querySelector('.menu');
-const sidebar = document.querySelector(".sidebar"); // use id
+/* ==============================
+   GLOBAL ELEMENTS & SWIPER
+============================== */
+const body = document.querySelector("body");
+const menu = body.querySelector(".menu");
+const sidebarEl = document.querySelector(".sidebar");
 const overlay = document.querySelector(".overlay");
 const sidebarContent = document.getElementById("sidebarContent");
 const sidebarItems = document.querySelectorAll(".sidebar-item");
 
-const fruits = body.querySelector('.fruits');
-const vegetables = body.querySelector('.vegetables');
-const fruits_bar = body.querySelector('.fruits-bar');
-const vegetables_bar = body.querySelector('.vegetables-bar');
-const mainContent = body.querySelector('.main-content');
-const mainItems = body.querySelector('.main-items');
-
-// Now you can safely use sidebar, overlay, fruits, vegetables, etc.
-
+const fruits = body.querySelector(".fruits");
+const vegetables = body.querySelector(".vegetables");
+const fruits_bar = body.querySelector(".fruits-bar");
+const vegetables_bar = body.querySelector(".vegetables-bar");
+const mainContent = body.querySelector(".main-content");
+const mainItems = body.querySelector(".main-items");
 
 let startX = 0;
 let currentX = 0;
 let touchingSidebar = false;
 
-
-//___________________________________________SWUPER___________________________________
-
-var swiper = new Swiper('.mySwiper', {
+// Swiper
+var swiper = new Swiper(".mySwiper", {
   slidesPerView: 1,
   loop: true,
+  autoplay: { delay: 2200 },
+});
 
-  autoplay: {
-    delay: 2200,
-  },
-})
+/* ==============================
+   UTILITIES (LOGIN + LOADER)
+============================== */
+const loader = document.getElementById("loader");
 
+function showLoader() {
+  if (loader) {
+    loader.style.display = "flex";
+    loader.style.opacity = "1";
+  }
+}
+function hideLoader() {
+  if (loader) {
+    loader.style.opacity = "0";
+    setTimeout(() => (loader.style.display = "none"), 300);
+  }
+}
+function showLoaderAndGo(url) {
+  showLoader();
+  setTimeout(() => {
+    window.location.href = url;
+  }, 600);
+}
 
-// _________________________________________AVATAR____________________________________
+// Canonical login check (use ONLY /getUser)
+async function isUserLoggedIn() {
+  try {
+    const res = await fetch("/getUser", { credentials: "include" });
+    const data = await res.json();
+    return data?.loggedIn === true;
+  } catch {
+    return false;
+  }
+}
+
+/* ==============================
+   AVATAR (TOPBAR + SIDEBAR HEADER)
+============================== */
 document.addEventListener("DOMContentLoaded", () => {
-  const topUserIcon = document.getElementById("topUserIcon");      // Top bar avatar container
-  const sidebarAvatar = document.getElementById("sidebarAvatar");  // Sidebar avatar container
+  const topUserIcon = document.getElementById("topUserIcon"); // Top bar avatar container
+  const sidebarAvatar = document.getElementById("sidebarAvatar"); // Sidebar avatar container
   const sidebarName = document.getElementById("sidebarName");
   const sidebarEmail = document.getElementById("sidebarEmail");
-  const sidebar = document.getElementById("sidebar");
-  const sidebarOverlay = document.getElementById("sidebarOverlay");
-  const closeSidebarBtn = document.getElementById("closeSidebarBtn");
-  const sidebarMenu = document.querySelector(".sidebar-menu");
 
-  // Helper — creates letter avatar using your .avatar CSS
+  // use your CSS .avatar
   function makeLetterAvatar(letter) {
     return `<div class="avatar">${letter}</div>`;
   }
 
-  // Sidebar open/close
+  // Sidebar open/close — single source of truth
   function openSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
+    const sidebarMenu = document.querySelector(".sidebar-menu");
     sidebar?.classList.add("open");
     sidebarOverlay?.classList.add("show");
     document.body.classList.add("sidebar-open");
-    sidebarMenu && (sidebarMenu.style.display = "block");
+    if (sidebarMenu) sidebarMenu.style.display = "block";
+    // populate header quickly
+    populateSidebarHeader();
   }
-
   function closeSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
     sidebar?.classList.remove("open");
     sidebarOverlay?.classList.remove("show");
     document.body.classList.remove("sidebar-open");
+    restoreMenu();
   }
+  window.openSidebar = openSidebar;  // expose for reuse
+  window.closeSidebar = closeSidebar;
 
+  // Close handlers
+  const closeSidebarBtn = document.getElementById("closeSidebarBtn");
+  const sidebarOverlay = document.getElementById("sidebarOverlay");
   closeSidebarBtn?.addEventListener("click", closeSidebar);
   sidebarOverlay?.addEventListener("click", closeSidebar);
   document.addEventListener("keydown", (e) => e.key === "Escape" && closeSidebar());
 
-  // --- Main logic ---
+  // MAIN: update UI based on login
   async function updateUserUI() {
     try {
-      const res = await fetch("/getUser", { credentials: "include" });
-      const data = await res.json();
-      const isLoggedIn = data?.loggedIn === true;
-
-      // Fade-in animation start
+      // avoid flicker: fade in after content set
       if (topUserIcon) {
         topUserIcon.style.opacity = "0";
-        topUserIcon.style.transition = "opacity 0.3s ease";
+        topUserIcon.style.transition = "opacity .3s ease";
       }
 
-      // 🟥 Not logged in
-      if (!isLoggedIn) {
+      const res = await fetch("/getUser", { credentials: "include" });
+      const data = await res.json();
+      const loggedIn = data?.loggedIn === true;
+
+      if (!loggedIn) {
+        // Not logged in → show user icon & redirect on click
         if (topUserIcon) {
           topUserIcon.innerHTML = `<i class='bx bx-user'></i>`;
           topUserIcon.style.cursor = "pointer";
-          topUserIcon.onclick = () => {
-            window.location.assign("signin.html");
-          };
+          topUserIcon.onclick = () => window.location.assign("signin.html");
         }
-
         if (sidebarAvatar) {
           sidebarAvatar.innerHTML = `<i class='bx bx-user'></i>`;
           sidebarAvatar.style.cursor = "pointer";
-          sidebarAvatar.onclick = () => {
-            window.location.assign("signin.html");
-          };
+          sidebarAvatar.onclick = () => window.location.assign("signin.html");
         }
-
         if (sidebarName) sidebarName.textContent = "Guest";
         if (sidebarEmail) sidebarEmail.textContent = "guest@farmstore.com";
-      }
-
-      // 🟢 Logged in
-      else {
+      } else {
+        // Logged in → show letter avatar & open sidebar on click
         const name = data.name || data.username || "User";
         const first = name.charAt(0).toUpperCase();
 
-        // Top avatar — open sidebar
         if (topUserIcon) {
           topUserIcon.innerHTML = makeLetterAvatar(first);
           topUserIcon.style.cursor = "pointer";
@@ -116,24 +145,22 @@ document.addEventListener("DOMContentLoaded", () => {
             openSidebar();
           };
         }
-
-        // Sidebar avatar — open sidebar only
         if (sidebarAvatar) {
           sidebarAvatar.innerHTML = makeLetterAvatar(first);
           sidebarAvatar.style.cursor = "pointer";
           sidebarAvatar.onclick = (e) => {
             e.preventDefault();
-            openSidebar();
+            openSidebar(); // no loader/profile load here
           };
         }
-
         if (sidebarName) sidebarName.textContent = name;
-        if (sidebarEmail)
+        if (sidebarEmail) {
           sidebarEmail.textContent =
             data.mobile ? `+91 ${data.mobile}` : data.email || "user@farmstore.com";
+        }
       }
 
-      // Fade-in after avatar update
+      // fade-in
       setTimeout(() => {
         if (topUserIcon) topUserIcon.style.opacity = "1";
       }, 100);
@@ -147,270 +174,241 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Run when page loads
-  updateUserUI();
   window.updateUserUI = updateUserUI;
+  updateUserUI();
 });
 
-
-
-// __________________________________________SIDEBAR______________________________________________
-
-
-
+/* ==============================
+   SIDEBAR (MENU + PROFILE LOADER)
+============================== */
 document.addEventListener("DOMContentLoaded", () => {
-  const menuBtn = document.querySelector('#openSidebar') || document.querySelector('.menu');
-  const sidebar = document.getElementById('sidebar');
-  const sidebarOverlay = document.getElementById('sidebarOverlay');
-  const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-  const sidebarMenu = document.querySelector('.sidebar-menu');
-  const sidebarMenuItems = document.querySelectorAll('.sidebar-menu-item');
-  const sidebarContent = document.getElementById('sidebarContent');
-  const sidebarAvatar = document.getElementById('sidebarAvatar');
-  const sidebarName = document.getElementById('sidebarName');
-  const sidebarEmail = document.getElementById('sidebarEmail');
+  const menuBtn = document.querySelector("#openSidebar") || document.querySelector(".menu");
+  const sidebar = document.getElementById("sidebar");
+  const sidebarOverlay = document.getElementById("sidebarOverlay");
+  const closeSidebarBtn = document.getElementById("closeSidebarBtn");
+  const sidebarMenu = document.querySelector(".sidebar-menu");
+  const sidebarMenuItems = document.querySelectorAll(".sidebar-menu-item");
+  const sidebarContent = document.getElementById("sidebarContent");
+  const sidebarAvatar = document.getElementById("sidebarAvatar");
+  const sidebarName = document.getElementById("sidebarName");
+  const sidebarEmail = document.getElementById("sidebarEmail");
 
   if (!sidebar || !sidebarOverlay || !menuBtn) return;
 
   // Populate header quickly when sidebar opens
   async function populateSidebarHeader() {
     try {
-      // lightweight endpoint that only needs to confirm user & basic info.
-      // Using /getUser (same as you used elsewhere) so it stays consistent with your backend.
-      const res = await fetch('/getUser', { credentials: 'include' });
+      const res = await fetch("/getUser", { credentials: "include" });
       const data = await res.json();
       if (data && data.loggedIn) {
         sidebarName.textContent = data.name || "User";
-        sidebarEmail.textContent = data.mobile ? `+91 ${data.mobile}` : (data.email || "user@farmstore.com");
-        // avatar: keep default unless backend has avatar URL in response
-        // if (data.avatarUrl) sidebarAvatar.src = data.avatarUrl;
+        sidebarEmail.textContent =
+          data.mobile ? `+91 ${data.mobile}` : data.email || "user@farmstore.com";
       } else {
         sidebarName.textContent = "Guest";
         sidebarEmail.textContent = "guest@farmstore.com";
-        sidebarAvatar.src = "assets/default-avatar.png";
+        // if you used <img>, keep default; using .avatar now
       }
     } catch (err) {
       console.error("Sidebar header load failed:", err);
       sidebarName.textContent = "Guest";
       sidebarEmail.textContent = "guest@farmstore.com";
-      sidebarAvatar.src = "assets/default-avatar.png";
     }
   }
 
   function showSidebarLoading() {
-    // lightweight inline loader / placeholder while profile content is fetched
-    sidebarContent.innerHTML = `  <div class="loader-overlay" id="loader">
-                                    <div class="loader"></div>
-                                  </div>`;
-    sidebarContent.classList.add('side-show');
+    sidebarContent.innerHTML = `
+      <div class="loader-overlay">
+        <div class="loader"></div>
+      </div>`;
+    sidebarContent.classList.add("side-show");
   }
 
-  // Restore the menu (used by Back button)
   function restoreMenu() {
-    sidebarContent.classList.remove('side-show');
-    sidebarContent.style.opacity = '0';
-
+    sidebarContent.classList.remove("side-show");
+    sidebarContent.style.opacity = "0";
     setTimeout(() => {
-      sidebarContent.innerHTML = '';
+      sidebarContent.innerHTML = "";
       sidebarContent.scrollTop = 0;
-      sidebarContent.style.opacity = '1';
-
-      if (sidebarMenu) sidebarMenu.style.display = 'block';
-      sidebarMenuItems.forEach(i => i.classList.remove('active'));
+      sidebarContent.style.opacity = "1";
+      if (sidebarMenu) sidebarMenu.style.display = "block";
+      sidebarMenuItems.forEach((i) => i.classList.remove("active"));
     }, 150);
   }
+  window.restoreMenu = restoreMenu; // used by closeSidebar
 
-
-
-  // Show content with a Back button (safe single place to render)
   function showWithBack(innerHtml) {
     sidebarContent.innerHTML = `<div class="back-btn" id="sidebarBackBtn">← Back</div>` + innerHtml;
-    sidebarContent.classList.add('side-show');
-    const backBtn = document.getElementById('sidebarBackBtn');
-    if (backBtn) backBtn.addEventListener('click', restoreMenu);
+    sidebarContent.classList.add("side-show");
+    const backBtn = document.getElementById("sidebarBackBtn");
+    if (backBtn) backBtn.addEventListener("click", restoreMenu);
   }
 
-
-
-
-
-  // -------------------- Load Profile --------------------
-
-  // Unified profile loader — only one definition (replaces duplicates)
+  // Load profile (used only when menu → profile)
   async function loadProfile() {
     showSidebarLoading();
     try {
-      const res = await fetch("https://farmstore-1.onrender.com/profile", { credentials: 'include' });
+      const res = await fetch("https://farmstore-1.onrender.com/profile", {
+        credentials: "include",
+      });
       const data = await res.json();
       if (data && data.success) {
-        // Immediately update header so top section is visible
         sidebarName.textContent = data.user.name || "Guest";
-        sidebarEmail.textContent = data.user.mobile ? `+91 ${data.user.mobile}` : (data.user.email || "guest@farmstore.com");
-        // Render profile area inside the sidebar content (single location)
+        sidebarEmail.textContent =
+          data.user.mobile ? `+91 ${data.user.mobile}` : data.user.email || "guest@farmstore.com";
+
         const profileHtml = `
           <div id="profileSection">
             <h3>Profile</h3>
             <p><strong>Name:</strong> ${data.user.name || "N/A"}</p>
             <p><strong>Mobile:</strong> ${data.user.mobile || "N/A"}</p>
-            ${data.user.email ? `<p><strong>Email:</strong> ${data.user.email}</p>` : ''}
+            ${data.user.email ? `<p><strong>Email:</strong> ${data.user.email}</p>` : ""}
           </div>
         `;
         showWithBack(profileHtml);
       } else {
-        showWithBack('<p>Not logged in</p>');
+        showWithBack("<p>Not logged in</p>");
       }
     } catch (err) {
       console.error("Profile load error:", err);
-      showWithBack('<p>Error loading profile</p>');
+      showWithBack("<p>Error loading profile</p>");
     }
   }
 
-  // Sidebar open / close
   function openSidebar() {
-    sidebar.classList.add('open');
-    sidebarOverlay.classList.add('side-show');
-    sidebar.setAttribute('aria-hidden', 'false');
-    sidebarOverlay.setAttribute('aria-hidden', 'false');
-    document.documentElement.style.overflow = 'hidden';
-    document.body.classList.add('sidebar-open');
-    // fetch header info right away so top section isn't blank
+    sidebar.classList.add("open");
+    sidebarOverlay.classList.add("side-show");
+    sidebar.setAttribute("aria-hidden", "false");
+    sidebarOverlay.setAttribute("aria-hidden", "false");
+    document.documentElement.style.overflow = "hidden";
+    document.body.classList.add("sidebar-open");
     populateSidebarHeader();
   }
-
   function closeSidebar() {
-    sidebar.classList.remove('open');
-    sidebarOverlay.classList.remove('side-show');
-    sidebar.setAttribute('aria-hidden', 'true');
-    sidebarOverlay.setAttribute('aria-hidden', 'true');
-    document.documentElement.style.overflow = '';
-    document.body.classList.remove('sidebar-open');
+    sidebar.classList.remove("open");
+    sidebarOverlay.classList.remove("side-show");
+    sidebar.setAttribute("aria-hidden", "true");
+    sidebarOverlay.setAttribute("aria-hidden", "true");
+    document.documentElement.style.overflow = "";
+    document.body.classList.remove("sidebar-open");
     restoreMenu();
   }
 
-  menuBtn.addEventListener('click', (e) => { e.stopPropagation(); openSidebar(); });
-  closeSidebarBtn && closeSidebarBtn.addEventListener('click', closeSidebar);
-  sidebarOverlay.addEventListener('click', closeSidebar);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
-  sidebar.addEventListener('click', (e) => e.stopPropagation());
+  menuBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openSidebar();
+  });
+  closeSidebarBtn && closeSidebarBtn.addEventListener("click", closeSidebar);
+  sidebarOverlay.addEventListener("click", closeSidebar);
+  document.addEventListener("keydown", (e) => e.key === "Escape" && closeSidebar);
+  sidebar.addEventListener("click", (e) => e.stopPropagation());
 
-  // Menu items click
-  sidebarMenuItems.forEach(item => {
-    item.addEventListener('click', async () => {
-      const section = item.getAttribute('data-section');
-      // Hide the menu and show loader area while we fetch
-      if (sidebarMenu) sidebarMenu.style.display = 'none';
-      sidebarMenuItems.forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
+  // Menu items
+  sidebarMenuItems.forEach((item) => {
+    item.addEventListener("click", async () => {
+      const section = item.getAttribute("data-section");
+      if (sidebarMenu) sidebarMenu.style.display = "none";
+      sidebarMenuItems.forEach((i) => i.classList.remove("active"));
+      item.classList.add("active");
 
-      if (section === 'profile') {
-        openSidebar();            // ensure sidebar is open
-        // show placeholder immediately
+      if (section === "profile") {
+        openSidebar();
         showSidebarLoading();
-        await loadProfile();      // will replace content when done
-      } else if (section === 'orders') {
-        const os = document.getElementById('ordersSection');
-        const contentHtml = os ? os.innerHTML : `<h3 class="content-head">Orders</h3><p>No orders found.</p>`;
+        await loadProfile();
+      } else if (section === "orders") {
+        const os = document.getElementById("ordersSection");
+        const contentHtml =
+          os?.innerHTML ||
+          `<h3 class="content-head">Orders</h3><p>No orders found.</p>`;
         showWithBack(contentHtml);
-      } else if (section === 'favorites') {
+      } else if (section === "favorites") {
         showWithBack(`<h3 class="content-head">Favorites</h3><p>Coming soon.</p>`);
-      } else if (section === 'contact') {
-        showWithBack(`<h3 class="content-head">Contact</h3><p>Email: support@farmstore.com<br>Phone: +91 98765 43210</p>`);
-      } else if (section === 'logout') {
+      } else if (section === "contact") {
+        showWithBack(
+          `<h3 class="content-head">Contact</h3><p>Email: support@farmstore.com<br>Phone: +91 98765 43210</p>`
+        );
+      } else if (section === "logout") {
         await logout();
-        return;
       }
     });
   });
 
-  // Avatar click loads profile (same unified flow)
+  // Avatar in sidebar: JUST open sidebar (no profile loader)
   if (sidebarAvatar) {
-    sidebarAvatar.addEventListener('click', async () => {
+    sidebarAvatar.addEventListener("click", () => {
       openSidebar();
-      if (sidebarMenu) sidebarMenu.style.display = 'none';
-      showSidebarLoading();
-      await loadProfile();
+      // leave menu visible; profile loads only when menu→Profile is clicked
     });
   }
 
-  // drag to close (keeps existing behavior)
+  // Drag to close
   (function enableDragToClose() {
     let startX = null;
     let touching = false;
-    sidebar.addEventListener('touchstart', e => {
-      if (!sidebar.classList.contains('open')) return;
-      touching = true;
-      startX = e.touches[0].clientX;
-    }, { passive: true });
-
-    sidebar.addEventListener('touchmove', e => {
-      if (!touching || startX === null) return;
-      const delta = e.touches[0].clientX - startX;
-      if (delta < -60) { touching = false; closeSidebar(); }
-    }, { passive: true });
-
-    sidebar.addEventListener('touchend', () => { touching = false; startX = null; });
+    sidebar.addEventListener(
+      "touchstart",
+      (e) => {
+        if (!sidebar.classList.contains("open")) return;
+        touching = true;
+        startX = e.touches[0].clientX;
+      },
+      { passive: true }
+    );
+    sidebar.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!touching || startX === null) return;
+        const delta = e.touches[0].clientX - startX;
+        if (delta < -60) {
+          touching = false;
+          closeSidebar();
+        }
+      },
+      { passive: true }
+    );
+    sidebar.addEventListener("touchend", () => {
+      touching = false;
+      startX = null;
+    });
   })();
 });
 
-
-// -------------------- Logout Function --------------------
+// Logout
 async function logout() {
   try {
-    // Request backend to destroy the MongoDB session
     const res = await fetch("https://farmstore-1.onrender.com/logout", {
       method: "POST",
-      credentials: "include", // send cookies
+      credentials: "include",
     });
-
-    // Parse JSON safely (some backends send plain text)
-    const data = await res.json().catch(() => ({}));
-
-    if (res.ok && (data.success || data.message || data.status === "logged_out")) {
-      console.log("Logout successful");
-    } else {
-      console.warn("Unexpected logout response:", data);
-    }
-
-    // Redirect user to signin page after logout
-    window.location.href = "/signin.html";
+    await res.json().catch(() => ({}));
   } catch (err) {
     console.error("Logout failed:", err);
-
-    // Still redirect (session likely invalid already)
+  } finally {
     window.location.href = "/signin.html";
   }
 }
 
-// ___________________________________________LOADER_______________________________________________
-
-const loader = document.getElementById("loader");
-
-// ===== Loader Control =====
+/* ==============================
+   LOADER (PAGE LOAD)
+============================== */
 window.addEventListener("load", () => {
-
   if (loader) {
     loader.style.opacity = "0";
     setTimeout(() => {
       loader.style.display = "none";
-    }, 400); // smooth fade
+    }, 400);
   }
 });
+window.addEventListener("pageshow", (event) => {
+  // hide loader if page returned from bfcache
+  if (event.persisted) hideLoader();
+});
 
-
-
-// ✅ Loader functions
-function showLoader() {
-  loader.style.display = "flex";
-}
-
-function hideLoader() {
-  loader.style.display = "none";
-}
-
-// ✅ Switch tab with loader
+/* ==============================
+   TABS (FRUITS / VEGETABLES)
+============================== */
 function switchTab(section) {
   showLoader();
-
   setTimeout(() => {
     if (section === "fruits") {
       fruits_bar.style.display = "flex";
@@ -424,166 +422,112 @@ function switchTab(section) {
       fruits.classList.remove("active");
     }
     hideLoader();
-  }, 1000); // simulate loading delay
+  }, 1000);
 }
+fruits?.addEventListener("click", () => switchTab("fruits"));
+vegetables?.addEventListener("click", () => switchTab("vegetables"));
 
-
-// ✅ Tab events (ONLY call switchTab, not old code)
-fruits.addEventListener("click", () => switchTab("fruits"));
-vegetables.addEventListener("click", () => switchTab("vegetables"));
-
-
-
-// ______________________________________________MAIN________________________________________________
-
-
+// Tab animation (kept as your second logic, unified once)
 document.addEventListener("DOMContentLoaded", () => {
   const fruitsTab = document.querySelector(".fruits");
   const vegetablesTab = document.querySelector(".vegetables");
   const fruitsContent = document.querySelector(".fruits-bar");
   const vegetablesContent = document.querySelector(".vegetables-bar");
 
-  function switchTab(tabName) {
-    const showContent =
-      tabName === "fruits" ? fruitsContent : vegetablesContent;
-    const hideContent =
-      tabName === "fruits" ? vegetablesContent : fruitsContent;
-
-    // Skip if already active
+  function runTabAnimation(tabName) {
+    const showContent = tabName === "fruits" ? fruitsContent : vegetablesContent;
+    const hideContent = tabName === "fruits" ? vegetablesContent : fruitsContent;
     if (showContent.classList.contains("show")) return;
 
-    // Update tab highlight
     fruitsTab.classList.toggle("tab", tabName === "fruits");
     vegetablesTab.classList.toggle("tab", tabName === "vegetables");
 
-    // Determine directions
     const isFruits = tabName === "fruits";
     hideContent.classList.remove("from-left", "from-right", "to-left", "to-right", "show");
     showContent.classList.remove("from-left", "from-right", "to-left", "to-right", "show");
 
-    // Assign correct animations
     hideContent.classList.add(isFruits ? "to-right" : "to-left");
     showContent.classList.add(isFruits ? "from-left" : "from-right");
 
-    // Trigger reflow to reset animation
     void showContent.offsetWidth;
-
-    // Show the new tab
     showContent.classList.add("show");
 
-    // After animation cleanup
     setTimeout(() => {
       hideContent.classList.remove("to-left", "to-right");
       showContent.classList.remove("from-left", "from-right");
     }, 500);
   }
 
-  fruitsTab.addEventListener("click", () => switchTab("fruits"));
-  vegetablesTab.addEventListener("click", () => switchTab("vegetables"));
+  fruitsTab?.addEventListener("click", () => runTabAnimation("fruits"));
+  vegetablesTab?.addEventListener("click", () => runTabAnimation("vegetables"));
 });
 
-
-
-
+/* ==============================
+   LOGIN POPUP + CARDS + CART
+============================== */
 document.addEventListener("DOMContentLoaded", () => {
   const loginPopup = document.getElementById("loginPopup");
   const closePopup = document.getElementById("closePopup");
   const cancelPopup = document.getElementById("cancelPopup");
   const goToLogin = document.getElementById("goToLogin");
 
-  // 🔹 Show popup
   function showLoginPopup(redirectPage) {
     loginPopup.style.display = "flex";
     loginPopup.setAttribute("data-redirect", redirectPage || "");
   }
+  closePopup && (closePopup.onclick = () => (loginPopup.style.display = "none"));
+  cancelPopup && (cancelPopup.onclick = () => (loginPopup.style.display = "none"));
 
-  // 🔹 Close popup
-  closePopup.onclick = cancelPopup.onclick = () => {
-    loginPopup.style.display = "none";
-  };
+  goToLogin &&
+    (goToLogin.onclick = () => {
+      const redirect = loginPopup.getAttribute("data-redirect");
+      window.location.href = redirect ? `signin.html?redirect=${redirect}` : "signin.html";
+    });
 
-  // 🔹 Go to login
-  goToLogin.onclick = () => {
-    const redirect = loginPopup.getAttribute("data-redirect");
-    window.location.href = redirect
-      ? `signin.html?redirect=${redirect}`
-      : "signin.html";
-  };
-
-  // 🔹 Helper: check login status
-  async function isLoggedIn() {
-    try {
-      const res = await fetch("/getUser", { credentials: "include" });
-      const data = await res.json();
-      return data.loggedIn === true;
-    } catch {
-      return false;
-    }
-  }
-
-  // =====================================================
-  // ✅ PRODUCT / CATEGORY CARDS
-  // =====================================================
+  // Product / Category cards
   document.querySelectorAll(".card").forEach((card) => {
     card.addEventListener("click", async (e) => {
       e.preventDefault();
       const targetPage = card.getAttribute("data-link");
-      if (!(await isLoggedIn())) {
+      if (!targetPage) return;
+
+      if (!(await isUserLoggedIn())) {
         showLoginPopup(targetPage);
       } else {
-        window.location.href = targetPage;
+        showLoaderAndGo(targetPage);
       }
     });
   });
 
-  // =====================================================
-  // ✅ CART BUTTON
-  // =====================================================
+  // Cart button
   const cartBtn = document.querySelector(".cart");
   if (cartBtn) {
     cartBtn.addEventListener("click", async (e) => {
       e.preventDefault();
-      if (!(await isLoggedIn())) {
+      if (!(await isUserLoggedIn())) {
         showLoginPopup("cart.html");
       } else {
-        window.location.href = "cart.html";
+        showLoaderAndGo("cart.html");
       }
     });
   }
 
-
-
-  // =====================================================
-  // ✅ CLOSE POPUP ON OUTSIDE CLICK
-  // =====================================================
+  // Close popup on outside click
   window.addEventListener("click", (e) => {
     if (e.target === loginPopup) loginPopup.style.display = "none";
   });
-
-  // =====================================================
-  // ✅ FORCE PAGE REFRESH ON BACK BUTTON (logout safety)
-  // =====================================================
-  window.addEventListener("pageshow", function (event) {
-    if (event.persisted) {
-      window.location.reload();
-    }
-  });
 });
 
-
-
-
-// _______________________________________SEARCH BAR________________________________________________
-// ===== SEARCH BAR & SUGGESTIONS =====
-// --- Search & Suggestions ---
+/* ==============================
+   SEARCH BAR + SUGGESTIONS
+============================== */
 const searchInput = document.querySelector(".search-bar input");
 const suggestionsBox = document.getElementById("searchSuggestions");
 const overlayEl = document.querySelector(".search-overlay");
 const searchBar = document.querySelector(".search-bar");
 
-// Sample items
-const items =
-  [{ name: "Oranges", emoji: "🍊", link: "citrusfruits.html" },
+const items = [
+  { name: "Oranges", emoji: "🍊", link: "citrusfruits.html" },
   { name: "Lemons", emoji: "🍋", link: "citrusfruits.html" },
   { name: "Mosambi", emoji: "🍊", link: "citrusfruits.html" },
   { name: "Mango", emoji: "🥭", link: "tropical.html" },
@@ -606,38 +550,33 @@ const items =
   { name: "Potato", emoji: "🥔", link: "tuber.html" },
   { name: "Garlic", emoji: "🧄", link: "tuber.html" },
   { name: "Onion", emoji: "🧅", link: "tuber.html" },
-  ];
+];
 
 let selectedIndex = -1;
-let isUserLoggedIn = null;
+let cachedLoginState = null;
 
-
-searchBar.addEventListener("click", () => {
+searchBar?.addEventListener("click", () => {
   searchBar.classList.add("scale");
-  searchInput.focus();
+  searchInput?.focus();
 });
-
-
-document.addEventListener('click', (event) => {
-  if (!searchBar.contains(event.target)) {
-    searchBar.classList.remove('scale');
+document.addEventListener("click", (event) => {
+  if (searchBar && !searchBar.contains(event.target)) {
+    searchBar.classList.remove("scale");
   }
 });
 
-// ✅ Check login
 async function checkLogin() {
-  if (isUserLoggedIn !== null) return isUserLoggedIn;
+  if (cachedLoginState !== null) return cachedLoginState;
   try {
     const res = await fetch("/getUser", { credentials: "include" });
     const data = await res.json();
-    isUserLoggedIn = data.loggedIn === true;
+    cachedLoginState = data.loggedIn === true;
   } catch {
-    isUserLoggedIn = false;
+    cachedLoginState = false;
   }
-  return isUserLoggedIn;
+  return cachedLoginState;
 }
 
-// ✅ Login popup logic
 const loginPopup = document.getElementById("loginPopup");
 const goToLogin = document.getElementById("goToLogin");
 const closePopup = document.getElementById("closePopup");
@@ -646,30 +585,27 @@ function showLoginPopup(redirectPage) {
   loginPopup.style.display = "flex";
   loginPopup.setAttribute("data-redirect", redirectPage || "");
 }
+closePopup && (closePopup.onclick = () => (loginPopup.style.display = "none"));
+goToLogin &&
+  (goToLogin.onclick = () => {
+    const redirect = loginPopup.getAttribute("data-redirect");
+    window.location.href = redirect ? `signin.html?redirect=${redirect}` : "signin.html";
+  });
 
-closePopup.onclick = () => loginPopup.style.display = "none";
-goToLogin.onclick = () => {
-  const redirect = loginPopup.getAttribute("data-redirect");
-  window.location.href = redirect
-    ? `signin.html?redirect=${redirect}`
-    : "signin.html";
-};
-
-// ✅ Render suggestions
 function renderSuggestions(filtered) {
-  suggestionsBox.innerHTML = filtered.map((item, i) => {
-    const q = searchInput.value.toLowerCase();
-    const highlighted = item.name.replace(new RegExp(q, "gi"), m => `<mark>${m}</mark>`);
-    return `<div class="suggestion-item" data-link="${item.link}" data-index="${i}">${item.emoji} ${highlighted}</div>`;
-  }).join("");
-
+  suggestionsBox.innerHTML = filtered
+    .map((item, i) => {
+      const q = (searchInput?.value || "").toLowerCase();
+      const highlighted = item.name.replace(new RegExp(q, "gi"), (m) => `<mark>${m}</mark>`);
+      return `<div class="suggestion-item" data-link="${item.link}" data-index="${i}">${item.emoji} ${highlighted}</div>`;
+    })
+    .join("");
   suggestionsBox.classList.add("s-show");
   overlayEl.classList.add("search-show");
 }
 
-// ✅ Input behavior
 let debounceTimer;
-searchInput.addEventListener("input", () => {
+searchInput?.addEventListener("input", () => {
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
     const query = searchInput.value.trim().toLowerCase();
@@ -682,342 +618,32 @@ searchInput.addEventListener("input", () => {
       return;
     }
 
-    const filtered = items.filter(item => item.name.toLowerCase().includes(query));
+    const filtered = items.filter((item) => item.name.toLowerCase().includes(query));
     if (!filtered.length) {
       suggestionsBox.innerHTML = `<p class="no-result">No Items Found ❌</p>`;
       suggestionsBox.classList.add("s-show");
-      overlayEl.classList.add("show");
+      overlayEl.classList.add("search-show");
       return;
     }
     renderSuggestions(filtered);
   }, 120);
 });
 
-// ✅ Click suggestion
-suggestionsBox.addEventListener("click", async (e) => {
+suggestionsBox?.addEventListener("click", async (e) => {
   const item = e.target.closest(".suggestion-item");
   if (!item) return;
-
   const link = item.getAttribute("data-link");
   const loggedIn = await checkLogin();
-
   if (!loggedIn) showLoginPopup(link);
-  else window.location.href = link;
+  else showLoaderAndGo(link);
 
-  // Close suggestions
   suggestionsBox.classList.remove("s-show");
-  overlayEl.classList.remove("show");
+  overlayEl.classList.remove("search-show");
   searchBar.classList.remove("scale");
 });
 
-// ✅ Overlay click closes suggestions
-overlayEl.addEventListener("click", () => {
+overlayEl?.addEventListener("click", () => {
   suggestionsBox.classList.remove("s-show");
-  overlayEl.classList.remove("show");
+  overlayEl.classList.remove("search-show");
   searchBar.classList.remove("scale");
 });
-
-
-
-//=-------------------------------- LOADER --------------------------------------
-document.addEventListener("DOMContentLoaded", async () => {
-  const loader = document.getElementById("loader");
-  const loginPopup = document.getElementById("loginPopup");
-  const cancelPopup = document.getElementById("cancelPopup");
-  const goToLogin = document.getElementById("goToLogin");
-
-  let navigating = false; // Prevent loader from showing on browser back
-
-  // Check login from backend
-  async function isUserLoggedIn() {
-    try {
-      const response = await fetch("/api/check-session", { credentials: "include" });
-      const data = await response.json();
-      return data.loggedIn === true;
-    } catch (err) {
-      console.error("Session check failed:", err);
-      return false;
-    }
-  }
-
-  function showLoaderAndGo(url) {
-    navigating = true;
-    loader.style.display = "flex";
-    setTimeout(() => {
-      window.location.href = url;
-    }, 600);
-  }
-
-  function showLoginPopup() {
-    loginPopup.style.display = "flex";
-  }
-
-  if (cancelPopup) {
-    cancelPopup.addEventListener("click", () => {
-      loginPopup.style.display = "none";
-    });
-  }
-
-  if (goToLogin) {
-    goToLogin.addEventListener("click", () => {
-      loginPopup.style.display = "none";
-      showLoaderAndGo("signin.html");
-    });
-  }
-
-  // Cards
-  const cards = document.querySelectorAll(".card");
-  cards.forEach(card => {
-    card.addEventListener("click", async e => {
-      e.preventDefault();
-      if (navigating) return; // prevent double click spam
-
-      const link = card.getAttribute("data-link");
-      const loggedIn = await isUserLoggedIn();
-      if (loggedIn) {
-        showLoaderAndGo(link);
-      } else {
-        showLoginPopup();
-      }
-    });
-  });
-
-  // Cart
-  const cartIcon = document.querySelector(".cart i");
-  if (cartIcon) {
-    cartIcon.addEventListener("click", async e => {
-      e.preventDefault();
-      if (navigating) return;
-
-      const loggedIn = await isUserLoggedIn();
-      if (loggedIn) {
-        showLoaderAndGo("cart.html");
-      } else {
-        showLoginPopup();
-      }
-    });
-  }
-
-
-
-
-  // Signin / Profile icon logic
-  const signinBtn = document.getElementById("topUserIcon");
-  const sidebar = document.getElementById("sidebar");
-  const sidebarOverlay = document.getElementById("sidebarOverlay");
-
-  if (signinBtn) {
-    signinBtn.addEventListener("click", async e => {
-      e.preventDefault();
-      if (navigating) return;
-
-      const loggedIn = await isUserLoggedIn();
-      if (loggedIn) {
-        // Logged in → open sidebar and focus on Profile
-        sidebar.classList.add("active");
-        sidebarOverlay.classList.add("active");
-
-        // Optional: highlight profile section if you have one
-        const profileSection = document.querySelector('[data-section="profile"]');
-        if (profileSection) {
-          profileSection.classList.add("active");
-        }
-
-        // Optional: hide other sections
-        document.querySelectorAll(".sidebar-section").forEach(sec => {
-          if (sec !== profileSection) sec.classList.remove("active");
-        });
-      } else {
-        // Not logged in → go to signin
-        showLoaderAndGo("signin.html");
-      }
-    });
-  }
-
-
-  // Prevent loader on back navigation
-  window.addEventListener("pageshow", event => {
-    if (event.persisted) {
-      loader.style.display = "none";
-      navigating = false;
-    }
-  });
-});
-
-
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  const loader = document.getElementById("loader");
-  const loginPopup = document.getElementById("loginPopup");
-  const cancelPopup = document.getElementById("cancelPopup");
-  const goToLogin = document.getElementById("goToLogin");
-
-  // ✅ Show Loader
-  function showLoader() {
-    if (loader) {
-      loader.style.display = "flex";
-      loader.style.opacity = "1";
-    }
-  }
-
-  // ✅ Hide Loader
-  function hideLoader() {
-    if (loader) {
-      loader.style.opacity = "0";
-      setTimeout(() => (loader.style.display = "none"), 300);
-    }
-  }
-
-  // ✅ Check Login (MongoDB session)
-  async function isUserLoggedIn() {
-    try {
-      const res = await fetch("/api/check-session", { credentials: "include" });
-      const data = await res.json();
-      return data.loggedIn === true;
-    } catch (err) {
-      console.error("Session check failed:", err);
-      return false;
-    }
-  }
-
-  // ✅ Navigate with Loader
-  function showLoaderAndGo(url) {
-    showLoader();
-    setTimeout(() => {
-      window.location.href = url;
-    }, 600);
-  }
-
-  // ✅ Popup Controls
-  if (cancelPopup) {
-    cancelPopup.addEventListener("click", () => {
-      loginPopup.style.display = "none";
-    });
-  }
-
-  if (goToLogin) {
-    goToLogin.addEventListener("click", () => {
-      loginPopup.style.display = "none";
-      showLoaderAndGo("signin.html");
-    });
-  }
-
-  // ✅ Handle Card Clicks
-  const cards = document.querySelectorAll(".card");
-  cards.forEach(card => {
-    card.addEventListener("click", async () => {
-      const link = card.getAttribute("data-link");
-      if (!link) return;
-
-      const loggedIn = await isUserLoggedIn();
-      if (loggedIn) {
-        showLoaderAndGo(link);
-      } else {
-        loginPopup.style.display = "flex";
-      }
-    });
-  });
-
-  // ✅ Handle Cart Click
-  const cartIcon = document.querySelector(".cart i");
-  if (cartIcon) {
-    cartIcon.addEventListener("click", async () => {
-      const loggedIn = await isUserLoggedIn();
-      if (loggedIn) {
-        showLoaderAndGo("cart.html");
-      } else {
-        loginPopup.style.display = "flex";
-      }
-    });
-  }
-
-  // ✅ Handle Signin Icon
-  const signinBtn = document.getElementById("topUserIcon");
-  if (signinBtn) {
-    signinBtn.addEventListener("click", () => {
-      showLoaderAndGo("signin.html");
-    });
-  }
-
-  // ✅ Hide Loader when page is restored or loaded
-  window.addEventListener("pageshow", () => hideLoader());
-  window.addEventListener("load", () => hideLoader());
-});
-
-
-
-
-// ================== CARD CLICK WITH LOADER FIX ==================
-document.addEventListener("DOMContentLoaded", () => {
-  const loader = document.getElementById("loader");
-  const loginPopup = document.getElementById("loginPopup"); // adjust ID if different
-  const loginBtn = document.getElementById("loginBtn");
-  const productCards = document.querySelectorAll(".product-card");
-
-  // 1️⃣ Show loader immediately while DOM is loading
-  loader.style.display = "flex";
-
-  // 2️⃣ When all resources (images, scripts, etc.) are fully loaded, hide loader
-  window.addEventListener("load", () => {
-    setTimeout(() => {
-      loader.classList.add("hidden"); // fade out smoothly
-    }, 500); // small delay for smoothness
-  });
-
-  // 3️⃣ When login popup appears — hide loader
-  function showLoginPopup() {
-    loader.classList.add("hidden");
-    if (loginPopup) loginPopup.style.display = "block";
-  }
-
-  // 4️⃣ When user logs in — show loader briefly
-  if (loginBtn) {
-    loginBtn.addEventListener("click", () => {
-      loader.classList.remove("hidden");
-      loader.style.display = "flex";
-
-      // simulate load delay (replace with your real login logic)
-      setTimeout(() => {
-        loader.classList.add("hidden");
-        if (loginPopup) loginPopup.style.display = "none";
-        console.log("Login successful, loader hidden");
-      }, 1200);
-    });
-  }
-
-  // 5️⃣ When clicking a product card — show loader
-  productCards.forEach(card => {
-    card.addEventListener("click", () => {
-      loader.classList.remove("hidden");
-      loader.style.display = "flex";
-
-      setTimeout(() => loader.classList.add("hidden"), 1000);
-    });
-  });
-});
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  const loader = document.getElementById("loader");
-  const productCards = document.querySelectorAll(".product-card");
-
-  // show loader on card click
-  productCards.forEach(card => {
-    card.addEventListener("click", e => {
-      // prevent duplicate triggers
-      if (!loader) return;
-
-      // show loader immediately
-      loader.classList.remove("hidden");
-      loader.style.display = "flex";
-
-      // optional: simulate delay if navigation is instant
-      // remove this block if your navigation already takes time
-      setTimeout(() => {
-        loader.classList.add("hidden");
-      }, 1200);
-    });
-  });
-});
-
