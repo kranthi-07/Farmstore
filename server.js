@@ -10,12 +10,14 @@ const app = express();
 app.use(express.json());
 
 // ✅ CORS setup
+
 app.use(
   cors({
-    origin: "http://localhost:5500", // change if frontend runs on different port
-    credentials: true,
+    origin: "https://farmstore-1.onrender.com", // your deployed frontend domain
+    credentials: true, // allows sending cookies
   })
 );
+
 
 // ✅ Connect MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -42,12 +44,20 @@ const User = mongoose.model("User", userSchema);
 // ✅ Sessions
 app.use(
   session({
-    secret: "supersecretkey", // change this in production
+    secret: "supersecretkey",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // true only with HTTPS
+    cookie: {
+      httpOnly: true,
+      secure: true, // ✅ required on HTTPS (your Render domain is HTTPS)
+      sameSite: "none", // ✅ allow cross-site cookies
+      maxAge: 1000 * 60 * 60 * 24 * 7 // (optional) 7 days
+    },
   })
 );
+
+app.set("trust proxy", 1);
+
 
 // 🔹 Signup
 app.post("/signup", async (req, res) => {
@@ -86,6 +96,7 @@ app.post("/signin", async (req, res) => {
 
 // 🔹 Get logged in user
 app.get("/getUser", (req, res) => {
+  console.log("SESSION CHECK:", req.session); // ✅ debug
   if (req.session.user) {
     res.json({
       loggedIn: true,
