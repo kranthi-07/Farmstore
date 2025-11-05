@@ -1,3 +1,21 @@
+const quantity = document.querySelector('.qty');
+const quantity_1kg = document.querySelector('.1kg');
+const quantity_500g = document.querySelector('.500g');
+
+
+
+
+quantity_1kg.addEventListener("click",()=>{
+  quantity_1kg.classList.add('click');
+  quantity_500g.classList.remove('click');
+});
+
+
+quantity_1kg.addEventListener("click",()=>{
+  quantity_1kg.classList.remove('click');
+  quantity_500g.classList.add('click');
+});
+
 // --- CART COUNT FUNCTION ---
 async function updateCartCount() {
   try {
@@ -13,6 +31,12 @@ async function updateCartCount() {
     console.error("Cart count fetch failed:", err);
   }
 }
+
+
+
+
+
+
 
 // --- ITEM DATA ---
 const itemData = {

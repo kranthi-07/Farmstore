@@ -1,3 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+
+
+
 * {
     padding: 0;
     margin: 0;
@@ -32,7 +37,7 @@ header {
     width: 100%;
     margin: 0px auto;
     display: flex;
-    /* align-items: center; */
+    align-items: center;
     flex-wrap: wrap;
     justify-content: space-around;
 }
@@ -43,11 +48,14 @@ header {
     text-align: center;
     cursor: pointer;
     flex-direction: column;
-    max-width: 45%;
+    /* max-width: 45%;   */
     font-size: 18px;
+    max-height: fit-content;
     border-radius: 10px;
     padding:5px;
 }
+
+
 
 
 .item p {
@@ -57,6 +65,42 @@ header {
 .item img {
     width: 100px;
     border-radius: 10px;
+}
+
+
+.matter{
+    font-family:'Lora', Times, serif;
+    padding:10px;
+    font-size: 14px;
+}
+
+
+
+strike{
+    font-size: 10px;
+}
+
+
+
+.qty{
+    display: flex;
+    font-size: 12px;
+    justify-content: space-between;
+}
+
+.qty div{
+    background-color:#a5ff80;
+    width:40px;
+    padding:3px 5px;
+    border-radius: 5px;
+    margin:5px 0;
+    text-align: center;
+}
+
+
+.click{
+    background-color: green;
+    color:#fff;
 }
 
 
@@ -97,9 +141,11 @@ header {
 
 .add {
     cursor: pointer;
-    background-color: rgba(144, 238, 144, 0.68);
+    background-color:green;
+    color:#fff;
+    font-size: 20px;
     max-width: fit-content;
-    padding: 8px;
+    padding: 6px;
     border: 1px solid rgb(63, 172, 63);
     border-radius: 7px;
 }

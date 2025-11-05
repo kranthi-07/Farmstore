@@ -11,8 +11,7 @@
         .item {
             border: 2px solid rgb(181, 122, 46);
             box-shadow: 0 0 5px rgb(229, 229, 229);
-            background: linear-gradient(to bottom, white, white, rgb(247, 229, 197));
-            margin-bottom: 20px;
+            background: linear-gradient(to bottom, white, white, rgb(254, 244, 226));
         }
     </style>
 </head>
@@ -52,9 +51,26 @@
     <div class="items flex">
 
 
-        <div class="orange item" onclick="goToItem('Orange','₹25','Juicy','Assets/orange.png')">
-            <img src="assets/orange.png" alt="">
-            <p>Orange</p>
+        <div class="orange">
+
+            <div class="item" onclick="goToItem('Orange','₹25','Juicy','Assets/orange.png')">
+                <img src="assets/orange.png" alt="">
+                <p>Orange</p>
+            </div>
+
+            <div class="matter">
+                <div style="display: flex; justify-content: space-between;padding:0 3px;align-items: center;">
+                    <p><b>43</b> <strike>54</strike></p>
+                    <div class="add"><i class='bx bx-plus'></i></div>
+                </div>
+                <p style="text-align: center;">Fresh oranges</p>
+
+                <div class="qty">
+                    <div class="1kg">1kg</div>
+                    <div class="500g">500g</div>
+                </div>
+            </div>
+
         </div>
 
 
