@@ -63,14 +63,14 @@
 
     .item-info h1 {
       font-size: 2rem;
-      padding-bottom:10px;
+      padding-bottom: 10px;
     }
 
-    .item-info .price{
-      padding:10px;
+    .item-info .price {
+      padding: 10px;
       font-size: 20px;
-      color:green;
-      font-weight:bold;
+      color: green;
+      font-weight: bold;
     }
 
     .labels {
@@ -90,7 +90,7 @@
     }
 
     .desc {
-      width:100%;
+      width: 100%;
       text-align: center;
       font-size: 1.2rem;
       color: #444;
@@ -257,6 +257,76 @@
         transform: rotate(360deg);
       }
     }
+
+
+
+
+    /* --- Apple-style toast popup --- */
+    .toast {
+      position: fixed;
+      bottom: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      border-radius: 18px;
+      padding: 14px 26px;
+      min-width: 220px;
+      max-width: 90%;
+      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      font-weight: 500;
+      color: #111;
+      opacity: 0;
+      transition: all 0.4s ease;
+      z-index: 9999;
+    }
+
+    .toast.show {
+      bottom: 40px;
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-left: 4px solid #28c76f;
+    }
+
+    .toast.error {
+      border-left: 4px solid #ea5455;
+    }
+
+    .toast.warn {
+      border-left: 4px solid #ff9f43;
+    }
+
+
+
+    .toast.show {
+      bottom: 40px;
+      opacity: 1;
+      animation: bounceIn 0.5s ease;
+    }
+
+    @keyframes bounceIn {
+      0% {
+        transform: translate(-50%, 100%);
+        opacity: 0;
+      }
+
+      60% {
+        transform: translate(-50%, -10%);
+        opacity: 1;
+      }
+
+      80% {
+        transform: translate(-50%, 5%);
+      }
+
+      100% {
+        transform: translate(-50%, 0);
+      }
+    }
   </style>
 </head>
 
@@ -319,32 +389,76 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const name = decodeURIComponent(params.get("name") || "");
-    const priceStr = decodeURIComponent(params.get("price") || "₹0");
-    const desc = decodeURIComponent(params.get("desc") || "No description.");
-    const image = decodeURIComponent(params.get("image") || "");
-    const price = parseInt(String(priceStr).replace("₹", "").trim()) || 0;
 
+    // --- Extract from URL ---
+    const name = decodeURIComponent(params.get("name") || "");
+    const desc = decodeURIComponent(params.get("desc") || "");
+    const image = decodeURIComponent(params.get("image") || "");
+    const price1kg = parseInt(params.get("price1kg")) || 0;
+    const price500g = parseInt(params.get("price500g")) || 0;
+
+    // --- Fill UI ---
     document.getElementById("itemName").textContent = name;
-    document.getElementById("itemPrice").textContent = `₹${price}`;
-    document.getElementById("itemDesc").textContent = desc;
-    document.getElementById("itemImage").src = image || 'Assets/placeholder.png';
+    document.getElementById("itemDesc").textContent = desc || "No description available.";
+    document.getElementById("itemImage").src = image || "assets/placeholder.png";
+
+    // ✅ Dynamically inject radio options
+    const labelsContainer = document.querySelector(".labels");
+    labelsContainer.innerHTML = "";
+
+    if (price1kg > 0) {
+      labelsContainer.innerHTML += `
+      <label>
+        <input type="radio" name="fruit1" value="${price1kg}" data-qty="1kg">
+        <span class="custom-radio"></span>
+        <div class="cont"><p>1 kg -</p><p>&ensp;₹${price1kg}</p></div>
+      </label>
+    `;
+    }
+
+    if (price500g > 0) {
+      labelsContainer.innerHTML += `
+      <label>
+        <input type="radio" name="fruit1" value="${price500g}" data-qty="500g">
+        <span class="custom-radio"></span>
+        <div class="cont"><p>1/2 kg -</p><p>&ensp;₹${price500g}</p></div>
+      </label>
+    `;
+    }
 
     const cartBtn = document.getElementById("cartBtn");
     const pageLoader = document.getElementById("pageLoader");
 
-    function showLoader() {
-      pageLoader.classList.remove("hidden");
-    }
-    function hideLoader() {
-      pageLoader.classList.add("hidden");
+    /* --- Loader functions --- */
+    function showLoader() { pageLoader.classList.remove("hidden"); }
+    function hideLoader() { pageLoader.classList.add("hidden"); }
+
+    /* --- Toast function (Apple-style) --- */
+    function showToast(message, type = "info") {
+      // Remove existing toast if visible
+      const oldToast = document.querySelector(".toast");
+      if (oldToast) oldToast.remove();
+
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      // Slide up
+      setTimeout(() => toast.classList.add("show"), 50);
+
+      // Auto hide after 2.5s
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 400);
+      }, 2500);
     }
 
-    // ✅ Add to Cart function
+    /* --- Add to Cart --- */
     async function toggleCart() {
       const selected = document.querySelector('input[name="fruit1"]:checked');
       if (!selected) {
-        alert("Please select a quantity.");
+        showToast("Please select a quantity ⚠️", "warn");
         return;
       }
 
@@ -352,10 +466,10 @@
       const selectedQty = selected.dataset.qty;
 
       const cartItem = {
-        name: name + " (" + selectedQty + ")",
+        name: `${name} (${selectedQty})`,
         price: selectedPrice,
         quantity: 1,
-        image: image
+        image
       };
 
       try {
@@ -367,52 +481,28 @@
           body: JSON.stringify(cartItem)
         });
 
-        if (res.ok) {
-          cartBtn.textContent = "Remove from Cart";
-          cartBtn.style.background = "#38b725";
-          cartBtn.onclick = removeFromCart;
+        const data = await res.json();
+        if (data.success) {
+          showToast(`${name} (${selectedQty}) added to cart 🛒`, "success");
         } else {
-          alert("Failed to add item.");
+          showToast(data.message || "Failed to add item ❌", "error");
         }
       } catch (err) {
         console.error(err);
-        alert("Error adding item to cart.");
+        showToast("Error adding item ❌", "error");
       } finally {
         hideLoader();
       }
     }
 
-    async function removeFromCart() {
-      try {
-        showLoader();
-        const res = await fetch("https://farmstore-1.onrender.com/cart/remove", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ name })
-        });
-
-        if (res.ok) {
-          cartBtn.textContent = "Add to Cart";
-          cartBtn.style.background = "green";
-          cartBtn.onclick = toggleCart;
-        } else {
-          alert("Failed to remove item.");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Error removing item.");
-      } finally {
-        hideLoader();
-      }
-    }
-
-    // ✅ Init
+    /* --- Init --- */
     window.addEventListener("load", () => {
       hideLoader();
       cartBtn.onclick = toggleCart;
     });
   </script>
+
+
 </body>
 
 </html>

@@ -1,4 +1,33 @@
 /* ==============================
+   ITEM DATA (used for /cart/add)
+============================== */
+const itemData = {
+  Orange: { price: 25, desc: "Juicy Fruit", image: "assets/orange.png", prices: { "1kg": 43, "500g": 25 } },
+  Lemon: { price: 25, desc: "Juicy Fruit", image: "assets/lemon.png", prices: { "1kg": 45, "500g": 25 } },
+  Mosambi: { price: 25, desc: "Juicy Fruit", image: "assets/mosambi.png", prices: { "1kg": 53, "500g": 25 } },
+  Mango: { price: 25, desc: "Juicy Fruit", image: "assets/mango.png", prices: { "1kg": 97, "500g": 56 } },
+  Banana: { price: 25, desc: "Juicy Fruit", image: "assets/banana.png", prices: { "1kg": 22, "500g": 34 } },
+  Papaya: { price: 25, desc: "Juicy Fruit", image: "assets/papaya.png", prices: { "1kg": 43, "500g": 12 } },
+  Guava: { price: 25, desc: "Juicy Fruit", image: "assets/guava.png", prices: { "1kg": 50, "500g": 25 } },
+  Strawberry: { price: 25, desc: "Juicy Fruit", image: "assets/strawberry.png", prices: { "1kg": 100, "500g": 57 } },
+  Coconut: { price: 25, desc: "Juicy Fruit", image: "assets/coconut.png", prices: { "1kg": 80, "500g": 40 } },
+  Jackfruit: { price: 25, desc: "Juicy Fruit", image: "assets/jackfruit.png", prices: { "1kg": 43, "500g": 25 } },
+  Watermelon: { price: 25, desc: "Juicy Fruit", image: "assets/watermelon.png", prices: { "1kg": 43, "500g": 25 } },
+  Muskmelon: { price: 25, desc: "Juicy Fruit", image: "assets/muskmelon.png", prices: { "1kg": 43, "500g": 25 } },
+  Spinach: { price: 25, desc: "Leafy Vegetable", image: "assets/spinach.png", prices: { "1kg": 43, "500g": 25 } },
+  Coriander: { price: 25, desc: "Leafy Vegetable", image: "assets/coriander.png", prices: { "1kg": 43, "500g": 25 } },
+  Carrot: { price: 25, desc: "Vegetable", image: "assets/carrot.png", prices: { "1kg": 43, "500g": 25 } },
+  Beetroot: { price: 25, desc: "Vegetable", image: "assets/beetroot.png", prices: { "1kg": 43, "500g": 25 } },
+  Tomato: { price: 25, desc: "Vegetable", image: "assets/tomato.png", prices: { "1kg": 43, "500g": 25 } },
+  Brinjal: { price: 25, desc: "Vegetable", image: "assets/brinjal.png", prices: { "1kg": 43, "500g": 25 } },
+  Ladysfinger: { price: 25, desc: "Vegetable", image: "assets/ladysfinger.jpeg", prices: { "1kg": 43, "500g": 25 } },
+  Potato: { price: 25, desc: "Vegetable", image: "assets/potato.png", prices: { "1kg": 43, "500g": 25 } },
+  Onion: { price: 25, desc: "Vegetable", image: "assets/onion.png", prices: { "1kg": 43, "500g": 25 } },
+  Garlic: { price: 25, desc: "Vegetable", image: "assets/garlic.png", prices: { "1kg": 43, "500g": 25 } },
+};
+
+
+/* ==============================
    ITEM PAGE (Apple-style UX + Cart)
 ============================== */
 
@@ -67,33 +96,6 @@ async function updateCartCount() {
   }
 }
 
-/* ==============================
-   ITEM DATA (used for /cart/add)
-============================== */
-const itemData = {
-  Orange: { price: 25, desc: "Juicy Fruit", image: "assets/orange.png" },
-  Lemon: { price: 25, desc: "Juicy Fruit", image: "assets/lemon.png" },
-  Mosambi: { price: 25, desc: "Juicy Fruit", image: "assets/mosambi.png" },
-  Mango: { price: 25, desc: "Juicy Fruit", image: "assets/mango.png" },
-  Banana: { price: 25, desc: "Juicy Fruit", image: "assets/banana.png" },
-  Papaya: { price: 25, desc: "Juicy Fruit", image: "assets/papaya.png" },
-  Guava: { price: 25, desc: "Juicy Fruit", image: "assets/guava.png" },
-  Strawberry: { price: 25, desc: "Juicy Fruit", image: "assets/strawberry.png" },
-  Coconut: { price: 25, desc: "Juicy Fruit", image: "assets/coconut.png" },
-  Jackfruit: { price: 25, desc: "Juicy Fruit", image: "assets/jackfruit.png" },
-  Watermelon: { price: 25, desc: "Juicy Fruit", image: "assets/watermelon.png" },
-  Muskmelon: { price: 25, desc: "Juicy Fruit", image: "assets/muskmelon.png" },
-  Spinach: { price: 25, desc: "Leafy Vegetable", image: "assets/spinach.png" },
-  Coriander: { price: 25, desc: "Leafy Vegetable", image: "assets/coriander.png" },
-  Carrot: { price: 25, desc: "Vegetable", image: "assets/carrot.png" },
-  Beetroot: { price: 25, desc: "Vegetable", image: "assets/beetroot.png" },
-  Tomato: { price: 25, desc: "Vegetable", image: "assets/tomato.png" },
-  Brinjal: { price: 25, desc: "Vegetable", image: "assets/brinjal.png" },
-  Ladysfinger: { price: 25, desc: "Vegetable", image: "assets/ladysfinger.jpeg" },
-  Potato: { price: 25, desc: "Vegetable", image: "assets/potato.png" },
-  Onion: { price: 25, desc: "Vegetable", image: "assets/onion.png" },
-  Garlic: { price: 25, desc: "Vegetable", image: "assets/garlic.png" },
-};
 
 /* ==============================
    ADD TO CART (qty-aware)
@@ -246,13 +248,15 @@ window.addEventListener("load", () => {
 ============================== */
 function goToItem(name) {
   const data = itemData[name];
-  if (!data) return showToast("Item details not found ❌", "error");
+  if (!data) return alert("Item details not found!");
 
+  // Construct full data into URL parameters
   const params = new URLSearchParams({
-    name,
-    price: `₹${data.price}`,
-    desc: data.desc,
+    name: data.name || name,
+    desc: data.desc || "Fresh item",
     image: data.image,
+    price1kg: data.prices?.["1kg"] || data.price || 0,
+    price500g: data.prices?.["500g"] || 0
   });
 
   const loader = document.getElementById("loader");
@@ -265,6 +269,7 @@ function goToItem(name) {
     window.location.assign(`item.html?${params.toString()}`);
   }, 400);
 }
+
 
 /* ==============================
    BACK BUTTON (if present)
@@ -290,7 +295,7 @@ window.addEventListener("pageshow", (event) => {
   const loader = document.getElementById("loader");
   if (event.persisted && loader) loader.style.display = "none";
 });
- 
+
 
 
 
