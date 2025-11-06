@@ -98,6 +98,9 @@ const itemData = {
 /* ==============================
    ADD TO CART
 ============================== */
+/* ==============================
+   ADD TO CART (Fixed with Quantity)
+============================== */
 async function addToCart(itemName) {
   const loader = document.getElementById("loader");
   const item = itemData[itemName];
@@ -111,22 +114,26 @@ async function addToCart(itemName) {
     return showToast("Please select a quantity ⚠️", "warn");
   }
 
+  // 👇 Quantity based on selection
   const quantity =
-    qtySelected.classList.contains("qty-1kg") ? 1 : 0.5; // 1kg or 500g
+    qtySelected.classList.contains("qty-1kg") ? 1 : 0.5;
 
   if (loader) loader.style.display = "flex";
 
   try {
-    // Check login
-    const sessionRes = await fetch(`${BASE_URL}/getUser`, { credentials: "include" });
+    // ✅ Check login session
+    const sessionRes = await fetch(`${BASE_URL}/getUser`, {
+      credentials: "include",
+    });
     const session = await sessionRes.json();
+
     if (!session.loggedIn) {
       showToast("Please sign in to continue 🔒", "warn");
       setTimeout(() => (window.location.href = "signin.html"), 1800);
       return;
     }
 
-    // Add to cart
+    // ✅ Add to cart
     const res = await fetch(`${BASE_URL}/cart/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -142,7 +149,7 @@ async function addToCart(itemName) {
     const data = await res.json();
     if (data.success) {
       updateCartCount();
-      showToast(`${itemName} added to cart 🛒`, "success");
+      showToast(`${itemName} (${quantity === 1 ? "1kg" : "500g"}) added 🛒`, "success");
     } else {
       showToast(data.message || "Failed to add ❌", "error");
     }

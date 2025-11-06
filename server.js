@@ -109,6 +109,7 @@ app.get("/getUser", (req, res) => {
 });
 
 // 🔹 Add item to cart
+// 🔹 Add item to cart (with quantity merge)
 app.post("/cart/add", async (req, res) => {
   try {
     if (!req.session.user) {
@@ -116,19 +117,29 @@ app.post("/cart/add", async (req, res) => {
     }
 
     const { name, price, quantity, image } = req.body;
+    const user = await User.findById(req.session.user.id);
+    if (!user) return res.json({ success: false, message: "User not found" });
 
-    await User.updateOne(
-      { _id: req.session.user.id },
-      { $push: { cart: { name, price, quantity, image } } }
-    );
+    // Check if item already exists in cart
+    const existingItem = user.cart.find(i => i.name === name);
 
+    if (existingItem) {
+      existingItem.quantity += quantity; // increment quantity
+    } else {
+      user.cart.push({ name, price, quantity, image });
+    }
+
+    await user.save();
     res.json({ success: true, message: "Item added to cart" });
+
   } catch (err) {
+    console.error("Error adding to cart:", err);
     res
       .status(500)
       .json({ success: false, message: "Error saving cart", error: err });
   }
 });
+
 
 
 // 🔹 Get user cart
