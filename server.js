@@ -109,71 +109,40 @@ app.get("/getUser", (req, res) => {
 });
 
 // 🔹 Add item to cart
-/* ==============================
-   ADD TO CART (Fixed with Quantity)
-============================== */
-async function addToCart(itemName) {
-  const loader = document.getElementById("loader");
-  const item = itemData[itemName];
-  if (!item) return showToast("Item not found ❌", "error");
-
-  const qtySelected =
-    document.querySelector(".qty-1kg.click") ||
-    document.querySelector(".qty-500g.click");
-
-  if (!qtySelected) {
-    return showToast("Please select a quantity ⚠️", "warn");
-  }
-
-  // 👇 Quantity based on selection
-  const quantity =
-    qtySelected.classList.contains("qty-1kg") ? 1 : 0.5;
-
-  if (loader) loader.style.display = "flex";
-
+// 🔹 Add item to cart (merge quantity if exists) + number safety
+app.post("/cart/add", async (req, res) => {
   try {
-    // ✅ Check login session
-    const sessionRes = await fetch(`${BASE_URL}/getUser`, {
-      credentials: "include",
-    });
-    const session = await sessionRes.json();
-
-    if (!session.loggedIn) {
-      showToast("Please sign in to continue 🔒", "warn");
-      setTimeout(() => (window.location.href = "signin.html"), 1800);
-      return;
+    if (!req.session.user) {
+      return res.json({ success: false, message: "Not logged in" });
     }
 
-    // ✅ Add to cart
-    const res = await fetch(`${BASE_URL}/cart/add`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        name: itemName,
-        price: item.price,
-        quantity,
-        image: item.image,
-      }),
-    });
+    const { name, price, quantity, image } = req.body;
 
-    const data = await res.json();
-    if (data.success) {
-      updateCartCount();
-      showToast(`${itemName} (${quantity === 1 ? "1kg" : "500g"}) added 🛒`, "success");
+    // Coerce numeric fields
+    const _price = Number(price);
+    const _qty = Number(quantity);
+
+    if (!name || isNaN(_price) || isNaN(_qty) || _qty <= 0) {
+      return res.status(400).json({ success: false, message: "Invalid payload" });
+    }
+
+    const user = await User.findById(req.session.user.id);
+    if (!user) return res.json({ success: false, message: "User not found" });
+
+    const existing = user.cart.find(i => i.name === name);
+    if (existing) {
+      existing.quantity += _qty;
     } else {
-      showToast(data.message || "Failed to add ❌", "error");
+      user.cart.push({ name, price: _price, quantity: _qty, image });
     }
+
+    await user.save();
+    res.json({ success: true, message: "Item added to cart" });
   } catch (err) {
-    console.error("Add to cart error:", err);
-    showToast("Something went wrong ❌", "error");
-  } finally {
-    if (loader) {
-      loader.style.opacity = "0";
-      setTimeout(() => (loader.style.display = "none"), 300);
-    }
+    console.error("Error adding to cart:", err);
+    res.status(500).json({ success: false, message: "Error saving cart" });
   }
-}
+});
 
 
 

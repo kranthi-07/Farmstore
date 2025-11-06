@@ -98,17 +98,27 @@ const itemData = {
 /* ==============================
    ADD TO CART (qty-aware)
 ============================== */
+/* ==============================
+   ADD TO CART (qty-aware + better errors)
+============================== */
 async function addToCart(itemName) {
   const loader = document.getElementById("loader");
-  const item = itemData[itemName];
-  if (!item) return showToast("Item not found ❌", "error");
 
+  // 1) Validate item exists in your map
+  const item = itemData[itemName];
+  if (!item) {
+    showToast(`Item not found: ${itemName} ❌`, "error");
+    return;
+  }
+
+  // 2) Validate quantity selection
   const qtySelected =
     document.querySelector(".qty-1kg.click") ||
     document.querySelector(".qty-500g.click");
 
   if (!qtySelected) {
-    return showToast("Please select a quantity ⚠️", "warn");
+    showToast("Please select a quantity ⚠️", "warn");
+    return;
   }
 
   const quantity = qtySelected.classList.contains("qty-1kg") ? 1 : 0.5;
@@ -116,38 +126,48 @@ async function addToCart(itemName) {
   if (loader) loader.style.display = "flex";
 
   try {
-    // session check
+    // 3) Must be logged in
     const sessionRes = await fetch(`${BASE_URL}/getUser`, { credentials: "include" });
     const session = await sessionRes.json();
+
     if (!session.loggedIn) {
       showToast("Please sign in to continue 🔒", "warn");
       setTimeout(() => (window.location.href = "signin.html"), 1200);
       return;
     }
 
-    // add to cart
+    // 4) Send add-to-cart
     const res = await fetch(`${BASE_URL}/cart/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
         name: itemName,
-        price: item.price,
-        quantity,
+        price: Number(item.price),
+        quantity: Number(quantity),
         image: item.image,
       }),
     });
 
-    const data = await res.json();
-    if (data.success) {
-      updateCartCount();
-      showToast(`${itemName} (${quantity === 1 ? "1kg" : "500g"}) added 🛒`, "success");
-    } else {
-      showToast(data.message || "Failed to add ❌", "error");
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = { message: "Non-JSON response" };
     }
+
+    if (!res.ok || !data.success) {
+      console.error("Add to cart failed:", { status: res.status, data });
+      showToast(data.message || `Add failed (${res.status}) ❌`, "error");
+      return;
+    }
+
+    // 5) Success
+    updateCartCount();
+    showToast(`${itemName} (${quantity === 1 ? "1kg" : "500g"}) added 🛒`, "success");
   } catch (err) {
     console.error("Add to cart error:", err);
-    showToast("Something went wrong ❌", "error");
+    showToast("Network/server error ❌", "error");
   } finally {
     if (loader) {
       loader.style.opacity = "0";
@@ -157,31 +177,45 @@ async function addToCart(itemName) {
 }
 
 /* ==============================
-   BIND “+” ICONS (and stop bubbling)
+   BIND “+” ICONS (name-safe)
 ============================== */
 function initAddToCartListeners() {
-  // support click on .add *or* the inner <i>
-  document.querySelectorAll(".add").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
+  // Bind to both the .add div and its inner <i>
+  const addButtons = document.querySelectorAll(".add, .add i");
+  addButtons.forEach(el => {
+    el.addEventListener("click", (e) => {
       e.stopPropagation();
-      const card = e.currentTarget.closest(".orange, .item, .lemon, .mosambi");
-      // Fallback: find the nearest product title <p> inside the card
-      const name = card?.querySelector("p")?.textContent.trim();
-      if (name) addToCart(name);
-    });
-  });
 
-  // also catch clicks on <i> specifically (in case of event target differences)
-  document.querySelectorAll(".add i").forEach((icon) => {
-    icon.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const card = e.currentTarget.closest(".orange, .item, .lemon, .mosambi");
-      const name = card?.querySelector("p")?.textContent.trim();
-      if (name) addToCart(name);
+      // Find the *card root* (supports your Orange wrapper + simple .item cards)
+      const cardRoot = e.target.closest(".orange, .item, .lemon, .mosambi");
+      if (!cardRoot) {
+        showToast("Could not locate item card ❌", "error");
+        return;
+      }
+
+      // Always get the title from the **.item p** (not price/desc)
+      // 1) Prefer `.item p` inside the card
+      let nameEl = cardRoot.querySelector(".item p");
+      // 2) Fallbacks if structure differs
+      if (!nameEl) nameEl = cardRoot.querySelector("p.item-name, .name, .item-title");
+      if (!nameEl) {
+        // as last resort, pick the <p> inside `.item`, else first <p> that contains only letters
+        const candidates = [...cardRoot.querySelectorAll("p")];
+        nameEl = candidates.find(p => /^[A-Za-z][A-Za-z\s\(\)\.-]*$/.test(p.textContent.trim())) || candidates[0];
+      }
+
+      const rawName = nameEl?.textContent || "";
+      const itemName = rawName.split("\n")[0].trim();
+
+      if (!itemName) {
+        showToast("Item name missing ❌", "error");
+        return;
+      }
+
+      addToCart(itemName);
     });
   });
 }
-
 /* ==============================
    CART ICON → cart.html
 ============================== */
@@ -257,3 +291,9 @@ window.addEventListener("pageshow", (event) => {
   if (event.persisted && loader) loader.style.display = "none";
 });
  
+
+
+
+function goHome() {
+  window.location.href = "index.html";
+}
