@@ -1,5 +1,5 @@
 /* ==============================
-   ITEM PAGE (Apple-style UX)
+   ITEM PAGE (Apple-style UX + Cart)
 ============================== */
 
 const BASE_URL = "https://farmstore-1.onrender.com";
@@ -12,40 +12,39 @@ document.addEventListener("DOMContentLoaded", () => {
   const qty500g = document.querySelector(".qty-500g");
 
   if (qty1kg && qty500g) {
-    qty1kg.addEventListener("click", () => {
+    qty1kg.addEventListener("click", (e) => {
+      e.stopPropagation();
       qty1kg.classList.add("click");
       qty500g.classList.remove("click");
     });
 
-    qty500g.addEventListener("click", () => {
+    qty500g.addEventListener("click", (e) => {
+      e.stopPropagation();
       qty500g.classList.add("click");
       qty1kg.classList.remove("click");
     });
   }
 
-  // Initialize cart count
+  // init
   updateCartCount();
   initAddToCartListeners();
+  initCartIconNavigation();
 });
 
 /* ==============================
    TOAST (Apple-like)
 ============================== */
 function showToast(message, type = "info") {
-  // Remove existing toast if any
   const oldToast = document.querySelector(".toast");
   if (oldToast) oldToast.remove();
 
-  // Create toast
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
   toast.innerHTML = `<p>${message}</p>`;
   document.body.appendChild(toast);
 
-  // Animate in
-  setTimeout(() => toast.classList.add("show"), 50);
+  setTimeout(() => toast.classList.add("show"), 50); // slide up
 
-  // Auto-hide after 2.5s
   setTimeout(() => {
     toast.classList.remove("show");
     setTimeout(() => toast.remove(), 400);
@@ -53,22 +52,23 @@ function showToast(message, type = "info") {
 }
 
 /* ==============================
-   CART COUNT
+   CART COUNT (header .total)
 ============================== */
 async function updateCartCount() {
   try {
     const res = await fetch(`${BASE_URL}/cart`, { credentials: "include" });
     const data = await res.json();
     if (data.success) {
-      document.querySelector(".total").textContent = data.cart.length;
+      const totalEl = document.querySelector(".total");
+      if (totalEl) totalEl.textContent = data.cart.length;
     }
   } catch {
-    console.warn("Cart count fetch failed");
+    // silent fail
   }
 }
 
 /* ==============================
-   ITEM DATA
+   ITEM DATA (used for /cart/add)
 ============================== */
 const itemData = {
   Orange: { price: 25, desc: "Juicy Fruit", image: "assets/orange.png" },
@@ -96,10 +96,7 @@ const itemData = {
 };
 
 /* ==============================
-   ADD TO CART
-============================== */
-/* ==============================
-   ADD TO CART (Fixed with Quantity)
+   ADD TO CART (qty-aware)
 ============================== */
 async function addToCart(itemName) {
   const loader = document.getElementById("loader");
@@ -114,26 +111,21 @@ async function addToCart(itemName) {
     return showToast("Please select a quantity ⚠️", "warn");
   }
 
-  // 👇 Quantity based on selection
-  const quantity =
-    qtySelected.classList.contains("qty-1kg") ? 1 : 0.5;
+  const quantity = qtySelected.classList.contains("qty-1kg") ? 1 : 0.5;
 
   if (loader) loader.style.display = "flex";
 
   try {
-    // ✅ Check login session
-    const sessionRes = await fetch(`${BASE_URL}/getUser`, {
-      credentials: "include",
-    });
+    // session check
+    const sessionRes = await fetch(`${BASE_URL}/getUser`, { credentials: "include" });
     const session = await sessionRes.json();
-
     if (!session.loggedIn) {
       showToast("Please sign in to continue 🔒", "warn");
-      setTimeout(() => (window.location.href = "signin.html"), 1800);
+      setTimeout(() => (window.location.href = "signin.html"), 1200);
       return;
     }
 
-    // ✅ Add to cart
+    // add to cart
     const res = await fetch(`${BASE_URL}/cart/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -165,21 +157,47 @@ async function addToCart(itemName) {
 }
 
 /* ==============================
-   INIT ADD BUTTONS
+   BIND “+” ICONS (and stop bubbling)
 ============================== */
 function initAddToCartListeners() {
-  document.querySelectorAll(".add i").forEach((btn) => {
+  // support click on .add *or* the inner <i>
+  document.querySelectorAll(".add").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const parent = e.target.closest(".item");
-      const name = parent?.querySelector("p")?.textContent.trim();
+      const card = e.currentTarget.closest(".orange, .item, .lemon, .mosambi");
+      // Fallback: find the nearest product title <p> inside the card
+      const name = card?.querySelector("p")?.textContent.trim();
+      if (name) addToCart(name);
+    });
+  });
+
+  // also catch clicks on <i> specifically (in case of event target differences)
+  document.querySelectorAll(".add i").forEach((icon) => {
+    icon.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const card = e.currentTarget.closest(".orange, .item, .lemon, .mosambi");
+      const name = card?.querySelector("p")?.textContent.trim();
       if (name) addToCart(name);
     });
   });
 }
 
 /* ==============================
-   PAGE LOADERS
+   CART ICON → cart.html
+============================== */
+function initCartIconNavigation() {
+  const cart = document.querySelector(".cart");
+  if (!cart) return;
+  cart.addEventListener("click", (e) => {
+    e.preventDefault();
+    const loader = document.getElementById("loader");
+    if (loader) loader.style.display = "flex";
+    setTimeout(() => (window.location.href = "cart.html"), 400);
+  });
+}
+
+/* ==============================
+   PAGE LOADER (on load)
 ============================== */
 window.addEventListener("load", () => {
   const loader = document.getElementById("loader");
@@ -190,7 +208,7 @@ window.addEventListener("load", () => {
 });
 
 /* ==============================
-   GO TO ITEM DETAILS
+   GO TO ITEM DETAILS (keeps your behavior)
 ============================== */
 function goToItem(name) {
   const data = itemData[name];
@@ -215,7 +233,7 @@ function goToItem(name) {
 }
 
 /* ==============================
-   BACK BUTTON
+   BACK BUTTON (if present)
 ============================== */
 document.addEventListener("DOMContentLoaded", () => {
   const backBtn = document.getElementById("backBtn");
@@ -238,3 +256,4 @@ window.addEventListener("pageshow", (event) => {
   const loader = document.getElementById("loader");
   if (event.persisted && loader) loader.style.display = "none";
 });
+ 

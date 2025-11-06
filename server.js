@@ -109,36 +109,71 @@ app.get("/getUser", (req, res) => {
 });
 
 // 🔹 Add item to cart
-// 🔹 Add item to cart (with quantity merge)
-app.post("/cart/add", async (req, res) => {
-  try {
-    if (!req.session.user) {
-      return res.json({ success: false, message: "Not logged in" });
-    }
+/* ==============================
+   ADD TO CART (Fixed with Quantity)
+============================== */
+async function addToCart(itemName) {
+  const loader = document.getElementById("loader");
+  const item = itemData[itemName];
+  if (!item) return showToast("Item not found ❌", "error");
 
-    const { name, price, quantity, image } = req.body;
-    const user = await User.findById(req.session.user.id);
-    if (!user) return res.json({ success: false, message: "User not found" });
+  const qtySelected =
+    document.querySelector(".qty-1kg.click") ||
+    document.querySelector(".qty-500g.click");
 
-    // Check if item already exists in cart
-    const existingItem = user.cart.find(i => i.name === name);
-
-    if (existingItem) {
-      existingItem.quantity += quantity; // increment quantity
-    } else {
-      user.cart.push({ name, price, quantity, image });
-    }
-
-    await user.save();
-    res.json({ success: true, message: "Item added to cart" });
-
-  } catch (err) {
-    console.error("Error adding to cart:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Error saving cart", error: err });
+  if (!qtySelected) {
+    return showToast("Please select a quantity ⚠️", "warn");
   }
-});
+
+  // 👇 Quantity based on selection
+  const quantity =
+    qtySelected.classList.contains("qty-1kg") ? 1 : 0.5;
+
+  if (loader) loader.style.display = "flex";
+
+  try {
+    // ✅ Check login session
+    const sessionRes = await fetch(`${BASE_URL}/getUser`, {
+      credentials: "include",
+    });
+    const session = await sessionRes.json();
+
+    if (!session.loggedIn) {
+      showToast("Please sign in to continue 🔒", "warn");
+      setTimeout(() => (window.location.href = "signin.html"), 1800);
+      return;
+    }
+
+    // ✅ Add to cart
+    const res = await fetch(`${BASE_URL}/cart/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        name: itemName,
+        price: item.price,
+        quantity,
+        image: item.image,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      updateCartCount();
+      showToast(`${itemName} (${quantity === 1 ? "1kg" : "500g"}) added 🛒`, "success");
+    } else {
+      showToast(data.message || "Failed to add ❌", "error");
+    }
+  } catch (err) {
+    console.error("Add to cart error:", err);
+    showToast("Something went wrong ❌", "error");
+  } finally {
+    if (loader) {
+      loader.style.opacity = "0";
+      setTimeout(() => (loader.style.display = "none"), 300);
+    }
+  }
+}
 
 
 
