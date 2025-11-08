@@ -19,22 +19,34 @@
 
 <body>
 
+    <div id="loader" class="page-loader">
+        <div class="spinner"></div>
+    </div>
+
+
     <header>
 
         <button onclick="goHome()" style="background:none;
         border:none;color:green;
-        font-size:18px;
+        font-size:24px;
         cursor:pointer;
         position:absolute;
-        left:0;margin-left:20px;
+        display: flex;
+        align-items:center ;
+        justify-content: center;
+        left:0;margin-left:10px;
         background-color: #ffffff;
         border-radius:10px;
-        padding:3px 5px">⬅</button>
+        height:30px;
+        padding-bottom: 3px;
+        width:35px">⬅</button>
 
         <h1>FARMSTORE</h1>
 
-        
-
+        <div class="cart">
+            <i class='bx bx-cart'></i>
+            <div class="total">0</div>
+        </div>
     </header>
 
     <div class="heading">
@@ -44,27 +56,66 @@
 
     <div class="items flex">
 
-        <div class="potato item" onclick="goToItem('Potato','₹25','Juicy','Assets/potato.png')">
-            <img src="assets/potato.png" alt="">
-            <div class="matter">
+        <div class="potato">
+            <div class="item" onclick="goToItem('Potato','₹25','Juicy','Assets/potato.png')">
+                <img src="assets/potato.png" alt="">
                 <p>Potato</p>
             </div>
-        </div>
 
-
-
-        <div class="garlic item" onclick="goToItem('Garlic','₹25','Juicy','Assets/garlic.png')">
-            <img src="assets/garlic.png" alt="">
             <div class="matter">
-                <p>Garlic</p>
+                <div style="display: flex; justify-content: space-between;padding:0 3px;align-items: center;">
+                    <p><b>43</b> <strike>54</strike></p>
+                    <div class="add"><i class='bx bx-plus'></i></div>
+                </div>
+                <p style="text-align: center;">Fresh oranges</p>
+
+                <div class="qty">
+                    <div class="qty-1kg">1kg</div>
+                    <div class="qty-500g">500g</div>
+                </div>
             </div>
         </div>
 
 
-        <div class="onion item" onclick="goToItem('Onion','₹25','Juicy','Assets/onion.png')">
-            <img src="assets/onion.png" alt="">
+
+        <div class="garlic">
+            <div class="item" onclick="goToItem('Garlic','₹25','Juicy','Assets/garlic.png')">
+                <img src="assets/garlic.png" alt="">
+                <p>Garlic</p>
+            </div>
+
             <div class="matter">
+                <div style="display: flex; justify-content: space-between;padding:0 3px;align-items: center;">
+                    <p><b>43</b> <strike>54</strike></p>
+                    <div class="add"><i class='bx bx-plus'></i></div>
+                </div>
+                <p style="text-align: center;">Fresh oranges</p>
+
+                <div class="qty">
+                    <div class="qty-1kg">1kg</div>
+                    <div class="qty-500g">500g</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="onion">
+            <div class="item" onclick="goToItem('Onion','₹25','Juicy','Assets/onion.png')">
+                <img src="assets/onion.png" alt="">
                 <p>Onion</p>
+            </div>
+
+            <div class="matter">
+                <div style="display: flex; justify-content: space-between;padding:0 3px;align-items: center;">
+                    <p><b>43</b> <strike>54</strike></p>
+                    <div class="add"><i class='bx bx-plus'></i></div>
+                </div>
+                <p style="text-align: center;">Fresh oranges</p>
+
+                <div class="qty">
+                    <div class="qty-1kg">1kg</div>
+                    <div class="qty-500g">500g</div>
+                </div>
             </div>
         </div>
 

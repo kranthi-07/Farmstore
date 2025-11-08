@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Item Details - Dab Dab</title>
+  <title>Item</title>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <style>
@@ -16,19 +15,71 @@
 
     body {
       font-family: 'Poppins', sans-serif;
-      background: #fff8f0;
+      background: #f2fff0;
       margin: 0;
       padding: 0;
       color: #333;
     }
 
+
+    header {
+      position: fixed;
+      width: 100%;
+      background-color: #a5ff80;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      height: 70px;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgb(185, 185, 185);
+    }
+
+
+
+
+    .cart {
+      background-color: green;
+      padding: 5px 10px;
+      border-radius: 7px;
+      width: 100%;
+      max-width: fit-content;
+      position: absolute;
+      right: 10;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .cart i {
+      font-size: 24px;
+
+    }
+
+
+
+    .total {
+      width: 100%;
+      font-family: 'Times New Roman', Times, serif;
+      display: flex;
+      align-items: center;
+      position: absolute;
+      font-size: 15px;
+      top: 0;
+      right: -15;
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+      justify-content: center;
+    }
+
+
+
+
+
     .item-wrapper {
-
-      margin: 2rem auto;
+      margin-top: 80px;
       padding: 1.5rem;
-
       border-radius: 20px;
       display: flex;
+      flex-direction: column;
       flex-wrap: wrap;
       gap: 2rem;
     }
@@ -47,19 +98,26 @@
     }
 
     .item-info {
+      background-color: #fff;
+      /* border:1px solid lightgray; */
+      box-shadow: 0 0 10px rgba(192, 192, 192, 0.237);
+      padding: 20px 30px;
+      border-radius: 10px;
+      font-family: 'Lora', sans-serif;
       width: 100%;
       display: flex;
       align-items: center;
-      justify-content: space-around;
+      justify-content: space-between;
     }
 
     .name-price {
       display: flex;
+      gap: 20px;
       align-items: center;
       justify-content: center;
       flex-direction: column;
-
     }
+
 
     .item-info h1 {
       font-size: 2rem;
@@ -68,102 +126,57 @@
 
     .item-info .price {
       padding: 10px;
-      font-size: 20px;
-      color: green;
-      font-weight: bold;
-    }
-
-    .labels {
-      display: flex;
-      text-align: left;
-      justify-content: center;
-      flex-direction: column;
-    }
-
-
-    label {
-      display: inline-flex;
-      align-items: center;
-      cursor: pointer;
-      padding: 15px;
       font-size: 16px;
+      color: rgb(0, 90, 0);
+      display: flex;
+      gap: 20px;
+      /* font-weight: bold; */
     }
 
-    .desc {
-      width: 100%;
+    .price p {
+      border: 1px solid green;
+      padding: 5px;
+      border-radius: 5px;
+      background-color: rgb(238, 255, 238);
+    }
+
+
+
+    .quantity {
+      background-color: #fff;
       text-align: center;
-      font-size: 1.2rem;
-      color: #444;
-    }
-
-
-
-    input[type="radio"] {
-      display: none;
-    }
-
-    /* Base style */
-
-
-    /* Custom circle */
-    .custom-radio {
-      width: 27px;
-      height: 27px;
-      border: 2px solid #4CAF50;
-      border-radius: 50%;
-      margin-right: 8px;
-      position: relative;
-      transition: all 0.2s ease;
-    }
-
-    /* Inner dot (hidden by default) */
-    .custom-radio::after {
-      content: "";
-      width: 10px;
-      height: 10px;
-      background: #4CAF50;
-      border-radius: 50%;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      transition: all 0.2s ease;
-    }
-
-
-    /* _________________________________________RADIO___________________________________ */
-
-    /* When checked */
-    input[type="radio"]:checked+.custom-radio::after {
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    /* Hover effect */
-    label:hover .custom-radio {
-      border-color: #2e7d32;
-    }
-
-    .actions {
+      flex-direction: column;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 1rem;
+      box-shadow: 0 0 10px rgba(164, 164, 164, 0.237);
+      justify-content: space-around;
+      padding: 20px;
+      border-radius: 10px;
+      gap: 20px;
     }
 
-    .actions button {
-      padding: 0.7rem 1.5rem;
-      font-size: 0.9rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .cont {
+    .weight {
+      width: 100%;
+      justify-content: space-around;
       display: flex;
     }
 
+
+    .qty-1kg,
+    .qty-500g {
+      background-color: rgb(238, 255, 238);
+      border: 1px solid green;
+      border-radius: 7px;
+      width: 100px;
+      padding: 5px;
+      font-size: 14px;
+      transition: .3s ease;
+    }
+
+
+    .active {
+      background-color: green;
+      color: #fff;
+    }
 
 
 
@@ -171,6 +184,8 @@
       background: green;
       color: white;
       height: 55px;
+      border: 0;
+      border-radius: 15px;
       width: 170px;
     }
 
@@ -328,63 +343,81 @@
       }
     }
   </style>
+
 </head>
 
 <body>
 
+  <header>
+
+    <button onclick="goHome()" style="background:none;
+        border:none;color:green;
+        font-size:24px;
+        cursor:pointer;
+        position:absolute;
+        display: flex;
+        align-items:center ;
+        justify-content: center;
+        left:0;margin-left:10px;
+        background-color: #ffffff;
+        border-radius:10px;
+        height:30px;
+        padding-bottom: 3px;
+        width:35px">⬅</button>
+
+    <h1>FARMSTORE</h1>
+
+    <div class="cart">
+      <i class='bx bx-cart'></i>
+      <div class="total">0</div>
+    </div>
+  </header>
+
   <!-- ✅ Full Page Loader -->
-  <div id="pageLoader">
+  <!-- <div id="pageLoader">
     <div class="loader"></div>
-  </div>
+  </div> -->
 
   <div class="item-wrapper">
+
     <div class="item-image">
       <img id="itemImage" src="" alt="Item Image">
     </div>
+
     <div class="item-info">
 
       <div class="name-price">
-        <h1 id="itemName"></h1>
-        <div class="price" id="itemPrice">₹--</div>
+        <h2 id="itemName"></h2>
+        <div class="desc" id="itemDesc">Loading...</div>
       </div>
 
-
-
-      <div class="labels flex">
-
-        <label>
-          <input type="radio" name="fruit1" value="50" data-qty="1kg">
-          <span class="custom-radio"></span>
-          <div class="cont">
-            <p>1 kg -</p>
-            <p>&ensp;₹50</p>
-          </div>
-        </label>
-
-
-        <label>
-          <input type="radio" name="fruit1" value="30" data-qty="500g">
-          <span class="custom-radio"></span>
-          <div class="cont">
-            <p>1/2 kg -</p>
-            <p>&ensp;₹30</p>
-          </div>
-        </label>
-
+      <div class="price">
+        <p>1kg</p>
+        <p style="font-size: 18px;">60</p>
       </div>
-
 
     </div>
 
-    <div class="desc" id="itemDesc">Loading...</div>
 
-  </div>
+    <div class="quantity">
+      <h2>Select Quantity</h2>
+      <div class="weight">
+        <div class="qty-1kg active">
+          <p>1kg</p>
+          <p style="font-size: 18px;">43</p>
+        </div>
+        <div class="qty-500g">
+          <p>500g</p>
+          <p style="font-size: 18px;">24</p>
+        </div>
+      </div>
+    </div>
 
-  <div class="actions">
-    <button id="cartBtn" class="add-cart">Add to Cart</button>
-  </div>
-  <a onclick="window.location.replace('index.html')" class="back-btn"><i class="ri-arrow-left-line"></i> Back to
-    Home</a>
+
+    <div class="actions">
+      <button id="cartBtn" class="add-cart">Add to Cart</button>
+    </div>
+
   </div>
 
   <script>
@@ -402,40 +435,67 @@
     document.getElementById("itemDesc").textContent = desc || "No description available.";
     document.getElementById("itemImage").src = image || "assets/placeholder.png";
 
-    // ✅ Dynamically inject radio options
-    const labelsContainer = document.querySelector(".labels");
-    labelsContainer.innerHTML = "";
+    // --- Elements ---
+    const quantity_1kg = document.querySelector(".qty-1kg");
+    const quantity_500g = document.querySelector(".qty-500g");
+    const priceContainer = document.querySelector(".price");
+    const priceQty = priceContainer.querySelector("p:first-child");
+    const priceValue = priceContainer.querySelector("p:last-child");
 
-    if (price1kg > 0) {
-      labelsContainer.innerHTML += `
-      <label>
-        <input type="radio" name="fruit1" value="${price1kg}" data-qty="1kg">
-        <span class="custom-radio"></span>
-        <div class="cont"><p>1 kg -</p><p>&ensp;₹${price1kg}</p></div>
-      </label>
-    `;
+    // ✅ Initial
+    priceQty.textContent = "1kg";
+    priceValue.textContent = price1kg;
+
+    // --- Smooth fade + pulse + tint animation ---
+    function animatePriceChange(newQty, newPrice) {
+      // Fade out
+      priceContainer.style.transition = "opacity 0.25s ease, transform 0.25s ease, color 0.25s ease";
+      priceContainer.style.opacity = "0";
+      priceContainer.style.transform = "scale(0.96)";
+
+      // Wait for fade-out
+      setTimeout(() => {
+        // Update values
+        priceQty.textContent = newQty;
+        priceValue.textContent = newPrice;
+
+        // Subtle green tint flash + fade in + pulse
+        priceContainer.style.color = "#0b8a00"; // temporary green tint
+        priceContainer.style.opacity = "1";
+        priceContainer.style.transform = "scale(1.08)";
+
+        setTimeout(() => {
+          priceContainer.style.transform = "scale(1)";
+          priceContainer.style.color = "rgb(0,90,0)"; // revert to normal color
+        }, 250);
+      }, 250); // matches fade-out duration
     }
 
-    if (price500g > 0) {
-      labelsContainer.innerHTML += `
-      <label>
-        <input type="radio" name="fruit1" value="${price500g}" data-qty="500g">
-        <span class="custom-radio"></span>
-        <div class="cont"><p>1/2 kg -</p><p>&ensp;₹${price500g}</p></div>
-      </label>
-    `;
-    }
+    // --- Quantity selection logic ---
+    quantity_1kg.addEventListener("click", () => {
+      quantity_1kg.classList.add("active");
+      quantity_500g.classList.remove("active");
+      animatePriceChange("1kg", price1kg);
+    });
+
+    quantity_500g.addEventListener("click", () => {
+      quantity_500g.classList.add("active");
+      quantity_1kg.classList.remove("active");
+      animatePriceChange("500g", price500g);
+    });
 
     const cartBtn = document.getElementById("cartBtn");
     const pageLoader = document.getElementById("pageLoader");
 
-    /* --- Loader functions --- */
-    function showLoader() { pageLoader.classList.remove("hidden"); }
-    function hideLoader() { pageLoader.classList.add("hidden"); }
+    function showLoader() {
+      if (pageLoader) pageLoader.classList.remove("hidden");
+    }
+    function hideLoader() {
+      if (pageLoader) pageLoader.classList.add("hidden");
+    }
 
-    /* --- Toast function (Apple-style) --- */
+    // --- Apple-style Toast ---
     function showToast(message, type = "info") {
-      // Remove existing toast if visible
       const oldToast = document.querySelector(".toast");
       if (oldToast) oldToast.remove();
 
@@ -444,32 +504,36 @@
       toast.textContent = message;
       document.body.appendChild(toast);
 
-      // Slide up
       setTimeout(() => toast.classList.add("show"), 50);
-
-      // Auto hide after 2.5s
       setTimeout(() => {
         toast.classList.remove("show");
         setTimeout(() => toast.remove(), 400);
       }, 2500);
     }
 
-    /* --- Add to Cart --- */
+    // --- Add to Cart ---
     async function toggleCart() {
-      const selected = document.querySelector('input[name="fruit1"]:checked');
-      if (!selected) {
+      let selectedQty = "";
+      let selectedPrice = 0;
+
+      if (quantity_1kg.classList.contains("active")) {
+        selectedQty = "1kg";
+        selectedPrice = price1kg;
+      } else if (quantity_500g.classList.contains("active")) {
+        selectedQty = "500g";
+        selectedPrice = price500g;
+      }
+
+      if (!selectedQty) {
         showToast("Please select a quantity ⚠️", "warn");
         return;
       }
-
-      const selectedPrice = parseInt(selected.value);
-      const selectedQty = selected.dataset.qty;
 
       const cartItem = {
         name: `${name} (${selectedQty})`,
         price: selectedPrice,
         quantity: 1,
-        image
+        image,
       };
 
       try {
@@ -478,7 +542,7 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify(cartItem)
+          body: JSON.stringify(cartItem),
         });
 
         const data = await res.json();
@@ -495,12 +559,16 @@
       }
     }
 
-    /* --- Init --- */
     window.addEventListener("load", () => {
       hideLoader();
       cartBtn.onclick = toggleCart;
     });
+
+    function goHome() {
+      window.location.replace("index.html");
+    }
   </script>
+
 
 
 </body>

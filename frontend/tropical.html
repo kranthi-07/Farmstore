@@ -18,22 +18,34 @@
 </head>
 
 <body>
+    <div id="loader" class="page-loader">
+        <div class="spinner"></div>
+    </div>
+
 
     <header>
 
         <button onclick="goHome()" style="background:none;
         border:none;color:green;
-        font-size:18px;
+        font-size:24px;
         cursor:pointer;
         position:absolute;
-        left:0;margin-left:20px;
+        display: flex;
+        align-items:center ;
+        justify-content: center;
+        left:0;margin-left:10px;
         background-color: #ffffff;
         border-radius:10px;
-        padding:3px 5px">⬅</button>
+        height:30px;
+        padding-bottom: 3px;
+        width:35px">⬅</button>
 
         <h1>FARMSTORE</h1>
 
-        
+        <div class="cart">
+            <i class='bx bx-cart'></i>
+            <div class="total">0</div>
+        </div>
     </header>
 
     <div class="heading">
@@ -43,11 +55,24 @@
     <div class="items flex">
 
 
-        <div class="mango item" onclick="goToItem('Mango','₹25','Juicy','Assets/mango.png')">
-            <img src="assets/mango.png" alt="">
-            <div class="matter">
+        <div class="mango">
+            <div class="item" onclick="goToItem('Mango','₹25','Juicy','Assets/mango.png')">
+                <img src="assets/mango.png" alt="">
                 <p>Mango</p>
             </div>
+            
+            <div class="matter">
+                <div style="display: flex; justify-content: space-between;padding:0 3px;align-items: center;">
+                    <p><b>43</b> <strike>54</strike></p>
+                    <div class="add"><i class='bx bx-plus'></i></div>
+                </div>
+                <p style="text-align: center;">Fresh oranges</p>
+
+                <div class="qty">
+                    <div class="qty-1kg">1kg</div>
+                    <div class="qty-500g">500g</div>
+                </div>
+            </div>
         </div>
 
 
@@ -55,30 +80,69 @@
 
 
 
-        <div class="banana item" onclick="goToItem('Banana','₹25','Juicy','Assets/banana.png')">
-            <img src="assets/banana.png" alt="">
-            <div class="matter">
+        <div class="banana">
+            <div class="item" onclick="goToItem('Banana','₹25','Juicy','Assets/banana.png')">
+                <img src="assets/banana.png" alt="">
                 <p>Banana</p>
             </div>
-        </div>
 
-
-
-
-
-        <div class="papaya item" onclick="goToItem('Papaya','₹25','Juicy','Assets/papaya.png')">
-            <img src="assets/papaya.png" alt="">
             <div class="matter">
-                <p>Papaya</p>
+                <div style="display: flex; justify-content: space-between;padding:0 3px;align-items: center;">
+                    <p><b>43</b> <strike>54</strike></p>
+                    <div class="add"><i class='bx bx-plus'></i></div>
+                </div>
+                <p style="text-align: center;">Fresh oranges</p>
+
+                <div class="qty">
+                    <div class="qty-1kg">1kg</div>
+                    <div class="qty-500g">500g</div>
+                </div>
             </div>
         </div>
 
 
 
-        <div class="guava item" onclick="goToItem('Guava','₹25','Juicy','Assets/guava.png')">
-            <img src="assets/guava.png" alt="">
+
+
+        <div class="papaya">
+            <div class="item" onclick="goToItem('Papaya','₹25','Juicy','Assets/papaya.png')">
+                <img src="assets/papaya.png" alt="">
+                <p>Papaya</p>
+            </div>
+
             <div class="matter">
+                <div style="display: flex; justify-content: space-between;padding:0 3px;align-items: center;">
+                    <p><b>43</b> <strike>54</strike></p>
+                    <div class="add"><i class='bx bx-plus'></i></div>
+                </div>
+                <p style="text-align: center;">Fresh oranges</p>
+
+                <div class="qty">
+                    <div class="qty-1kg">1kg</div>
+                    <div class="qty-500g">500g</div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="guava">
+            <div class="item" onclick="goToItem('Guava','₹25','Juicy','Assets/guava.png')">
+                <img src="assets/guava.png" alt="">
                 <p>Guava</p>
+            </div>
+
+            <div class="matter">
+                <div style="display: flex; justify-content: space-between;padding:0 3px;align-items: center;">
+                    <p><b>43</b> <strike>54</strike></p>
+                    <div class="add"><i class='bx bx-plus'></i></div>
+                </div>
+                <p style="text-align: center;">Fresh oranges</p>
+
+                <div class="qty">
+                    <div class="qty-1kg">1kg</div>
+                    <div class="qty-500g">500g</div>
+                </div>
             </div>
         </div>
 

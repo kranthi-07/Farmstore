@@ -189,7 +189,7 @@ function initAddToCartListeners() {
       e.stopPropagation();
 
       // Find the *card root* (supports your Orange wrapper + simple .item cards)
-      const cardRoot = e.target.closest(".orange, .item, .lemon, .mosambi");
+      const cardRoot = e.target.closest(".orange, .item, .lemon, .mosambi, .watermelon, .muskmelon, .strawberry, .carrot, .beetroot, .coconut, .jackfruit, .mango, .banana, .papaya, .guava, .potato, .garlic, .onion, .spinach, .coriander, .tomato, .brinjal, .ladysfinger");
       if (!cardRoot) {
         showToast("Could not locate item card ❌", "error");
         return;
