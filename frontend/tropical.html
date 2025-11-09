@@ -60,7 +60,7 @@
                 <img src="assets/mango.png" alt="">
                 <p>Mango</p>
             </div>
-            
+
             <div class="matter">
                 <div style="display: flex; justify-content: space-between;padding:0 3px;align-items: center;">
                     <p><b>43</b> <strike>54</strike></p>
@@ -149,5 +149,45 @@
     </div>
 </body>
 <script src="itemjs.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Loop through each item block
+        document.querySelectorAll(".item").forEach(card => {
+            const nameEl = card.querySelector("p");
+            if (!nameEl) return;
+
+            const itemName = nameEl.textContent.trim();
+            const item = itemData[itemName];
+            if (!item) return; // skip unknown items
+
+            // Update visible prices in HTML
+            const parent = card.closest("div"); // wrapper div (like .orange, .lemon etc.)
+            if (!parent) return;
+
+            // Locate .matter or .qty section
+            const qtyContainer = parent.querySelector(".qty");
+            if (!qtyContainer) return;
+
+            // Ensure correct price display in quantity blocks
+            const qty1kg = qtyContainer.querySelector(".qty-1kg");
+            const qty500g = qtyContainer.querySelector(".qty-500g");
+
+            if (qty1kg) {
+                qty1kg.innerHTML = `<p>1kg</p><p>${item.prices["1kg"]}</p>`;
+            }
+            if (qty500g) {
+                qty500g.innerHTML = `<p>500g</p><p>${item.prices["500g"]}</p>`;
+            }
+
+            // Optionally update the main price near name (if exists)
+            const priceLabel = parent.querySelector(".matter p b");
+            if (priceLabel) {
+                priceLabel.textContent = item.prices["1kg"]; // default display as 1kg
+            }
+        });
+    });
+</script>
+
 
 </html>

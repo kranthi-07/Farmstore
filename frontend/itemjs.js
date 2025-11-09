@@ -100,23 +100,19 @@ async function updateCartCount() {
 }
 
 
-/* ==============================
-   ADD TO CART (qty-aware)
-============================== */
-/* ==============================
-   ADD TO CART (qty-aware + better errors)
-============================== */
+// ------------------------------------------ADD TO CART--------------------------------------------
+
+
 async function addToCart(itemName) {
   const loader = document.getElementById("loader");
 
-  // 1) Validate item exists in your map
   const item = itemData[itemName];
   if (!item) {
     showToast(`Item not found: ${itemName} ❌`, "error");
     return;
   }
 
-  // 2) Validate quantity selection
+  // Get selected quantity label
   const qtySelected =
     document.querySelector(".qty-1kg.click") ||
     document.querySelector(".qty-500g.click");
@@ -126,12 +122,15 @@ async function addToCart(itemName) {
     return;
   }
 
-  const quantity = qtySelected.classList.contains("qty-1kg") ? 1 : 0.5;
+  // ✅ Use label + correct price
+  const selectedLabel = qtySelected.classList.contains("qty-1kg") ? "1kg" : "500g";
+  const selectedPrice = item.prices[selectedLabel];
+  const quantity = 1; // always 1 per add
 
   if (loader) loader.style.display = "flex";
 
   try {
-    // 3) Must be logged in
+    // Check login
     const sessionRes = await fetch(`${BASE_URL}/getUser`, { credentials: "include" });
     const session = await sessionRes.json();
 
@@ -141,25 +140,20 @@ async function addToCart(itemName) {
       return;
     }
 
-    // 4) Send add-to-cart
+    // ✅ Send clean data (name includes size)
     const res = await fetch(`${BASE_URL}/cart/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
-        name: itemName,
-        price: Number(item.price),
-        quantity: Number(quantity),
+        name: `${itemName} (${selectedLabel})`,
+        price: selectedPrice,
+        quantity,
         image: item.image,
       }),
     });
 
-    let data;
-    try {
-      data = await res.json();
-    } catch {
-      data = { message: "Non-JSON response" };
-    }
+    const data = await res.json();
 
     if (!res.ok || !data.success) {
       console.error("Add to cart failed:", { status: res.status, data });
@@ -167,9 +161,8 @@ async function addToCart(itemName) {
       return;
     }
 
-    // 5) Success
     updateCartCount();
-    showToast(`${itemName} (${quantity === 1 ? "1kg" : "500g"}) added 🛒`, "success");
+    showToast(`${itemName} (${selectedLabel}) added 🛒`, "success");
   } catch (err) {
     console.error("Add to cart error:", err);
     showToast("Network/server error ❌", "error");
