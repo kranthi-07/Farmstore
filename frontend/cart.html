@@ -235,140 +235,182 @@
   </div>
 
   <script>
+    const API = "https://farmstore-1.onrender.com";
+
+    // -------- Helpers --------
+    function animateTotal(from, to, dur = 450) {
+      const el = document.getElementById("totalAmount");
+      const start = performance.now();
+      function tick(t) {
+        const p = Math.min((t - start) / dur, 1);
+        const val = Math.round(from + (to - from) * p);
+        el.textContent = "Total: ₹" + val;
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function currentTotalFromDom() {
+      const txt = document.getElementById("totalAmount").textContent || "";
+      const m = txt.match(/₹\s*([\d]+)/);
+      return m ? parseInt(m[1], 10) : 0;
+    }
+
+    // -------- Load & Render --------
     async function loadCart() {
       const overlay = document.getElementById("overlayLoader");
       const cartItemsDiv = document.getElementById("cartItems");
-      const totalAmount = document.getElementById("totalAmount");
       const paymentBtn = document.getElementById("paymentBtn");
+      const prevTotal = currentTotalFromDom();
 
       overlay.style.display = "flex";
 
       try {
-        const res = await fetch("https://farmstore-1.onrender.com/cart", { credentials: "include" });
+        const res = await fetch(`${API}/cart`, { credentials: "include" });
         const data = await res.json();
 
-        if (data.success && data.cart && data.cart.length > 0) {
-          renderCart(data.cart);
-          paymentBtn.classList.remove("disabled");
+        if (data.success && Array.isArray(data.cart) && data.cart.length) {
+          // Group by name (name already includes "(1kg)" or "(500g)")
+          const grouped = {};
+          for (const it of data.cart) {
+            const key = `${it.name}__${it.price}`;
+            if (!grouped[key]) grouped[key] = { ...it, quantity: 0 };
+            grouped[key].quantity += Number(it.quantity || 1);
+          }
+          const items = Object.values(grouped);
 
-          const total = data.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-          paymentBtn.onclick = () => {
+          // Build DOM
+          cartItemsDiv.innerHTML = "";
+          let newTotal = 0;
+
+          items.forEach(item => {
+            const subtotal = item.price * item.quantity;
+            newTotal += subtotal;
+
+            const card = document.createElement("div");
+            card.className = "cart-item";
+            card.style.transition = "all 0.35s ease";
+            card.dataset.name = item.name;   // includes variant e.g., "Tomato (1kg)"
+            card.dataset.price = item.price; // keep for update/remove
+
+            card.innerHTML = `
+            <img src="${item.image}" alt="${item.name}">
+            <div class="cart-info">
+              <h4>${item.name}</h4>
+              <p><b>Unit Price:</b> ₹${item.price}</p>
+
+              <div class="quantity-control" data-qwrap>
+                <button data-action="dec">-</button>
+                <span data-qty>${item.quantity}</span>
+                <button data-action="inc">+</button>
+              </div>
+
+              <p style="margin-top:8px;font-weight:500;color:#333;" data-subtotal>Subtotal: ₹${subtotal}</p>
+
+              <button class="remove-btn" data-action="remove">❌ Remove</button>
+            </div>
+          `;
+            cartItemsDiv.appendChild(card);
+          });
+
+          // Enable checkout
+          paymentBtn.classList.remove("disabled");
+          const btnHandler = () => {
             if (!paymentBtn.classList.contains("disabled")) {
-              window.location.href = "payment.html?total=" + total;
+              window.location.href = "payment.html?total=" + newTotal;
             }
           };
+          paymentBtn.onclick = btnHandler;
+
+          // Animate total change
+          animateTotal(prevTotal, newTotal);
         } else {
-          cartItemsDiv.innerHTML = `
+          // Empty state
+          document.getElementById("cartItems").innerHTML = `
           <div class="empty-cart">
             <img src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png" alt="Empty cart">
             <p>Your cart is empty.</p>
             <button class="add-items" onclick="goHome()">Add Items</button>
           </div>
         `;
-          totalAmount.textContent = "Total: ₹0";
+          document.getElementById("totalAmount").textContent = "Total: ₹0";
           paymentBtn.classList.add("disabled");
+          paymentBtn.onclick = null;
         }
-      } catch {
-        cartItemsDiv.innerHTML = `<p style="text-align:center;color:red;">Failed to load cart. Please try again.</p>`;
-        totalAmount.textContent = "Total: ₹0";
-        paymentBtn.classList.add("disabled");
+      } catch (e) {
+        document.getElementById("cartItems").innerHTML =
+          `<p style="text-align:center;color:red;">Failed to load cart. Please try again.</p>`;
+        document.getElementById("totalAmount").textContent = "Total: ₹0";
+        document.getElementById("paymentBtn").classList.add("disabled");
+        document.getElementById("paymentBtn").onclick = null;
       } finally {
         overlay.style.display = "none";
       }
     }
 
-    function renderCart(cart) {
-      const cartItemsDiv = document.getElementById("cartItems");
-      const totalAmount = document.getElementById("totalAmount");
+    // -------- Event delegation for + / − / remove --------
+    document.getElementById("cartItems").addEventListener("click", async (e) => {
+      const card = e.target.closest(".cart-item");
+      if (!card) return;
 
-      cartItemsDiv.innerHTML = "";
-      let total = 0;
+      const name = card.dataset.name;
+      const price = Number(card.dataset.price) || 0;
 
-      const groupedCart = {};
-      cart.forEach(item => {
-        const key = `${item.name}_${item.price}`;
-        if (groupedCart[key]) groupedCart[key].quantity += 1;
-        else groupedCart[key] = { ...item, quantity: 1 };
-      });
+      // minus / plus
+      const action = e.target.dataset.action;
+      if (action === "dec" || action === "inc") {
+        const overlay = document.getElementById("overlayLoader");
+        overlay.style.display = "flex";
+        const change = action === "inc" ? 1 : -1;
 
-      const mergedCart = Object.values(groupedCart);
-
-      mergedCart.forEach(item => {
-        const subtotal = item.price * item.quantity;
-        total += subtotal;
-
-        const div = document.createElement("div");
-        div.classList.add("cart-item");
-        div.style.transition = "all 0.4s ease";
-
-        div.innerHTML = `
-        <img src="${item.image}" alt="${item.name}">
-        <div class="cart-info">
-          <h4>${item.name}</h4>
-          <p><b>Unit Price:</b> ₹${item.price}</p>
-          <div class="quantity-control">
-            <button onclick="updateQuantity('${item.name}', ${item.price}, -1, this)">-</button>
-            <span>${item.quantity}</span>
-            <button onclick="updateQuantity('${item.name}', ${item.price}, 1, this)">+</button>
-          </div>
-          <p style="margin-top:8px;font-weight:500;color:#333;">Subtotal: ₹${subtotal}</p>
-          <button class="remove-btn" onclick="removeItem('${item.name}', ${item.price}, this)">❌ Remove</button>
-        </div>
-      `;
-
-        cartItemsDiv.appendChild(div);
-      });
-
-      totalAmount.textContent = "Total: ₹" + total;
-    }
-
-    // ✨ Smooth quantity update (with glow)
-    async function updateQuantity(name, price, change, btn) {
-      const overlay = document.getElementById("overlayLoader");
-      const span = btn.parentElement.querySelector("span");
-      overlay.style.display = "flex";
-
-      try {
-        await fetch("https://farmstore-1.onrender.com/cart/update", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ name, price, change })
-        });
-        // Animate glow on quantity
-        span.style.transition = "all 0.3s ease";
-        span.style.background = "#d0ffd0";
-        setTimeout(() => (span.style.background = "transparent"), 400);
-        await loadCart();
-      } finally {
-        overlay.style.display = "none";
-      }
-    }
-
-    // 🩶 Smooth remove animation (fade + shrink)
-    async function removeItem(name, price, btn) {
-      const card = btn.closest(".cart-item");
-      card.style.transition = "all 0.4s ease";
-      card.style.opacity = "0";
-      card.style.transform = "scale(0.96)";
-      setTimeout(async () => {
-        card.style.height = "0";
-        card.style.margin = "0";
-        card.style.padding = "0";
-        card.style.overflow = "hidden";
-
-        setTimeout(async () => {
-          await fetch("https://farmstore-1.onrender.com/cart/remove", {
+        try {
+          await fetch(`${API}/cart/update`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            body: JSON.stringify({ name, price })
+            // backend uses name + change; price is harmless extra if ignored
+            body: JSON.stringify({ name, price, change })
           });
-          await loadCart();
-        }, 300);
-      }, 200);
-    }
 
+          // Small glow on the quantity number
+          const qtyEl = card.querySelector("[data-qty]");
+          qtyEl.style.transition = "background 0.25s ease";
+          qtyEl.style.background = "#d9ffd9";
+          setTimeout(() => (qtyEl.style.background = "transparent"), 280);
+
+          // Reload to recompute totals safely
+          await loadCart();
+        } finally {
+          overlay.style.display = "none";
+        }
+        return;
+      }
+
+      // remove
+      if (action === "remove") {
+        // fade + shrink before actual removal
+        card.style.opacity = "0";
+        card.style.transform = "scale(0.96)";
+        setTimeout(async () => {
+          card.style.height = "0";
+          card.style.margin = "0";
+          card.style.padding = "0";
+          card.style.overflow = "hidden";
+          setTimeout(async () => {
+            await fetch(`${API}/cart/remove`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              // backend expects { name }; price included is fine if ignored
+              body: JSON.stringify({ name, price })
+            });
+            await loadCart();
+          }, 260);
+        }, 180);
+      }
+    });
+
+    // -------- Init --------
     window.onload = loadCart;
 
     function goHome() {
