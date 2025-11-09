@@ -241,7 +241,7 @@
       const totalAmount = document.getElementById("totalAmount");
       const paymentBtn = document.getElementById("paymentBtn");
 
-      overlay.style.display = "flex"; // show overlay before fetch
+      overlay.style.display = "flex";
 
       try {
         const res = await fetch("https://farmstore-1.onrender.com/cart", { credentials: "include" });
@@ -268,12 +268,12 @@
           totalAmount.textContent = "Total: ₹0";
           paymentBtn.classList.add("disabled");
         }
-      } catch (err) {
+      } catch {
         cartItemsDiv.innerHTML = `<p style="text-align:center;color:red;">Failed to load cart. Please try again.</p>`;
         totalAmount.textContent = "Total: ₹0";
         paymentBtn.classList.add("disabled");
       } finally {
-        overlay.style.display = "none"; // hide overlay after fetch completes
+        overlay.style.display = "none";
       }
     }
 
@@ -284,39 +284,37 @@
       cartItemsDiv.innerHTML = "";
       let total = 0;
 
-      // 🔹 Group items by unique key (name + price)
       const groupedCart = {};
       cart.forEach(item => {
-        const key = item.name + "_" + item.price;
-        if (groupedCart[key]) {
-          groupedCart[key].quantity += item.quantity;
-        } else {
-          groupedCart[key] = { ...item };
-        }
+        const key = `${item.name}_${item.price}`;
+        if (groupedCart[key]) groupedCart[key].quantity += 1;
+        else groupedCart[key] = { ...item, quantity: 1 };
       });
 
       const mergedCart = Object.values(groupedCart);
 
       mergedCart.forEach(item => {
-        let subtotal = item.price * item.quantity;
+        const subtotal = item.price * item.quantity;
         total += subtotal;
 
         const div = document.createElement("div");
         div.classList.add("cart-item");
+        div.style.transition = "all 0.4s ease";
 
         div.innerHTML = `
-          <img src="${item.image}" alt="${item.name}">
-          <div class="cart-info">
-            <h4>${item.name}</h4>
-            <p><b>Unit Price:</b> ₹${item.price}</p>
-            <div class="quantity-control">
-              <button onclick="updateQuantity('${item.name}', ${item.price}, -1)">-</button>
-              <span>${item.quantity}</span>
-              <button onclick="updateQuantity('${item.name}', ${item.price}, 1)">+</button>
-            </div>
-            <button class="remove-btn" onclick="removeItem('${item.name}')">❌ Remove</button>
+        <img src="${item.image}" alt="${item.name}">
+        <div class="cart-info">
+          <h4>${item.name}</h4>
+          <p><b>Unit Price:</b> ₹${item.price}</p>
+          <div class="quantity-control">
+            <button onclick="updateQuantity('${item.name}', ${item.price}, -1, this)">-</button>
+            <span>${item.quantity}</span>
+            <button onclick="updateQuantity('${item.name}', ${item.price}, 1, this)">+</button>
           </div>
-        `;
+          <p style="margin-top:8px;font-weight:500;color:#333;">Subtotal: ₹${subtotal}</p>
+          <button class="remove-btn" onclick="removeItem('${item.name}', ${item.price}, this)">❌ Remove</button>
+        </div>
+      `;
 
         cartItemsDiv.appendChild(div);
       });
@@ -324,25 +322,51 @@
       totalAmount.textContent = "Total: ₹" + total;
     }
 
-    // ✅ FIX: Add this function
-    async function updateQuantity(name, price, change) {
-      await fetch("https://farmstore-1.onrender.com/cart/update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name, price, change }) // sending name+price so backend knows which one
-      });
-      loadCart(); // reload after update
+    // ✨ Smooth quantity update (with glow)
+    async function updateQuantity(name, price, change, btn) {
+      const overlay = document.getElementById("overlayLoader");
+      const span = btn.parentElement.querySelector("span");
+      overlay.style.display = "flex";
+
+      try {
+        await fetch("https://farmstore-1.onrender.com/cart/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ name, price, change })
+        });
+        // Animate glow on quantity
+        span.style.transition = "all 0.3s ease";
+        span.style.background = "#d0ffd0";
+        setTimeout(() => (span.style.background = "transparent"), 400);
+        await loadCart();
+      } finally {
+        overlay.style.display = "none";
+      }
     }
 
-    async function removeItem(name) {
-      await fetch("https://farmstore-1.onrender.com/cart/remove", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name })
-      });
-      loadCart();
+    // 🩶 Smooth remove animation (fade + shrink)
+    async function removeItem(name, price, btn) {
+      const card = btn.closest(".cart-item");
+      card.style.transition = "all 0.4s ease";
+      card.style.opacity = "0";
+      card.style.transform = "scale(0.96)";
+      setTimeout(async () => {
+        card.style.height = "0";
+        card.style.margin = "0";
+        card.style.padding = "0";
+        card.style.overflow = "hidden";
+
+        setTimeout(async () => {
+          await fetch("https://farmstore-1.onrender.com/cart/remove", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ name, price })
+          });
+          await loadCart();
+        }, 300);
+      }, 200);
     }
 
     window.onload = loadCart;
@@ -351,7 +375,8 @@
       window.location.replace("index.html");
     }
   </script>
- 
+
+
 </body>
 
 </html>
