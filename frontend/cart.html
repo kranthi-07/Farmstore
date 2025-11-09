@@ -237,7 +237,7 @@
   <script>
     const API = "https://farmstore-1.onrender.com";
 
-    // -------- Helpers --------
+    // ------- Animate Total (Count-Up) -------
     function animateTotal(from, to, dur = 450) {
       const el = document.getElementById("totalAmount");
       const start = performance.now();
@@ -256,7 +256,7 @@
       return m ? parseInt(m[1], 10) : 0;
     }
 
-    // -------- Load & Render --------
+    // ------- Load Cart -------
     async function loadCart() {
       const overlay = document.getElementById("overlayLoader");
       const cartItemsDiv = document.getElementById("cartItems");
@@ -270,16 +270,14 @@
         const data = await res.json();
 
         if (data.success && Array.isArray(data.cart) && data.cart.length) {
-          // Group by name (name already includes "(1kg)" or "(500g)")
           const grouped = {};
           for (const it of data.cart) {
-            const key = `${it.name}__${it.price}`;
+            const key = `${it.name}_${it.price}`;
             if (!grouped[key]) grouped[key] = { ...it, quantity: 0 };
             grouped[key].quantity += Number(it.quantity || 1);
           }
-          const items = Object.values(grouped);
 
-          // Build DOM
+          const items = Object.values(grouped);
           cartItemsDiv.innerHTML = "";
           let newTotal = 0;
 
@@ -289,44 +287,38 @@
 
             const card = document.createElement("div");
             card.className = "cart-item";
+            card.dataset.name = item.name;
+            card.dataset.price = item.price;
             card.style.transition = "all 0.35s ease";
-            card.dataset.name = item.name;   // includes variant e.g., "Tomato (1kg)"
-            card.dataset.price = item.price; // keep for update/remove
 
             card.innerHTML = `
             <img src="${item.image}" alt="${item.name}">
             <div class="cart-info">
               <h4>${item.name}</h4>
               <p><b>Unit Price:</b> ₹${item.price}</p>
-
+              <p><b>Quantity:</b> <span data-qty>${item.quantity}</span></p>
               <div class="quantity-control" data-qwrap>
                 <button data-action="dec">-</button>
-                <span data-qty>${item.quantity}</span>
+                <span>${item.quantity}</span>
                 <button data-action="inc">+</button>
               </div>
-
               <p style="margin-top:8px;font-weight:500;color:#333;" data-subtotal>Subtotal: ₹${subtotal}</p>
-
               <button class="remove-btn" data-action="remove">❌ Remove</button>
             </div>
           `;
             cartItemsDiv.appendChild(card);
           });
 
-          // Enable checkout
           paymentBtn.classList.remove("disabled");
-          const btnHandler = () => {
+          paymentBtn.onclick = () => {
             if (!paymentBtn.classList.contains("disabled")) {
               window.location.href = "payment.html?total=" + newTotal;
             }
           };
-          paymentBtn.onclick = btnHandler;
 
-          // Animate total change
           animateTotal(prevTotal, newTotal);
         } else {
-          // Empty state
-          document.getElementById("cartItems").innerHTML = `
+          cartItemsDiv.innerHTML = `
           <div class="empty-cart">
             <img src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png" alt="Empty cart">
             <p>Your cart is empty.</p>
@@ -335,60 +327,79 @@
         `;
           document.getElementById("totalAmount").textContent = "Total: ₹0";
           paymentBtn.classList.add("disabled");
-          paymentBtn.onclick = null;
         }
       } catch (e) {
-        document.getElementById("cartItems").innerHTML =
-          `<p style="text-align:center;color:red;">Failed to load cart. Please try again.</p>`;
+        cartItemsDiv.innerHTML = `<p style="text-align:center;color:red;">Failed to load cart. Please try again.</p>`;
         document.getElementById("totalAmount").textContent = "Total: ₹0";
-        document.getElementById("paymentBtn").classList.add("disabled");
-        document.getElementById("paymentBtn").onclick = null;
+        paymentBtn.classList.add("disabled");
       } finally {
         overlay.style.display = "none";
       }
     }
 
-    // -------- Event delegation for + / − / remove --------
+    // ------- Handle + / - / Remove (Delegation) -------
     document.getElementById("cartItems").addEventListener("click", async (e) => {
       const card = e.target.closest(".cart-item");
       if (!card) return;
 
       const name = card.dataset.name;
       const price = Number(card.dataset.price) || 0;
-
-      // minus / plus
+      const overlay = document.getElementById("overlayLoader");
       const action = e.target.dataset.action;
-      if (action === "dec" || action === "inc") {
-        const overlay = document.getElementById("overlayLoader");
-        overlay.style.display = "flex";
-        const change = action === "inc" ? 1 : -1;
 
+      // Increment / Decrement
+      if (action === "inc" || action === "dec") {
+        const change = action === "inc" ? 1 : -1;
+        overlay.style.display = "flex";
         try {
           await fetch(`${API}/cart/update`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
-            // backend uses name + change; price is harmless extra if ignored
             body: JSON.stringify({ name, price, change })
           });
 
-          // Small glow on the quantity number
+          // Local update animation
           const qtyEl = card.querySelector("[data-qty]");
-          qtyEl.style.transition = "background 0.25s ease";
-          qtyEl.style.background = "#d9ffd9";
-          setTimeout(() => (qtyEl.style.background = "transparent"), 280);
+          const displaySpan = card.querySelector(".quantity-control span");
+          const currentQty = Number(qtyEl.textContent);
+          const newQty = Math.max(currentQty + change, 0);
+          qtyEl.textContent = newQty;
+          displaySpan.textContent = newQty;
 
-          // Reload to recompute totals safely
-          await loadCart();
+          // Subtotal update animation
+          const subEl = card.querySelector("[data-subtotal]");
+          subEl.textContent = `Subtotal: ₹${itemPrice = newQty * price}`;
+          qtyEl.style.transition = "background 0.3s ease";
+          qtyEl.style.background = "#d8ffd8";
+          setTimeout(() => (qtyEl.style.background = "transparent"), 400);
+
+          if (newQty <= 0) {
+            card.style.opacity = "0";
+            card.style.transform = "scale(0.96)";
+            setTimeout(() => {
+              card.style.height = "0";
+              card.style.margin = "0";
+              card.style.padding = "0";
+              card.style.overflow = "hidden";
+            }, 200);
+            await fetch(`${API}/cart/remove`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ name, price })
+            });
+            await loadCart();
+          } else {
+            await loadCart();
+          }
         } finally {
           overlay.style.display = "none";
         }
-        return;
       }
 
-      // remove
+      // Remove
       if (action === "remove") {
-        // fade + shrink before actual removal
         card.style.opacity = "0";
         card.style.transform = "scale(0.96)";
         setTimeout(async () => {
@@ -396,21 +407,18 @@
           card.style.margin = "0";
           card.style.padding = "0";
           card.style.overflow = "hidden";
-          setTimeout(async () => {
-            await fetch(`${API}/cart/remove`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-              // backend expects { name }; price included is fine if ignored
-              body: JSON.stringify({ name, price })
-            });
-            await loadCart();
-          }, 260);
-        }, 180);
+          await fetch(`${API}/cart/remove`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ name, price })
+          });
+          await loadCart();
+        }, 250);
       }
     });
 
-    // -------- Init --------
+    // ------- Init -------
     window.onload = loadCart;
 
     function goHome() {

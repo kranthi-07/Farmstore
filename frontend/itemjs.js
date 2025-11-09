@@ -34,27 +34,30 @@ const itemData = {
 const BASE_URL = "https://farmstore-1.onrender.com";
 
 /* ==============================
-   QUANTITY SELECTOR
+   QUANTITY SELECTOR (multi-item safe)
 ============================== */
 document.addEventListener("DOMContentLoaded", () => {
-  const qty1kg = document.querySelector(".qty-1kg");
-  const qty500g = document.querySelector(".qty-500g");
+  // Attach quantity toggle logic for every product block on the page
+  document.querySelectorAll(".item, .orange, .lemon, .mosambi, .watermelon, .muskmelon, .strawberry, .carrot, .beetroot, .coconut, .jackfruit, .mango, .banana, .papaya, .guava, .potato, .garlic, .onion, .spinach, .coriander, .tomato, .brinjal, .ladysfinger")
+    .forEach(card => {
+      const qty1kg = card.querySelector(".qty-1kg");
+      const qty500g = card.querySelector(".qty-500g");
+      if (!qty1kg || !qty500g) return;
 
-  if (qty1kg && qty500g) {
-    qty1kg.addEventListener("click", (e) => {
-      e.stopPropagation();
-      qty1kg.classList.add("click");
-      qty500g.classList.remove("click");
+      qty1kg.addEventListener("click", e => {
+        e.stopPropagation();
+        qty1kg.classList.add("click");
+        qty500g.classList.remove("click");
+      });
+
+      qty500g.addEventListener("click", e => {
+        e.stopPropagation();
+        qty500g.classList.add("click");
+        qty1kg.classList.remove("click");
+      });
     });
 
-    qty500g.addEventListener("click", (e) => {
-      e.stopPropagation();
-      qty500g.classList.add("click");
-      qty1kg.classList.remove("click");
-    });
-  }
-
-  // init
+  // init other features after selectors are bound
   updateCartCount();
   initAddToCartListeners();
   initCartIconNavigation();

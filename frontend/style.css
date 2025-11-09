@@ -402,6 +402,35 @@ body.sidebar-open .main-content {
     font-family: 'Lora' sans-serif;
 }
 
+
+
+
+
+
+
+
+#sidebar.open .sidebar-header,
+#sidebar.open .sidebar-menu,
+#sidebar.open .sidebar-content {
+  animation: sidebarFadeIn 0.4s ease forwards;
+}
+
+@keyframes sidebarFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Prevent background scroll when sidebar open */
+body.sidebar-open {
+  overflow: hidden;
+}
+
 /*_________________________________________ TOP BAR _____________________________________*/
 
 

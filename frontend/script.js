@@ -81,20 +81,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const sidebarOverlay = document.getElementById("sidebarOverlay");
     const sidebarMenu = document.querySelector(".sidebar-menu");
     sidebar.classList.add("open");
-    sidebarOverlay.classList.add("show");
+    sidebarOverlay.classList.add("side-show"); // ✅ use .side-show
     document.body.classList.add("sidebar-open");
     if (sidebarMenu) sidebarMenu.style.display = "block";
-    // populate header quickly
     populateSidebarHeader();
   }
+
   function closeSidebar() {
     const sidebar = document.getElementById("sidebar");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
     sidebar.classList.remove("open");
-    sidebarOverlay.classList.remove("show");
+    sidebarOverlay.classList.remove("side-show"); // ✅ use .side-show
     document.body.classList.remove("sidebar-open");
     restoreMenu();
   }
+
   window.openSidebar = openSidebar;  // expose for reuse
   window.closeSidebar = closeSidebar;
 

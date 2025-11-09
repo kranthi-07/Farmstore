@@ -421,89 +421,105 @@
   </div>
 
   <script>
+    /* ==============================
+       MASTER ITEM DATA
+    ============================== */
+    const itemData = {
+      Orange: { desc: "Juicy Fruit", image: "assets/orange.png", prices: { "1kg": 43, "500g": 25 } },
+      Lemon: { desc: "Juicy Fruit", image: "assets/lemon.png", prices: { "1kg": 45, "500g": 25 } },
+      Mosambi: { desc: "Juicy Fruit", image: "assets/mosambi.png", prices: { "1kg": 53, "500g": 25 } },
+      Mango: { desc: "Juicy Fruit", image: "assets/mango.png", prices: { "1kg": 97, "500g": 56 } },
+      Banana: { desc: "Juicy Fruit", image: "assets/banana.png", prices: { "1kg": 22, "500g": 34 } },
+      Papaya: { desc: "Juicy Fruit", image: "assets/papaya.png", prices: { "1kg": 43, "500g": 12 } },
+      Guava: { desc: "Juicy Fruit", image: "assets/guava.png", prices: { "1kg": 50, "500g": 25 } },
+      Strawberry: { desc: "Juicy Fruit", image: "assets/strawberry.png", prices: { "1kg": 100, "500g": 57 } },
+      Coconut: { desc: "Juicy Fruit", image: "assets/coconut.png", prices: { "1kg": 80, "500g": 40 } },
+      Jackfruit: { desc: "Juicy Fruit", image: "assets/jackfruit.png", prices: { "1kg": 43, "500g": 25 } },
+      Watermelon: { desc: "Juicy Fruit", image: "assets/watermelon.png", prices: { "1kg": 43, "500g": 25 } },
+      Muskmelon: { desc: "Juicy Fruit", image: "assets/muskmelon.png", prices: { "1kg": 43, "500g": 25 } },
+      Spinach: { desc: "Leafy Vegetable", image: "assets/spinach.png", prices: { "1kg": 43, "500g": 25 } },
+      Coriander: { desc: "Leafy Vegetable", image: "assets/coriander.png", prices: { "1kg": 43, "500g": 25 } },
+      Carrot: { desc: "Vegetable", image: "assets/carrot.png", prices: { "1kg": 43, "500g": 25 } },
+      Beetroot: { desc: "Vegetable", image: "assets/beetroot.png", prices: { "1kg": 43, "500g": 25 } },
+      Tomato: { desc: "Vegetable", image: "assets/tomato.png", prices: { "1kg": 43, "500g": 25 } },
+      Brinjal: { desc: "Vegetable", image: "assets/brinjal.png", prices: { "1kg": 43, "500g": 25 } },
+      Ladysfinger: { desc: "Vegetable", image: "assets/ladysfinger.jpeg", prices: { "1kg": 43, "500g": 25 } },
+      Potato: { desc: "Vegetable", image: "assets/potato.png", prices: { "1kg": 43, "500g": 25 } },
+      Onion: { desc: "Vegetable", image: "assets/onion.png", prices: { "1kg": 43, "500g": 25 } },
+      Garlic: { desc: "Vegetable", image: "assets/garlic.png", prices: { "1kg": 43, "500g": 25 } },
+    };
+
+    const BASE_URL = "https://farmstore-1.onrender.com";
+
+    /* ==============================
+       LOAD ITEM DETAILS
+    ============================== */
     const params = new URLSearchParams(window.location.search);
+    const itemName = decodeURIComponent(params.get("name") || "");
+    const item = itemData[itemName];
 
-    // --- Extract from URL ---
-    const name = decodeURIComponent(params.get("name") || "");
-    const desc = decodeURIComponent(params.get("desc") || "");
-    const image = decodeURIComponent(params.get("image") || "");
-    const price1kg = parseInt(params.get("price1kg")) || 0;
-    const price500g = parseInt(params.get("price500g")) || 0;
+    if (!item) {
+      alert("Item not found!");
+    } else {
+      document.getElementById("itemName").textContent = itemName;
+      document.getElementById("itemDesc").textContent = item.desc;
+      document.getElementById("itemImage").src = item.image;
 
-    // --- Fill UI ---
-    document.getElementById("itemName").textContent = name;
-    document.getElementById("itemDesc").textContent = desc || "No description available.";
-    document.getElementById("itemImage").src = image || "assets/placeholder.png";
+      // load initial prices
+      const priceContainer = document.querySelector(".price");
+      const priceQty = priceContainer.querySelector("p:first-child");
+      const priceValue = priceContainer.querySelector("p:last-child");
+      priceQty.textContent = "1kg";
+      priceValue.textContent = item.prices["1kg"];
 
-    // --- Elements ---
-    const quantity_1kg = document.querySelector(".qty-1kg");
-    const quantity_500g = document.querySelector(".qty-500g");
-    const priceContainer = document.querySelector(".price");
-    const priceQty = priceContainer.querySelector("p:first-child");
-    const priceValue = priceContainer.querySelector("p:last-child");
+      // update quantity blocks
+      document.querySelector(".qty-1kg p:last-child").textContent = item.prices["1kg"];
+      document.querySelector(".qty-500g p:last-child").textContent = item.prices["500g"];
 
-    // ✅ Initial
-    priceQty.textContent = "1kg";
-    priceValue.textContent = price1kg;
-
-    // --- Smooth fade + pulse + tint animation ---
-    function animatePriceChange(newQty, newPrice) {
-      // Fade out
-      priceContainer.style.transition = "opacity 0.25s ease, transform 0.25s ease, color 0.25s ease";
-      priceContainer.style.opacity = "0";
-      priceContainer.style.transform = "scale(0.96)";
-
-      // Wait for fade-out
-      setTimeout(() => {
-        // Update values
-        priceQty.textContent = newQty;
-        priceValue.textContent = newPrice;
-
-        // Subtle green tint flash + fade in + pulse
-        priceContainer.style.color = "#0b8a00"; // temporary green tint
-        priceContainer.style.opacity = "1";
-        priceContainer.style.transform = "scale(1.08)";
-
+      // smooth animation on change
+      function animatePriceChange(newQty, newPrice) {
+        priceContainer.style.transition = "opacity 0.25s ease, transform 0.25s ease, color 0.25s ease";
+        priceContainer.style.opacity = "0";
+        priceContainer.style.transform = "scale(0.96)";
         setTimeout(() => {
-          priceContainer.style.transform = "scale(1)";
-          priceContainer.style.color = "rgb(0,90,0)"; // revert to normal color
+          priceQty.textContent = newQty;
+          priceValue.textContent = newPrice;
+          priceContainer.style.color = "#0b8a00";
+          priceContainer.style.opacity = "1";
+          priceContainer.style.transform = "scale(1.08)";
+          setTimeout(() => {
+            priceContainer.style.transform = "scale(1)";
+            priceContainer.style.color = "rgb(0,90,0)";
+          }, 250);
         }, 250);
-      }, 250); // matches fade-out duration
+      }
+
+      const quantity_1kg = document.querySelector(".qty-1kg");
+      const quantity_500g = document.querySelector(".qty-500g");
+
+      quantity_1kg.addEventListener("click", () => {
+        quantity_1kg.classList.add("active");
+        quantity_500g.classList.remove("active");
+        animatePriceChange("1kg", item.prices["1kg"]);
+      });
+
+      quantity_500g.addEventListener("click", () => {
+        quantity_500g.classList.add("active");
+        quantity_1kg.classList.remove("active");
+        animatePriceChange("500g", item.prices["500g"]);
+      });
     }
 
-    // --- Quantity selection logic ---
-    quantity_1kg.addEventListener("click", () => {
-      quantity_1kg.classList.add("active");
-      quantity_500g.classList.remove("active");
-      animatePriceChange("1kg", price1kg);
-    });
-
-    quantity_500g.addEventListener("click", () => {
-      quantity_500g.classList.add("active");
-      quantity_1kg.classList.remove("active");
-      animatePriceChange("500g", price500g);
-    });
-
-    const cartBtn = document.getElementById("cartBtn");
-    const pageLoader = document.getElementById("pageLoader");
-
-    function showLoader() {
-      if (pageLoader) pageLoader.classList.remove("hidden");
-    }
-    function hideLoader() {
-      if (pageLoader) pageLoader.classList.add("hidden");
-    }
-
-    // --- Apple-style Toast ---
+    /* ==============================
+       TOAST FUNCTION
+    ============================== */
     function showToast(message, type = "info") {
       const oldToast = document.querySelector(".toast");
       if (oldToast) oldToast.remove();
-
       const toast = document.createElement("div");
       toast.className = `toast ${type}`;
       toast.textContent = message;
       document.body.appendChild(toast);
-
       setTimeout(() => toast.classList.add("show"), 50);
       setTimeout(() => {
         toast.classList.remove("show");
@@ -511,63 +527,72 @@
       }, 2500);
     }
 
-    // --- Add to Cart ---
+    /* ==============================
+       CART COUNT UPDATE
+    ============================== */
+    async function updateCartCount() {
+      try {
+        const res = await fetch(`${BASE_URL}/cart`, { credentials: "include" });
+        const data = await res.json();
+        if (data.success) {
+          document.querySelector(".total").textContent = data.cart.length;
+        }
+      } catch { }
+    }
+    updateCartCount();
+
+    /* ==============================
+       ADD TO CART
+    ============================== */
     async function toggleCart() {
+      if (!item) return showToast("Item not found ❌", "error");
+
       let selectedQty = "";
-      let selectedPrice = 0;
-
-      if (quantity_1kg.classList.contains("active")) {
-        selectedQty = "1kg";
-        selectedPrice = price1kg;
-      } else if (quantity_500g.classList.contains("active")) {
-        selectedQty = "500g";
-        selectedPrice = price500g;
-      }
-
-      if (!selectedQty) {
-        showToast("Please select a quantity ⚠️", "warn");
-        return;
-      }
+      if (document.querySelector(".qty-1kg.active")) selectedQty = "1kg";
+      else if (document.querySelector(".qty-500g.active")) selectedQty = "500g";
+      if (!selectedQty) return showToast("Please select a quantity ⚠️", "warn");
 
       const cartItem = {
-        name: `${name} (${selectedQty})`,
-        price: selectedPrice,
+        name: `${itemName} (${selectedQty})`,
+        price: item.prices[selectedQty],
         quantity: 1,
-        image,
+        image: item.image,
       };
 
       try {
-        showLoader();
-        const res = await fetch("https://farmstore-1.onrender.com/cart/add", {
+        const res = await fetch(`${BASE_URL}/cart/add`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify(cartItem),
         });
-
         const data = await res.json();
         if (data.success) {
-          showToast(`${name} (${selectedQty}) added to cart 🛒`, "success");
+          showToast(`${itemName} (${selectedQty}) added to cart 🛒`, "success");
+          updateCartCount();
         } else {
           showToast(data.message || "Failed to add item ❌", "error");
         }
-      } catch (err) {
-        console.error(err);
-        showToast("Error adding item ❌", "error");
-      } finally {
-        hideLoader();
+      } catch {
+        showToast("Network error ❌", "error");
       }
     }
 
-    window.addEventListener("load", () => {
-      hideLoader();
-      cartBtn.onclick = toggleCart;
+    /* ==============================
+       CART ICON BEHAVIOR
+    ============================== */
+    const cartIcon = document.querySelector(".cart");
+    cartIcon.addEventListener("click", () => {
+      window.location.href = "cart.html";
     });
+
+    document.getElementById("cartBtn").addEventListener("click", toggleCart);
 
     function goHome() {
       window.location.replace("index.html");
     }
   </script>
+
 
 
 
