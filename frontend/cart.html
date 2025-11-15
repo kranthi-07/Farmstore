@@ -107,7 +107,7 @@
     .cart-summary {
       position: fixed;
       bottom: 0;
-      width:100%;
+      width: 100%;
       background: #fff;
       padding: 15px 0px;
       border-top: 1px solid #ddd;
@@ -119,7 +119,7 @@
 
     .cart-summary .total {
       font-size: 18px;
-      margin-left:20px;
+      margin-left: 20px;
       font-weight: bold;
       color: #333;
       background-color: whitesmoke;
@@ -133,7 +133,7 @@
       background: #00a40e;
       color: #fff;
       font-weight: bold;
-      margin-right:20px;
+      margin-right: 20px;
       cursor: pointer;
       border: none;
       transition: 0.3s;
@@ -301,10 +301,10 @@
               <p><b>Unit Price:</b> ₹${item.price}</p>
               <div class="quantity-control" data-qwrap>
                 <button data-action="dec">-</button>
-                <span>${item.quantity}</span>
+                <span data-qty>${item.quantity}</span>
                 <button data-action="inc">+</button>
               </div>
-              <p style="margin-top:8px;font-weight:500;color:#333;" data-subtotal>Subtotal: ₹${subtotal}</p>
+              <p style="margin-top:8px;font-weight:600;color:#333;" data-subtotal>Subtotal: ₹${subtotal}</p>
               <button class="remove-btn" data-action="remove">❌ Remove</button>
             </div>
           `;
@@ -330,16 +330,12 @@
           document.getElementById("totalAmount").textContent = "Total: ₹0";
           paymentBtn.classList.add("disabled");
         }
-      } catch (e) {
-        cartItemsDiv.innerHTML = `<p style="text-align:center;color:red;">Failed to load cart. Please try again.</p>`;
-        document.getElementById("totalAmount").textContent = "Total: ₹0";
-        paymentBtn.classList.add("disabled");
       } finally {
         overlay.style.display = "none";
       }
     }
 
-    // ------- Handle + / - / Remove (Delegation) -------
+    // ------- Live +/- Remove with smooth animations -------
     document.getElementById("cartItems").addEventListener("click", async (e) => {
       const card = e.target.closest(".cart-item");
       if (!card) return;
@@ -349,10 +345,10 @@
       const overlay = document.getElementById("overlayLoader");
       const action = e.target.dataset.action;
 
-      // Increment / Decrement
       if (action === "inc" || action === "dec") {
         const change = action === "inc" ? 1 : -1;
         overlay.style.display = "flex";
+
         try {
           await fetch(`${API}/cart/update`, {
             method: "POST",
@@ -361,54 +357,53 @@
             body: JSON.stringify({ name, price, change })
           });
 
-          // Local update animation
+          // UI Update instantly
           const qtyEl = card.querySelector("[data-qty]");
-          const displaySpan = card.querySelector(".quantity-control span");
           const currentQty = Number(qtyEl.textContent);
           const newQty = Math.max(currentQty + change, 0);
           qtyEl.textContent = newQty;
-          displaySpan.textContent = newQty;
 
-          // Subtotal update animation
+          // Smooth animation
+          qtyEl.style.transition = "transform 0.3s ease, color 0.3s ease";
+          qtyEl.style.transform = "scale(1.25)";
+          qtyEl.style.color = "#00a40e";
+          setTimeout(() => {
+            qtyEl.style.transform = "scale(1)";
+            qtyEl.style.color = "#333";
+          }, 280);
+
+          // Update subtotal
           const subEl = card.querySelector("[data-subtotal]");
-          subEl.textContent = `Subtotal: ₹${itemPrice = newQty * price}`;
-          qtyEl.style.transition = "background 0.3s ease";
-          qtyEl.style.background = "#d8ffd8";
-          setTimeout(() => (qtyEl.style.background = "transparent"), 400);
+          subEl.textContent = `Subtotal: ₹${newQty * price}`;
+
+          // Update total live
+          const newTotal = calculateTotal();
+          animateTotal(currentTotalFromDom(), newTotal);
 
           if (newQty <= 0) {
             card.style.opacity = "0";
-            card.style.transform = "scale(0.96)";
-            setTimeout(() => {
-              card.style.height = "0";
-              card.style.margin = "0";
-              card.style.padding = "0";
-              card.style.overflow = "hidden";
-            }, 200);
-            await fetch(`${API}/cart/remove`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-              body: JSON.stringify({ name, price })
-            });
-            await loadCart();
-          } else {
-            await loadCart();
+            card.style.transform = "scale(0.85)";
+            setTimeout(async () => {
+              card.remove();
+              await fetch(`${API}/cart/remove`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ name, price })
+              });
+              await loadCart();
+            }, 250);
           }
         } finally {
           overlay.style.display = "none";
         }
       }
 
-      // Remove
       if (action === "remove") {
         card.style.opacity = "0";
-        card.style.transform = "scale(0.96)";
+        card.style.transform = "scale(0.85)";
         setTimeout(async () => {
-          card.style.height = "0";
-          card.style.margin = "0";
-          card.style.padding = "0";
-          card.style.overflow = "hidden";
+          card.remove();
           await fetch(`${API}/cart/remove`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -416,17 +411,27 @@
             body: JSON.stringify({ name, price })
           });
           await loadCart();
-        }, 250);
+        }, 300);
       }
     });
 
-    // ------- Init -------
+    function calculateTotal() {
+      let total = 0;
+      document.querySelectorAll(".cart-item").forEach(card => {
+        const qty = Number(card.querySelector("[data-qty]").textContent);
+        const price = Number(card.dataset.price);
+        total += qty * price;
+      });
+      return total;
+    }
+
     window.onload = loadCart;
 
     function goHome() {
       window.location.replace("index.html");
     }
   </script>
+
 
 
 </body>
