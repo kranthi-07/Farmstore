@@ -61,6 +61,53 @@ async function isUserLoggedIn() {
   }
 }
 
+
+
+
+
+const topBar = document.querySelector(".top-bar");
+const topSection = document.querySelector(".top-section");
+const bottomSection = document.querySelector(".bottom-section");
+const cartIcon = document.querySelector(".cart i");
+
+const hideDistance = 60;  // movement range
+
+window.addEventListener("scroll", () => {
+    let scrolled = Math.min(window.scrollY, hideDistance);
+    let progress = scrolled / hideDistance; // 0 to 1
+
+    // Move bar smoothly proportional to scroll
+    topBar.style.transform = `translateY(-${progress * hideDistance}px)`;
+
+    // Opacity fade out
+    topSection.style.opacity = `${1 - progress}`;
+
+    // After slight scroll add solid BG & blur
+    if (progress > 0.05) {
+        bottomSection.classList.add("scrolled");
+        topBar.classList.add("scrolled-bg");
+    } else {
+        bottomSection.classList.remove("scrolled");
+        topBar.classList.remove("scrolled-bg");
+    }
+
+    // Floating cart pop effect
+    if (progress > 0.4) {
+        cartIcon.classList.add("float");
+    } else {
+        cartIcon.classList.remove("float");
+    }
+});
+
+// Elastic return animation when user scrolls up fast or reaches top
+window.addEventListener("scrollend", () => {
+    if (window.scrollY < 10) {
+        topBar.classList.add("elastic");
+        setTimeout(() => topBar.classList.remove("elastic"), 500);
+    }
+});
+
+
 /* ==============================
    AVATAR (TOPBAR + SIDEBAR HEADER)
 ============================== */
