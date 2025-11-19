@@ -509,26 +509,33 @@
   <script>
 
     /* ==============================
-   IMAGE PARALLAX SCROLL ANIMATION
-============================== */
+     IMAGE ELASTIC PARALLAX + FADE + BLUR
+  ============================== */
     const imageEl = document.getElementById("itemImage");
+    let currentY = 0;   // elastic simulated position
+    const ease = 0.07;  // lower = more stretch; recommended 0.05-0.1
 
+    function animateElastic() {
+      const targetY = window.scrollY;
+      currentY += (targetY - currentY) * ease;
 
-    window.addEventListener("scroll", () => {
-      const y = window.scrollY;
-
-      // Fade control
-      const opacity = Math.max(1 - y / 220, 0);
+      // Fade
+      const opacity = Math.max(1 - currentY / 250, 0);
       imageEl.style.opacity = opacity;
 
-      // Reduced parallax motion upward
-      const translateY = Math.min(y / 12, 18);
-      imageEl.style.transform = `translateY(-${translateY}px) scale(${1 - y / 1800})`;
+      // Elastic motion
+      const translateY = Math.min(currentY / 22, 12);
+      imageEl.style.transform = `translateY(-${translateY}px)`;
 
-      // blur smooth increase (0px to 3px max)
-      const blurValue = Math.min(y / 70, 3);
-      imageEl.style.filter = `blur(${blurValue}px)`;
-    });
+      // Blur
+      const blur = Math.min(currentY / 90, 2);
+      imageEl.style.filter = `blur(${blur}px)`;
+
+      requestAnimationFrame(animateElastic);
+    }
+
+    requestAnimationFrame(animateElastic);
+
 
 
 
