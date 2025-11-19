@@ -97,6 +97,63 @@
       border-radius: 14px;
     }
 
+
+
+    /* -------------------------------
+   IMAGE PARALLAX + FADE ON SCROLL
+--------------------------------*/
+    .item-image img {
+      transition: opacity 0.12s linear, transform 0.12s linear;
+      will-change: transform, opacity;
+    }
+
+    /* -------------------------------
+    BUTTON RIPPLE ANIMATION
+--------------------------------*/
+    .add-cart {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .add-cart::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      transform: scale(0);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .add-cart.ripple-effect::after {
+      animation: ripple 0.6s ease-out;
+    }
+
+    @keyframes ripple {
+      0% {
+        transform: scale(0);
+        opacity: 0.7;
+      }
+
+      100% {
+        transform: scale(28);
+        opacity: 0;
+      }
+    }
+
+    /* -------------------------------
+    QUANTITY ACTIVE ANIMATION
+--------------------------------*/
+    .active {
+      transform: scale(1.08);
+      box-shadow: 0 6px 15px rgba(0, 128, 0, 0.25);
+      transition: all 0.3s ease;
+    }
+
+
+
     .item-info {
       background-color: #fff;
       /* border:1px solid lightgray; */
@@ -421,6 +478,45 @@
   </div>
 
   <script>
+
+    /* ==============================
+   IMAGE PARALLAX SCROLL ANIMATION
+============================== */
+    const imageEl = document.getElementById("itemImage");
+    const fadeDistance = 250;
+    const moveDistance = 70;
+
+    window.addEventListener("scroll", () => {
+      const y = window.scrollY;
+      const opacity = Math.max(1 - y / fadeDistance, 0);
+      const translateY = Math.min(y / 4, moveDistance);
+
+      imageEl.style.opacity = opacity;
+      imageEl.style.transform = `translateY(-${translateY}px)`;
+    });
+
+
+    /* ==============================
+       RIPPLE EFFECT ON ADD BUTTON
+    ============================== */
+    const addBtn = document.getElementById("cartBtn");
+
+    addBtn.addEventListener("click", (e) => {
+      const rect = addBtn.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      addBtn.style.setProperty("--ripple-x", `${x}px`);
+      addBtn.style.setProperty("--ripple-y", `${y}px`);
+
+      addBtn.classList.remove("ripple-effect");
+      void addBtn.offsetWidth; // restart animation
+      addBtn.classList.add("ripple-effect");
+    });
+
+
+
+
     /* ==============================
        MASTER ITEM DATA
     ============================== */
