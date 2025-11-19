@@ -30,6 +30,7 @@
       left: 0;
       display: flex;
       align-items: center;
+      z-index: 999;
       height: 70px;
       justify-content: center;
       box-shadow: 0 2px 5px rgb(185, 185, 185);
@@ -115,30 +116,26 @@
       overflow: hidden;
     }
 
-    .add-cart::after {
-      content: "";
+    /* Ripple circle */
+    .add-cart .ripple {
       position: absolute;
-      width: 10px;
-      height: 10px;
-      background: rgba(255, 255, 255, 0.7);
+      width: 15px;
+      height: 15px;
+      background: rgba(224, 255, 227, 0.8);
       border-radius: 50%;
       transform: scale(0);
-      opacity: 0;
       pointer-events: none;
+      animation: rippleEffect 0.6s ease-out forwards;
     }
 
-    .add-cart.ripple-effect::after {
-      animation: ripple 0.6s ease-out;
-    }
-
-    @keyframes ripple {
+    @keyframes rippleEffect {
       0% {
         transform: scale(0);
         opacity: 0.7;
       }
 
       100% {
-        transform: scale(28);
+        transform: scale(22);
         opacity: 0;
       }
     }
@@ -166,6 +163,36 @@
       align-items: center;
       justify-content: space-between;
     }
+
+
+
+    /* Smooth card entrance animation */
+    .item-info,
+    .quantity {
+      opacity: 0;
+      transform: translateY(15px);
+      animation: smoothEnter 0.6s cubic-bezier(.16, .82, .37, 1) forwards;
+    }
+
+    .quantity {
+      animation-delay: 0.1s;
+    }
+
+    @keyframes smoothEnter {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Blur background items when scrolling */
+    .blur-on-scroll {
+      filter: blur(4px);
+      transition: filter 0.2s ease;
+    }
+
+
+
 
     .name-price {
       display: flex;
@@ -249,6 +276,8 @@
     .add-cart:hover {
       background: lightgreen;
     }
+
+
 
 
 
@@ -483,36 +512,50 @@
    IMAGE PARALLAX SCROLL ANIMATION
 ============================== */
     const imageEl = document.getElementById("itemImage");
-    const fadeDistance = 250;
-    const moveDistance = 70;
+
 
     window.addEventListener("scroll", () => {
       const y = window.scrollY;
-      const opacity = Math.max(1 - y / fadeDistance, 0);
-      const translateY = Math.min(y / 4, moveDistance);
 
+      // Fade control
+      const opacity = Math.max(1 - y / 220, 0);
       imageEl.style.opacity = opacity;
-      imageEl.style.transform = `translateY(-${translateY}px)`;
+
+      // Reduced parallax motion upward
+      const translateY = Math.min(y / 12, 18);
+      imageEl.style.transform = `translateY(-${translateY}px) scale(${1 - y / 1800})`;
+
+      // blur smooth increase (0px to 3px max)
+      const blurValue = Math.min(y / 70, 3);
+      imageEl.style.filter = `blur(${blurValue}px)`;
     });
+
+
 
 
     /* ==============================
        RIPPLE EFFECT ON ADD BUTTON
     ============================== */
+    /* REAL ripple based on click coordinates */
     const addBtn = document.getElementById("cartBtn");
 
-    addBtn.addEventListener("click", (e) => {
+    addBtn.addEventListener("click", function (e) {
       const rect = addBtn.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      addBtn.style.setProperty("--ripple-x", `${x}px`);
-      addBtn.style.setProperty("--ripple-y", `${y}px`);
+      const ripple = document.createElement("span");
+      ripple.classList.add("ripple");
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
 
-      addBtn.classList.remove("ripple-effect");
-      void addBtn.offsetWidth; // restart animation
-      addBtn.classList.add("ripple-effect");
+      addBtn.appendChild(ripple);
+
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
     });
+
 
 
 
