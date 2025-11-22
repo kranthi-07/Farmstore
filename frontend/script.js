@@ -63,6 +63,7 @@ async function isUserLoggedIn() {
 
 
 
+// TOP BAR SCOLL ANIMATION
 
 
 const topBar = document.querySelector(".top-bar");
@@ -106,6 +107,46 @@ window.addEventListener("scrollend", () => {
         setTimeout(() => topBar.classList.remove("elastic"), 500);
     }
 });
+
+
+
+
+//* ================= TAB SWITCH ================= */
+const fruitsTab = document.querySelector(".fruits");
+const vegetablesTab = document.querySelector(".vegetables");
+
+const fruitsBar = document.querySelector(".fruits-bar");
+const vegetablesBar = document.querySelector(".vegetables-bar");
+
+function setActiveTab(active, inactive, showBar, hideBar) {
+    // Remove active first to avoid both highlighting
+    fruitsTab.classList.remove("active-tab");
+    vegetablesTab.classList.remove("active-tab");
+
+    // Add active to selected tab instantly
+    active.classList.add("active-tab");
+
+    // Start animation
+    hideBar.classList.remove("show");
+    hideBar.classList.add("to-left");
+
+    setTimeout(() => {
+        hideBar.classList.remove("to-left");
+        hideBar.classList.add("display");
+        showBar.classList.remove("display");
+        showBar.classList.add("show");
+    }, 180);  // transition finish
+}
+
+fruitsTab.addEventListener("click", () => {
+    setActiveTab(fruitsTab, vegetablesTab, fruitsBar, vegetablesBar);
+});
+
+vegetablesTab.addEventListener("click", () => {
+    setActiveTab(vegetablesTab, fruitsTab, vegetablesBar, fruitsBar);
+});
+
+
 
 
 /* ==============================
@@ -461,13 +502,13 @@ function switchTab(section) {
     if (section === "fruits") {
       fruits_bar.style.display = "flex";
       vegetables_bar.style.display = "none";
-      fruits.classList.add("active");
-      vegetables.classList.remove("active");
+      fruits.classList.add("active-tab");
+      vegetables.classList.remove("active-tab");
     } else {
       vegetables_bar.style.display = "flex";
       fruits_bar.style.display = "none";
-      vegetables.classList.add("active");
-      fruits.classList.remove("active");
+      vegetables.classList.add("active-tab");
+      fruits.classList.remove("active-tab");
     }
     hideLoader();
   }, 1000);
@@ -695,3 +736,66 @@ overlayEl?.addEventListener("click", () => {
   overlayEl.classList.remove("search-show");
   searchBar.classList.remove("scale");
 });
+
+
+
+
+
+/* ==============================
+   GO TO ITEM DETAILS
+============================== */
+
+const itemData = {
+  Orange: { price: 25, desc: "Juicy Fruit", image: "assets/orange.png", prices: { "1kg": 43, "500g": 25 } },
+  Lemon: { price: 25, desc: "Juicy Fruit", image: "assets/lemon.png", prices: { "1kg": 45, "500g": 25 } },
+  Mosambi: { price: 25, desc: "Juicy Fruit", image: "assets/mosambi.png", prices: { "1kg": 53, "500g": 25 } },
+  Mango: { price: 25, desc: "Juicy Fruit", image: "assets/mango.png", prices: { "1kg": 97, "500g": 56 } },
+  Banana: { price: 25, desc: "Juicy Fruit", image: "assets/banana.png", prices: { "1kg": 22, "500g": 34 } },
+  Papaya: { price: 25, desc: "Juicy Fruit", image: "assets/papaya.png", prices: { "1kg": 43, "500g": 12 } },
+  Guava: { price: 25, desc: "Juicy Fruit", image: "assets/guava.png", prices: { "1kg": 50, "500g": 25 } },
+  Strawberry: { price: 25, desc: "Juicy Fruit", image: "assets/strawberry.png", prices: { "1kg": 100, "500g": 57 } },
+  Coconut: { price: 25, desc: "Juicy Fruit", image: "assets/coconut.png", prices: { "1kg": 80, "500g": 40 } },
+  Jackfruit: { price: 25, desc: "Juicy Fruit", image: "assets/jackfruit.png", prices: { "1kg": 43, "500g": 25 } },
+  Watermelon: { price: 25, desc: "Juicy Fruit", image: "assets/watermelon.png", prices: { "1kg": 43, "500g": 25 } },
+  Muskmelon: { price: 25, desc: "Juicy Fruit", image: "assets/muskmelon.png", prices: { "1kg": 43, "500g": 25 } },
+  Spinach: { price: 25, desc: "Leafy Vegetable", image: "assets/spinach.png", prices: { "1kg": 43, "500g": 25 } },
+  Coriander: { price: 25, desc: "Leafy Vegetable", image: "assets/coriander.png", prices: { "1kg": 43, "500g": 25 } },
+  Carrot: { price: 25, desc: "Vegetable", image: "assets/carrot.png", prices: { "1kg": 43, "500g": 25 } },
+  Beetroot: { price: 25, desc: "Vegetable", image: "assets/beetroot.png", prices: { "1kg": 43, "500g": 25 } },
+  Tomato: { price: 25, desc: "Vegetable", image: "assets/tomato.png", prices: { "1kg": 43, "500g": 25 } },
+  Brinjal: { price: 25, desc: "Vegetable", image: "assets/brinjal.png", prices: { "1kg": 43, "500g": 25 } },
+  Ladysfinger: { price: 25, desc: "Vegetable", image: "assets/ladysfinger.jpeg", prices: { "1kg": 43, "500g": 25 } },
+  Potato: { price: 25, desc: "Vegetable", image: "assets/potato.png", prices: { "1kg": 43, "500g": 25 } },
+  Onion: { price: 25, desc: "Vegetable", image: "assets/onion.png", prices: { "1kg": 43, "500g": 25 } },
+  Garlic: { price: 25, desc: "Vegetable", image: "assets/garlic.png", prices: { "1kg": 43, "500g": 25 } },
+};
+
+
+
+
+
+
+
+function goToItem(name) {
+  const data = itemData[name];
+  if (!data) return alert("Item details not found!");
+
+  // Construct full data into URL parameters
+  const params = new URLSearchParams({
+    name: data.name || name,
+    desc: data.desc || "Fresh item",
+    image: data.image,
+    price1kg: data.prices?.["1kg"] || data.price || 0,
+    price500g: data.prices?.["500g"] || 0
+  });
+
+  const loader = document.getElementById("loader");
+  if (loader) {
+    loader.style.display = "flex";
+    loader.style.opacity = "1";
+  }
+
+  setTimeout(() => {
+    window.location.assign(`item.html?${params.toString()}`);
+  }, 400);
+}

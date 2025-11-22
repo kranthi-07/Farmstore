@@ -154,7 +154,7 @@
 
 
     <section class="main-items flex">
-        <div class="fruits flex tab">
+        <div class="fruits flex active-tab">
             <h3>Fruits</h3>
         </div>
 
@@ -205,42 +205,126 @@
 
 
             <div class="fruits-list">
-                <h2>Your favoutite fruits:</h2>
+                <h2 class="head">Fruits Category:</h2>
 
-                <div class="list">
-                    <div class="list-card">
-                        <img src="assets/apple.png" alt="">
-                        <p>Apple</p>
+
+
+                <div class="citrus-list item-list">
+
+                    <h2>Citrus Fruits</h2>
+
+                    <div class="list">
+
+                        <div class="list-card" onclick="goToItem('Orange','₹25','Juicy','assets/orange.png')">
+                            <img src="assets/orange.png" alt="">
+                            <p>Orange</p>
+                        </div>
+
+                        <div class="list-card" onclick="goToItem('Lemon','₹25','Juicy','Assets/lemon.png')">
+                            <img src="assets/lemon.png" alt="">
+                            <p>Lemon</p>
+                        </div>
+
+                        <div class="list-card" onclick="goToItem('Mosambi','₹25','Juicy','Assets/mosambi.png')">
+                            <img src="assets/mosambi.png" alt="">
+                            <p>Sweetlemon</p>
+                        </div>
+
                     </div>
-
-                    <div class="list-card">
-                        <img src="assets/apple.png" alt="">
-                        <p>Apple</p>
-                    </div>
-
-                    <div class="list-card">
-                        <img src="assets/apple.png" alt="">
-                        <p>Apple</p>
-                    </div>
-
-                    <div class="list-card">
-                        <img src="assets/apple.png" alt="">
-                        <p>Apple</p>
-                    </div>
-
-                    <div class="list-card">
-                        <img src="assets/apple.png" alt="">
-                        <p>Apple</p>
-                    </div>
-
-                    <div class="list-card">
-                        <img src="assets/apple.png" alt="">
-                        <p>Apple</p>
-                    </div>
-
 
                 </div>
+
+
+                <div class="tropical-list item-list">
+
+                    <h2>Tropical Fruits</h2>
+
+                    <div class="list">
+
+                        <div class="list-card" onclick="goToItem('Mango','₹25','Juicy','Assets/mango.png')">
+                            <img src="assets/mango.png" alt="">
+                            <p>Mango</p>
+                        </div>
+
+                        <div class="list-card" onclick="goToItem('Banana','₹25','Juicy','Assets/banana.png')">
+                            <img src="assets/banana.png" alt="">
+                            <p>Banana</p>
+                        </div>
+
+                        <div class="list-card" onclick="goToItem('Papaya','₹25','Juicy','assets/papaya.png')">
+                            <img src="assets/papaya.png" alt="">
+                            <p>Papaya</p>
+                        </div>
+
+                        <div class="list-card" onclick="goToItem('Guava','₹25','Juicy','assets/guava.png')">
+                            <img src="assets/guava.png" alt="">
+                            <p>Guava</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="berries-list item-list">
+
+                    <h2>Berries</h2>
+
+                    <div class="list">
+
+                        <div class="list-card" onclick="goToItem('Strawberry','₹25','Juicy','assets/strawberry.png')">
+                            <img src="assets/strawberry.png" alt="">
+                            <p>Strawberry</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stone-list item-list">
+
+                    <h2>Stone Fruits</h2>
+
+                    <div class="list">
+
+                        <div class="list-card" onclick="goToItem('Coconut','₹25','Juicy','assets/coconut.png')">
+                            <img src="assets/coconut.png" alt="">
+                            <p>Coconut</p>
+                        </div>
+
+                        <div class="list-card" onclick="goToItem('Jackfruit','₹25','Juicy','assets/jackfruit.png')">
+                            <img src="assets/jackfruit.png" alt="">
+                            <p>Jackfruit</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="melons-list item-list">
+
+                    <h2>Melons</h2>
+
+                    <div class="list">
+
+                        <div class="list-card" onclick="goToItem('Muskmelon','₹25','Juicy','assets/muskmelon.png')">
+                            <img src="assets/muskmelon.png" alt="">
+                            <p>Muskmelon</p>
+                        </div>
+
+                        <div class="list-card" onclick="goToItem('Watermelon','₹25','Juicy','assets/watermelon.png')">
+                            <img src="assets/watermelon.png" alt="">
+                            <p>Watermelon</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
             </div>
+
 
         </div>
 
@@ -274,6 +358,110 @@
                     <h3>Bulb&Tuber <br>Vegetables</h3>
                 </div>
 
+
+                <div class="vegetables-list">
+
+                    <h2 class="head">Vegetables Category:</h2>
+
+
+
+                    <div class="leafy-list item-list">
+
+                        <h2>Leafy Vegetables</h2>
+
+                        <div class="list">
+
+                            <div class="list-card" onclick="goToItem('Spinach','₹25','Juicy','assets/spinach.png')">
+                                <img src="assets/spinach.png" alt="">
+                                <p>Spinach</p>
+                            </div>
+
+                            <div class="list-card" onclick="goToItem('Coriander','₹25','Juicy','assets/coriander.png')">
+                                <img src="assets/coriander.png" alt="">
+                                <p>Coriander</p>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="root-list item-list">
+
+                        <h2>Root Vegetables</h2>
+
+                        <div class="list">
+
+                            <div class="list-card" onclick="goToItem('Carrot','₹25','Juicy','assets/carrot.png')">
+                                <img src="assets/carrot.png" alt="">
+                                <p>Carrot</p>
+                            </div>
+
+                            <div class="list-card" onclick="goToItem('Beetroot','₹25','Juicy','assets/beetroot.png')">
+                                <img src="assets/beetroot.png" alt="">
+                                <p>Beetroot</p>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="fruiting-list item-list">
+
+                        <h2>Fruiting Vegetables</h2>
+
+                        <div class="list">
+
+                            <div class="list-card" onclick="goToItem('Ladysfinger','₹25','Juicy','assets/ladysfinger.jpeg')">
+                                <img src="assets/ladysfinger.jpeg" alt="">
+                                <p>LadysFinger</p>
+                            </div>
+                            
+                            <div class="list-card" onclick="goToItem('Tomato','₹25','Vegetable','assets/tomato.png')">
+                                <img src="assets/tomato.png" alt="">
+                                <p>Tomato</p>
+                            </div>
+
+                            <div class="list-card" onclick="goToItem('Brinjal','₹25','Juicy','assets/brinjal.png')">
+                                <img src="assets/brinjal.png" alt="">
+                                <p>Brinjal</p>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="tuber-list item-list">
+
+                        <h2>Bulb & Tuber Vegetables</h2>
+
+                        <div class="list">
+
+                            <div class="list-card" onclick="goToItem('Potato','₹25','Juicy','assets/potato.png')">
+                                <img src="assets/potato.png" alt="">
+                                <p>Potato</p>
+                            </div>
+
+                            <div class="list-card" onclick="goToItem('Onion','₹25','Juicy','assets/onion.png')">
+                                <img src="assets/onion.png" alt="">
+                                <p>Onion</p>
+                            </div>
+
+                            <div class="list-card" onclick="goToItem('Garlic','₹25','Juicy','assets/garlic.png')">
+                                <img src="assets/garlic.png" alt="">
+                                <p>Garlic</p>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
             </div>
 
         </div>
@@ -281,7 +469,7 @@
 
     </main>
 
-    <footer class="footer flex">
+    <!-- <footer class="footer flex">
         <div class="aboutus">
             <h3>About us</h3>
         </div>
@@ -293,7 +481,7 @@
         <div class="registered">
             <p>All rights reserved according to the law 2005</p>
         </div>
-    </footer>
+    </footer> -->
 </body>
 <!-- ✅ Include Swiper library FIRST -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
