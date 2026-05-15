@@ -105,13 +105,26 @@
                 <h1>FARMSTORE</h1>
             </div>
 
-            <div class="location">
+             <div class="top-search-bar">
+                <i class='bx bx-search' id="searchBtn"></i>
+                <input type="search" placeholder="Search..." name="search">
+                <div class="search-suggestions" id="searchSuggestions"></div>
+            </div>      
+            <div class="search-overlay"></div>      
 
+            <div class="location">
+                <i class="ri-map-pin-line"></i>
             </div>
 
             <div class="signin" id="topUserIcon" onclick="window.location.href='signin.html'">
                 <i class='bx bx-user'></i>
             </div>
+
+            <div class="cart">
+                <i class='bx bx-cart'></i>
+            </div>
+
+            
 
         </div>
 
@@ -149,6 +162,232 @@
 
 
 
+    <!-- ========= HERO / BRAND MISSION (A + F) =========
+    <section class="hero-section" id="about">
+        <div class="hero-content">
+            <h2>Fresh from Local Farms to Your Home</h2>
+            <p>
+                FARMSTORE connects you directly with trusted farmers around you.
+                Harvested at dawn, delivered the same day so your family always eats fresh.
+            </p>
+
+            <div class="hero-highlights">
+                <div class="hero-chip">
+                    <i class="ri-leaf-line"></i>
+                    <span>Farm-direct sourcing</span>
+                </div>
+                <div class="hero-chip">
+                    <i class="ri-timer-line"></i>
+                    <span>Same-day delivery</span>
+                </div>
+                <div class="hero-chip">
+                    <i class="ri-shield-check-line"></i>
+                    <span>Hand-checked quality</span>
+                </div>
+            </div>
+
+            <div class="hero-cta-row">
+                <button class="hero-btn primary"
+                    onclick="document.getElementById('subscriptions')?.scrollIntoView({behavior:'smooth'})">
+                    Explore Weekly Boxes
+                </button>
+                <button class="hero-btn ghost"
+                    onclick="document.getElementById('why-us')?.scrollIntoView({behavior:'smooth'})">
+                    Why FARMSTORE?
+                </button>
+            </div>
+
+            <p class="hero-note">
+                Now serving select areas in Hyderabad &amp; Bangalore. More localities soon.
+            </p>
+        </div>
+    </section>
+
+
+    ========= WHY CHOOSE US (D) =========
+    <section class="why-section" id="why-us">
+        <h2 class="section-title">Why Families Choose FARMSTORE</h2>
+
+        <div class="why-grid">
+            <div class="why-card">
+                <div class="why-icon"><i class="ri-plant-line"></i></div>
+                <h3>Closer to Farmers</h3>
+                <p>We work with small local farmers to reduce middlemen and keep produce fresh &amp; fairly priced.</p>
+            </div>
+
+            <div class="why-card">
+                <div class="why-icon"><i class="ri-restaurant-line"></i></div>
+                <h3>Careful Handling</h3>
+                <p>Cleaned, sorted and packed in breathable bags so your vegetables last longer in the fridge.</p>
+            </div>
+
+            <div class="why-card">
+                <div class="why-icon"><i class="ri-time-line"></i></div>
+                <h3>Planned Delivery Slots</h3>
+                <p>Morning &amp; evening delivery windows that match your routine. No waiting all day.</p>
+            </div>
+
+            <div class="why-card">
+                <div class="why-icon"><i class="ri-refresh-line"></i></div>
+                <h3>No-Questions Replacement</h3>
+                <p>If anything is not fresh, we replace it or refund you. Simple &amp; honest.</p>
+            </div>
+        </div>
+    </section>
+
+
+    ========= SUBSCRIPTION / BUNDLES (C) =========
+    <section class="subscription-section" id="subscriptions">
+        <h2 class="section-title">Weekly Fresh Boxes</h2>
+        <p class="section-subtitle">
+            Simple curated boxes so you don’t have to think about what to buy every time.
+        </p>
+
+        <div class="subscription-grid">
+            Veg Box
+            <div class="sub-card">
+                <h3>Essential Veg Box</h3>
+                <p class="sub-tagline">Perfect for 2–3 people</p>
+                <div class="sub-price">₹149 <span>/ week</span></div>
+                <ul class="sub-list">
+                    <li><i class="ri-check-line"></i> Seasonal leafy &amp; root vegetables</li>
+                    <li><i class="ri-check-line"></i> Ideal for daily cooking</li>
+                    <li><i class="ri-check-line"></i> 1 fixed delivery slot / week</li>
+                </ul>
+                <button class="sub-btn" onclick="window.location.href='subscribe.html?plan=veg-box'">
+                    Pre-book this box
+                </button>
+            </div>
+
+            Fruit Box
+            <div class="sub-card highlight">
+                <div class="sub-badge">Popular</div>
+                <h3>Family Fruit Box</h3>
+                <p class="sub-tagline">Energy &amp; snacks sorted</p>
+                <div class="sub-price">₹199 <span>/ week</span></div>
+                <ul class="sub-list">
+                    <li><i class="ri-check-line"></i> 3–4 seasonal fruits every week</li>
+                    <li><i class="ri-check-line"></i> Great for kids’ tiffin</li>
+                    <li><i class="ri-check-line"></i> Priority early-morning delivery</li>
+                </ul>
+                <button class="sub-btn" onclick="window.location.href='subscribe.html?plan=fruit-box'">
+                    Pre-book this box
+                </button>
+            </div>
+
+            Combo Box
+            <div class="sub-card">
+                <h3>Balanced Combo Box</h3>
+                <p class="sub-tagline">Fruits + Vegetables mix</p>
+                <div class="sub-price">₹299 <span>/ week</span></div>
+                <ul class="sub-list">
+                    <li><i class="ri-check-line"></i> Mix of kitchen essentials</li>
+                    <li><i class="ri-check-line"></i> Designed for 3–4 member families</li>
+                    <li><i class="ri-check-line"></i> Flexible delivery day</li>
+                </ul>
+                <button class="sub-btn" onclick="window.location.href='subscribe.html?plan=combo-box'">
+                    Pre-book this box
+                </button>
+            </div>
+        </div>
+    </section>
+
+
+    ========= TESTIMONIALS (B) =========
+    <section class="testimonials-section" id="reviews">
+        <h2 class="section-title">What Our Early Customers Say</h2>
+
+        <div class="testimonials-grid">
+            <article class="testimonial-card">
+                <p class="testimonial-text">
+                    “The coriander and spinach stayed fresh for 4 days. I don’t have to rush to the market
+                    every morning now.”
+                </p>
+                <div class="testimonial-user">
+                    <div class="testimonial-avatar">A</div>
+                    <div>
+                        <h4>Akshaya, Working Professional</h4>
+                        <span>Lives in Hyderabad</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="testimonial-card">
+                <p class="testimonial-text">
+                    “Loved the fruit box idea. Kids now expect ‘FARMSTORE fruits’ every Sunday.”
+                </p>
+                <div class="testimonial-user">
+                    <div class="testimonial-avatar">R</div>
+                    <div>
+                        <h4>Rahul &amp; Family</h4>
+                        <span>Bangalore</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="testimonial-card">
+                <p class="testimonial-text">
+                    “Delivery guy comes exactly in the chosen slot. Super convenient for our apartment.”
+                </p>
+                <div class="testimonial-user">
+                    <div class="testimonial-avatar">S</div>
+                    <div>
+                        <h4>Swathi</h4>
+                        <span>Gated community resident</span>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+
+    ========= FARMER STORY / HOW IT WORKS (E) =========
+    <section class="farmer-story-section" id="farm-story">
+        <div class="farmer-story-inner">
+            <div class="farmer-story-text">
+                <h2 class="section-title align-left">From Farm to Your Plate</h2>
+                <p class="farmer-intro">
+                    We are building a transparent bridge between you and local farmers.
+                    No long cold-storage chains. No confusing labels. Just honest produce.
+                </p>
+
+                <ol class="farmer-steps">
+                    <li>
+                        <h4>1. Partner with local farms</h4>
+                        <p>We personally visit farms around your city to understand their practices.</p>
+                    </li>
+                    <li>
+                        <h4>2. Early morning harvest</h4>
+                        <p>Produce is collected early in the morning when it’s naturally cool &amp; fresh.</p>
+                    </li>
+                    <li>
+                        <h4>3. Sorting &amp; quality check</h4>
+                        <p>Each batch is checked for freshness, size and any visible damage.</p>
+                    </li>
+                    <li>
+                        <h4>4. Packed &amp; delivered to you</h4>
+                        <p>We use minimal, eco-friendly packaging and deliver within planned time slots.</p>
+                    </li>
+                </ol>
+
+                <button class="hero-btn ghost" onclick="window.location.href='about.html'">
+                    Learn more about our farmers
+                </button>
+            </div>
+
+            <div class="farmer-story-panel">
+                <h3>Our Promise</h3>
+                <ul>
+                    <li><i class="ri-seedling-line"></i> Transparent sourcing</li>
+                    <li><i class="ri-checkbox-circle-line"></i> Freshness-first decisions</li>
+                    <li><i class="ri-emotion-happy-line"></i> Easy replacement if you’re not happy</li>
+                </ul>
+                <div class="farmer-badge">
+                    <span>Currently onboarding local farmers near you</span>
+                </div>
+            </div>
+        </div>
+    </section> -->
 
 
 
@@ -175,13 +414,13 @@
             <div class="items">
                 <div class="citrus-fruits card" data-link="citrusfruits.html">
                     <img src="assets/citrus fruits.png" class="box" alt="">
-                    <h3>Citrus<br>Fruits</h3>
+                    <h3>Citrus Fruits</h3>
                 </div>
 
 
                 <div class="tropical-fruits card" data-link='tropical.html'>
                     <img src="assets/tropical fruits.png" class="box" alt="">
-                    <h3>Tropical <br> Fruits</h3>
+                    <h3>Tropical Fruits</h3>
                 </div>
 
 
@@ -414,11 +653,12 @@
 
                         <div class="list">
 
-                            <div class="list-card" onclick="goToItem('Ladysfinger','₹25','Juicy','assets/ladysfinger.jpeg')">
+                            <div class="list-card"
+                                onclick="goToItem('Ladysfinger','₹25','Juicy','assets/ladysfinger.jpeg')">
                                 <img src="assets/ladysfinger.jpeg" alt="">
                                 <p>LadysFinger</p>
                             </div>
-                            
+
                             <div class="list-card" onclick="goToItem('Tomato','₹25','Vegetable','assets/tomato.png')">
                                 <img src="assets/tomato.png" alt="">
                                 <p>Tomato</p>

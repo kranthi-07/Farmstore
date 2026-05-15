@@ -21,9 +21,24 @@ let touchingSidebar = false;
 
 // Swiper
 var swiper = new Swiper(".mySwiper", {
-  slidesPerView: 1,
-  loop: true,
+  slidesPerView: 1, // default (mobile)
+  spaceBetween: 10,
   autoplay: { delay: 2200 },
+  breakpoints: {
+    640: {
+      slidesPerView: 2,
+      spaceBetween: 20,
+    },
+    768: {
+      slidesPerView: 3,
+      spaceBetween: 30,
+    },
+    1024: {
+      slidesPerView: 3, // PC view (show multiple)
+      spaceBetween: 40,
+    }
+  },
+
 });
 
 /* ==============================
@@ -71,41 +86,41 @@ const topSection = document.querySelector(".top-section");
 const bottomSection = document.querySelector(".bottom-section");
 const cartIcon = document.querySelector(".cart i");
 
-const hideDistance = 60;  // movement range
+const hideDistance = 65;  // movement range
 
 window.addEventListener("scroll", () => {
-    let scrolled = Math.min(window.scrollY, hideDistance);
-    let progress = scrolled / hideDistance; // 0 to 1
+  let scrolled = Math.min(window.scrollY, hideDistance);
+  let progress = scrolled / hideDistance; // 0 to 1
 
-    // Move bar smoothly proportional to scroll
-    topBar.style.transform = `translateY(-${progress * hideDistance}px)`;
+  // Move bar smoothly proportional to scroll
+  topBar.style.transform = `translateY(-${progress * hideDistance}px)`;
 
-    // Opacity fade out
-    topSection.style.opacity = `${1 - progress}`;
+  // Opacity fade out
+  topSection.style.opacity = `${1 - progress}`;
 
-    // After slight scroll add solid BG & blur
-    if (progress > 0.05) {
-        bottomSection.classList.add("scrolled");
-        topBar.classList.add("scrolled-bg");
-    } else {
-        bottomSection.classList.remove("scrolled");
-        topBar.classList.remove("scrolled-bg");
-    }
+  // After slight scroll add solid BG & blur
+  if (progress > 0.05) {
+    bottomSection.classList.add("scrolled");
+    topBar.classList.add("scrolled-bg");
+  } else {
+    bottomSection.classList.remove("scrolled");
+    topBar.classList.remove("scrolled-bg");
+  }
 
-    // Floating cart pop effect
-    if (progress > 0.4) {
-        cartIcon.classList.add("float");
-    } else {
-        cartIcon.classList.remove("float");
-    }
+  // Floating cart pop effect
+  if (progress > 0.4) {
+    cartIcon.classList.add("float");
+  } else {
+    cartIcon.classList.remove("float");
+  }
 });
 
 // Elastic return animation when user scrolls up fast or reaches top
 window.addEventListener("scrollend", () => {
-    if (window.scrollY < 10) {
-        topBar.classList.add("elastic");
-        setTimeout(() => topBar.classList.remove("elastic"), 500);
-    }
+  if (window.scrollY < 10) {
+    topBar.classList.add("elastic");
+    setTimeout(() => topBar.classList.remove("elastic"), 500);
+  }
 });
 
 
@@ -119,31 +134,31 @@ const fruitsBar = document.querySelector(".fruits-bar");
 const vegetablesBar = document.querySelector(".vegetables-bar");
 
 function setActiveTab(active, inactive, showBar, hideBar) {
-    // Remove active first to avoid both highlighting
-    fruitsTab.classList.remove("active-tab");
-    vegetablesTab.classList.remove("active-tab");
+  // Remove active first to avoid both highlighting
+  fruitsTab.classList.remove("active-tab");
+  vegetablesTab.classList.remove("active-tab");
 
-    // Add active to selected tab instantly
-    active.classList.add("active-tab");
+  // Add active to selected tab instantly
+  active.classList.add("active-tab");
 
-    // Start animation
-    hideBar.classList.remove("show");
-    hideBar.classList.add("to-left");
+  // Start animation
+  hideBar.classList.remove("show");
+  hideBar.classList.add("to-left");
 
-    setTimeout(() => {
-        hideBar.classList.remove("to-left");
-        hideBar.classList.add("display");
-        showBar.classList.remove("display");
-        showBar.classList.add("show");
-    }, 180);  // transition finish
+  setTimeout(() => {
+    hideBar.classList.remove("to-left");
+    hideBar.classList.add("display");
+    showBar.classList.remove("display");
+    showBar.classList.add("show");
+  }, 180);  // transition finish
 }
 
 fruitsTab.addEventListener("click", () => {
-    setActiveTab(fruitsTab, vegetablesTab, fruitsBar, vegetablesBar);
+  setActiveTab(fruitsTab, vegetablesTab, fruitsBar, vegetablesBar);
 });
 
 vegetablesTab.addEventListener("click", () => {
-    setActiveTab(vegetablesTab, fruitsTab, vegetablesBar, fruitsBar);
+  setActiveTab(vegetablesTab, fruitsTab, vegetablesBar, fruitsBar);
 });
 
 
